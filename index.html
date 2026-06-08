@@ -17,10 +17,11 @@
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 
 /* NAV */
-.nav{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
-.nav-logo{padding:12px 16px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;letter-spacing:0.02em}
-.nav-tabs{display:flex;flex:1}
-.nav-tab{padding:13px 14px;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.nav{display:flex;flex-direction:column;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+.nav-top-row{display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 0}
+.nav-logo{padding:12px 16px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;letter-spacing:0.02em;flex:1}
+.nav-tabs{display:flex}
+.nav-tab{padding:10px 14px;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .nav-tab:hover{color:var(--text2)}
 .nav-tab.active{color:var(--text);border-bottom:2px solid var(--text)}
 
@@ -314,6 +315,118 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
 .diary-deck-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
 .diary-deck-btn:hover{background:var(--bg2);border-color:var(--border2)}
 .diary-deck-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
+
+/* ═══ MOBILE RESPONSIVE ═══ */
+@media (max-width: 600px){
+  /* Nav: clean two-row layout on mobile */
+  .nav{flex-direction:column}
+  .nav-top-row{padding:0 12px 0 0}
+  .nav-logo{padding:10px 14px;font-size:15px}
+  .nav-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-tabs::-webkit-scrollbar{display:none}
+  .nav-tab{padding:9px 11px;font-size:11px;flex-shrink:0}
+  .nav-auth{padding:0 4px}
+  .nav-user-name{display:none}
+  .nav-avatar{width:26px;height:26px}
+  .nav-login-btn{padding:5px 12px;font-size:11px}
+  .nav-signout{font-size:10px}
+  .sync-dot{width:5px;height:5px}
+
+  /* Pages: less padding on mobile */
+  .page{padding:16px 14px}
+  #loginGate{padding:48px 16px}
+
+  /* Mode switch */
+  .mode-switch{margin-bottom:16px}
+  .mode-btn{font-size:12px;padding:8px 6px}
+
+  /* Topic grid: 4 cols on mobile */
+  .topic-grid{grid-template-columns:repeat(4,1fr);gap:5px}
+  .topic-btn{padding:10px 4px 8px;border-radius:var(--rm)}
+  .topic-icon{font-size:14px}
+  .topic-name{font-size:10px}
+
+  /* Question display */
+  .q-text{font-size:16px}
+  .gen-btn{font-size:15px;padding:12px 16px}
+
+  /* Draw mode cards: stack on mobile */
+  .draw-mode-cards{grid-template-columns:1fr 1fr}
+  .draw-mode-card{padding:12px 10px}
+  .dmc-icon{font-size:18px;margin-bottom:4px}
+  .dmc-title{font-size:13px}
+  .dmc-desc{font-size:11px}
+
+  /* Cards row */
+  .cards-row{gap:6px}
+  .card{min-width:60px;max-width:90px}
+  .card-name{font-size:10px}
+  .nine-grid{gap:5px}
+
+  /* Interp box */
+  textarea.interp-unified{min-height:140px;font-size:13px}
+
+  /* Prompt section */
+  .rating-style-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .rating-style-btn{padding:10px 4px}
+  .rs-icon{font-size:16px}
+  .rs-name{font-size:11px}
+  .rs-desc{font-size:9px}
+  .prompt-text{font-size:12px;max-height:200px}
+  .platform-links{gap:6px}
+  .platform-link{padding:4px 10px;font-size:11px}
+
+  /* Practice record filters: scroll horizontally */
+  .pr-filter-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:0;padding-bottom:4px}
+  .pr-filter-row::-webkit-scrollbar{display:none}
+  .pr-filter-group{flex-shrink:0;gap:4px}
+  .pr-filter-divider{flex-shrink:0;margin:0 6px}
+  .filter-btn{padding:4px 10px;font-size:11px;flex-shrink:0}
+  .clear-journal-btn{flex-shrink:0;font-size:11px;padding:4px 10px}
+
+  /* Journal items */
+  .journal-header{gap:5px}
+  .j-spread{font-size:12px}
+  .j-score{font-size:14px}
+
+  /* Calendar */
+  .cal-grid{gap:2px}
+  .cal-day{min-height:36px;padding:2px}
+  .cal-day-num{font-size:11px}
+  .cal-card-preview{font-size:8px}
+  .cal-dot{width:4px;height:4px}
+  .cal-month{font-size:17px}
+
+  /* Diary panel */
+  .diary-mode-switch{margin-bottom:10px}
+  .diary-mode-btn{font-size:11px;padding:6px}
+  .diary-deck-row{gap:5px}
+  .diary-deck-btn{font-size:11px;padding:4px 10px}
+
+  /* Database */
+  .db-sub-filter{gap:4px}
+  .db-sub-btn{font-size:10px;padding:3px 10px}
+  .db-card-name{font-size:14px}
+
+  /* Len system switch */
+  .len-system-switch{gap:5px}
+  .len-sys-btn{font-size:11px;padding:4px 12px}
+
+  /* Manual card rows */
+  .manual-card-row{padding:7px 10px;gap:6px}
+  .mcr-pos{min-width:55px;font-size:10px}
+  .orient-btn{padding:5px 8px;font-size:10px}
+
+  /* Result section */
+  .result-header{padding:12px 14px}
+  .score{font-size:20px}
+  .result-body{padding:14px}
+  .result-text{font-size:13px}
+
+  /* Save db section */
+  .save-db-section{padding:12px 14px}
+  .card-note-label{min-width:64px;font-size:11px}
+}
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -338,23 +451,25 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
 </div>
 
 <nav class="nav">
-  <div class="nav-logo">✦ 塔羅筆記</div>
+  <div class="nav-top-row">
+    <div class="nav-logo">✦ 塔羅筆記</div>
+    <!-- logged out: show login button -->
+    <div class="nav-auth" id="navAuthLoggedOut">
+      <button class="nav-login-btn" onclick="signInWithGoogle()">登入</button>
+    </div>
+    <!-- logged in: show avatar + signout -->
+    <div class="nav-auth" id="navAuthLoggedIn" style="display:none">
+      <span class="sync-dot" id="syncDot"></span>
+      <img class="nav-avatar" id="navAvatar" src="" alt="">
+      <span class="nav-user-name" id="navUserName"></span>
+      <button class="nav-signout" onclick="signOut()">登出</button>
+    </div>
+  </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="goPage('practice')">練習</button>
     <button class="nav-tab" onclick="goPage('record')">練習記錄</button>
     <button class="nav-tab" onclick="goPage('diary')">塔羅日記</button>
     <button class="nav-tab" onclick="goPage('database')">牌義庫</button>
-  </div>
-  <!-- logged out: show login button -->
-  <div class="nav-auth" id="navAuthLoggedOut">
-    <button class="nav-login-btn" onclick="signInWithGoogle()">登入</button>
-  </div>
-  <!-- logged in: show avatar + signout -->
-  <div class="nav-auth" id="navAuthLoggedIn" style="display:none">
-    <span class="sync-dot" id="syncDot"></span>
-    <img class="nav-avatar" id="navAvatar" src="" alt="">
-    <span class="nav-user-name" id="navUserName"></span>
-    <button class="nav-signout" onclick="signOut()">登出</button>
   </div>
 </nav>
 
