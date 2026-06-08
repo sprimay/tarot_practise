@@ -111,12 +111,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .p-action-btn:hover{background:var(--bg2)}
 .p-action-btn:disabled{opacity:0.4;cursor:not-allowed}
 .cards-section{display:none;margin-top:24px}
-.cards-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:6px}
-.card{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);padding:12px 8px;text-align:center;min-width:72px;flex:1;max-width:110px;animation:fadeUp 0.35s ease forwards;opacity:0}
-.card-pos{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
-.card-sym{font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1;margin-bottom:3px}
-.card-name{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--text);font-weight:500}
+.cards-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:6px}
+/* Elegant card design */
+.card{border-radius:10px;background:var(--bg);padding:0;text-align:center;min-width:78px;flex:1;max-width:108px;animation:fadeUp 0.35s ease forwards;opacity:0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08),0 0 0 1px var(--border)}
+.card-inner{padding:10px 6px 8px}
+.card-pos{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.card-art{width:100%;aspect-ratio:2/3;max-height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.card-art svg{width:100%;height:100%}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--text);font-weight:500;line-height:1.3}
 .card-orient{font-size:9px;color:var(--text3);margin-top:2px}
+.card.reversed .card-art{transform:rotate(180deg)}
 .nine-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
 .nine-grid .card{max-width:none}
 .interp-section{display:none;margin-top:20px}
@@ -140,6 +144,14 @@ textarea.interp-unified{width:100%;border:none;padding:16px;font-family:'DM Sans
 .platform-link:hover{background:var(--bg2);border-color:var(--border2)}
 .feedback-input-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:10px}
 textarea.feedback-input{width:100%;border:none;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:140px;line-height:1.8;outline:none}
+/* rating style selector */
+.rating-style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0}
+.rating-style-btn{border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;background:var(--bg);cursor:pointer;text-align:center;transition:all 0.15s;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;align-items:center;gap:5px}
+.rating-style-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.rating-style-btn.active{border:1.5px solid var(--border2);background:var(--bg2)}
+.rs-icon{font-size:18px;line-height:1}
+.rs-name{font-size:12px;font-weight:500;color:var(--text)}
+.rs-desc{font-size:10px;color:var(--text3);line-height:1.4;text-align:center}
 .result-section{display:none;margin-top:20px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .result-header{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .result-title{font-family:'Cormorant Garamond',serif;font-size:17px}
@@ -221,9 +233,11 @@ textarea.note-input:focus{border-color:var(--border2)}
 .diary-draw-btn{padding:8px 18px;border:1px solid var(--border2);border-radius:var(--rm);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text);cursor:pointer;transition:all 0.15s}
 .diary-draw-btn:hover{background:var(--bg2)}
 .diary-cards-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;min-height:10px}
-.diary-card{border:1px solid var(--border);border-radius:var(--rm);background:var(--bg2);padding:10px 8px;text-align:center;min-width:68px;flex:1;max-width:100px;animation:fadeUp 0.3s ease forwards;opacity:0}
-.diary-card-sym{font-size:20px;margin-bottom:3px}
-.diary-card-name{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:500}
+.diary-card{border-radius:var(--rm);background:var(--bg2);padding:0;text-align:center;min-width:68px;flex:1;max-width:100px;animation:fadeUp 0.3s ease forwards;opacity:0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07),0 0 0 1px var(--border)}
+.diary-card-inner{padding:6px 4px}
+.diary-card-art{width:100%;aspect-ratio:2/3;max-height:60px;display:flex;align-items:center;justify-content:center}
+.diary-card-art svg{width:100%;height:100%}
+.diary-card-name{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:500;margin-top:4px}
 .diary-card-orient{font-size:9px;color:var(--text3);margin-top:2px}
 /* physical diary area */
 .diary-physical-area{display:none}
@@ -267,6 +281,26 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
 .db-note-date{font-size:11px;color:var(--text3);margin-top:2px}
 .db-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
 .db-del-btn{font-size:11px;color:#E24B4A;cursor:pointer;margin-top:4px;background:none;border:none;padding:0;font-family:'DM Sans',sans-serif}
+/* AUTH */
+.auth-overlay{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.auth-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:36px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.auth-logo{font-family:'Cormorant Garamond',serif;font-size:28px;margin-bottom:6px;color:var(--text)}
+.auth-sub{font-size:13px;color:var(--text3);margin-bottom:28px;line-height:1.6}
+.google-btn{width:100%;padding:12px 20px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.15s}
+.google-btn:hover{background:var(--bg2)}
+.google-btn svg{width:18px;height:18px;flex-shrink:0}
+.auth-note{font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5}
+/* nav auth badge */
+.nav-auth{display:flex;align-items:center;gap:8px;padding:0 12px}
+.nav-avatar{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);object-fit:cover}
+.nav-user-name{font-size:12px;color:var(--text2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-signout{font-size:11px;color:var(--text3);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+.nav-signout:hover{color:var(--text)}
+/* sync status */
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#97C459;display:inline-block;margin-right:4px}
+.sync-dot.syncing{background:#EF9F27;animation:pulse 1s infinite}
+.sync-dot.offline{background:var(--border2)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 /* DB sub-filter (tarot suit) */
 .db-sub-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .db-sub-btn{padding:4px 12px;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
@@ -285,8 +319,30 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
 .diary-deck-btn:hover{background:var(--bg2);border-color:var(--border2)}
 .diary-deck-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+<!-- AUTH OVERLAY (shown before login) -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-logo">✦ 塔羅筆記</div>
+    <div class="auth-sub">登入後，你的練習記錄、牌義庫與塔羅日記<br>將自動同步到雲端，換裝置也不怕遺失。</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      使用 Google 帳號登入
+    </button>
+    <div class="auth-note">登入資料僅用於識別你的帳號與儲存個人資料，<br>不會用於其他用途。</div>
+  </div>
+</div>
+
 <nav class="nav">
   <div class="nav-logo">✦ 塔羅筆記</div>
   <div class="nav-tabs">
@@ -294,6 +350,12 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
     <button class="nav-tab" onclick="goPage('record')">練習記錄</button>
     <button class="nav-tab" onclick="goPage('diary')">塔羅日記</button>
     <button class="nav-tab" onclick="goPage('database')">牌義庫</button>
+  </div>
+  <div class="nav-auth" id="navAuth" style="display:none">
+    <span class="sync-dot" id="syncDot"></span>
+    <img class="nav-avatar" id="navAvatar" src="" alt="">
+    <span class="nav-user-name" id="navUserName"></span>
+    <button class="nav-signout" onclick="signOut()">登出</button>
   </div>
 </nav>
 
@@ -400,7 +462,25 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
     <button class="action-row-btn" style="margin-top:8px" onclick="generatePrompt()">✦ 產生評分 Prompt</button>
   </div>
   <div class="prompt-section" id="promptSection">
-    <div class="sec-label">Step 5 — 複製 Prompt，貼到任意 AI 平台</div>
+    <div class="sec-label">Step 5 — 選擇評分風格</div>
+    <div class="rating-style-grid">
+      <button class="rating-style-btn active" id="rs-gentle" data-style="gentle" onclick="setRatingStyle('gentle',this)">
+        <span class="rs-icon">🌸</span>
+        <span class="rs-name">溫柔老師</span>
+        <span class="rs-desc">溫暖鼓勵為主，輕柔指出改進空間</span>
+      </button>
+      <button class="rating-style-btn" id="rs-balanced" data-style="balanced" onclick="setRatingStyle('balanced',this)">
+        <span class="rs-icon">⚖️</span>
+        <span class="rs-name">公正評分</span>
+        <span class="rs-desc">好的給予肯定，不足的直接指正</span>
+      </button>
+      <button class="rating-style-btn" id="rs-strict" data-style="strict" onclick="setRatingStyle('strict',this)">
+        <span class="rs-icon">🗡️</span>
+        <span class="rs-name">毒蛇嚴師</span>
+        <span class="rs-desc">不給稱讚，專注矯正所有解讀錯誤</span>
+      </button>
+    </div>
+    <div class="sec-label" style="margin-top:16px">複製 Prompt，貼到任意 AI 平台</div>
     <div class="prompt-box">
       <div class="prompt-box-header">
         <span class="prompt-box-label">評分用 Prompt</span>
@@ -543,6 +623,94 @@ const LENORMAND_40=[...LENORMAND_36,...LENORMAND_RANA4];
 let lenSystem='36'; // '36' | 'rana40'
 function getLenormand(){return lenSystem==='rana40'?LENORMAND_40:LENORMAND_36;}
 
+// ══════════════════════════════════════════
+//  SVG CARD ART
+// ══════════════════════════════════════════
+// Colour palette per tarot suit / category
+const CARD_PALETTE={
+  major:  {bg:'#1C1830',border:'#C4A03A',accent:'#E8C84A',text:'#F5EDD0'},
+  wands:  {bg:'#3D1F0A',border:'#C4622A',accent:'#F09040',text:'#FDE8D0'},
+  cups:   {bg:'#0A1F3D',border:'#3A7AC4',accent:'#60A8F0',text:'#D0E8FD'},
+  swords: {bg:'#1A1A2A',border:'#8A8AB0',accent:'#C0C0E0',text:'#E8E8F8'},
+  coins:  {bg:'#1A2A0A',border:'#6A9A2A',accent:'#A0C840',text:'#E0F0D0'},
+  len:    {bg:'#2A1A30',border:'#9A60C0',accent:'#C090E0',text:'#F0E0FF'},
+  rana:   {bg:'#301020',border:'#C03060',accent:'#F06090',text:'#FFE0EC'},
+};
+function getCardPalette(card,mode){
+  if(mode==='lenormand'){
+    return RANA4_NAMES.has(card.name)?CARD_PALETTE.rana:CARD_PALETTE.len;
+  }
+  if(MAJOR_NAMES.has(card.name)) return CARD_PALETTE.major;
+  if(card.name.startsWith('權杖')) return CARD_PALETTE.wands;
+  if(card.name.startsWith('聖杯')) return CARD_PALETTE.cups;
+  if(card.name.startsWith('寶劍')) return CARD_PALETTE.swords;
+  return CARD_PALETTE.coins;
+}
+
+// Map of major arcana to symbolic SVG paths
+const MAJOR_SYMBOLS={
+  '愚者':   `<circle cx="50" cy="35" r="12" fill="none" stroke-width="2"/><path d="M38 58 Q50 42 62 58" fill="none" stroke-width="2"/><circle cx="68" cy="28" r="4" fill="currentColor" opacity=".6"/>`,
+  '魔術師': `<rect x="35" y="30" width="30" height="30" rx="4" fill="none" stroke-width="2"/><path d="M50 20 L50 30" stroke-width="2.5"/><circle cx="50" cy="17" r="3" fill="currentColor"/>`,
+  '女祭司': `<path d="M36 25 L36 70 M64 25 L64 70" stroke-width="2"/><ellipse cx="50" cy="47" rx="14" ry="20" fill="none" stroke-width="2"/><path d="M43 35 Q50 28 57 35" fill="none" stroke-width="2"/>`,
+  '女皇':   `<path d="M50 20 L56 38 L76 38 L61 49 L67 67 L50 56 L33 67 L39 49 L24 38 L44 38 Z" fill="none" stroke-width="2" opacity=".7" transform="scale(.75) translate(17,13)"/>`,
+  '皇帝':   `<rect x="32" y="28" width="36" height="42" rx="3" fill="none" stroke-width="2"/><path d="M38 28 L38 22 L62 22 L62 28" stroke-width="2"/><path d="M42 48 L58 48 M42 55 L52 55" stroke-width="1.5"/>`,
+  '教皇':   `<path d="M50 18 L50 72" stroke-width="2.5"/><path d="M38 30 L62 30 M38 40 L62 40" stroke-width="2"/><circle cx="50" cy="18" r="6" fill="none" stroke-width="2"/>`,
+  '戀人':   `<circle cx="38" cy="55" r="10" fill="none" stroke-width="2"/><circle cx="62" cy="55" r="10" fill="none" stroke-width="2"/><path d="M45 30 Q50 20 55 30 Q60 20 65 26" fill="none" stroke-width="2"/>`,
+  '戰車':   `<rect x="28" y="38" width="44" height="32" rx="3" fill="none" stroke-width="2"/><path d="M28 52 L18 62 M72 52 L82 62" stroke-width="2"/><path d="M38 38 L38 28 L62 28 L62 38" stroke-width="2"/>`,
+  '力量':   `<ellipse cx="50" cy="50" rx="22" ry="16" fill="none" stroke-width="2"/><path d="M50 34 Q60 28 65 38" fill="none" stroke-width="2.5"/><path d="M36 44 Q30 50 36 56" fill="none" stroke-width="2"/>`,
+  '隱士':   `<path d="M50 20 L50 72" stroke-width="2"/><circle cx="50" cy="20" r="8" fill="none" stroke-width="2"/><path d="M50 72 L42 65 M50 72 L58 65" stroke-width="2"/>`,
+  '命運之輪':`<circle cx="50" cy="50" r="26" fill="none" stroke-width="2"/><circle cx="50" cy="50" r="12" fill="none" stroke-width="2"/><path d="M50 24 L50 38 M50 62 L50 76 M24 50 L38 50 M62 50 L76 50" stroke-width="1.5"/>`,
+  '正義':   `<path d="M50 20 L50 75" stroke-width="2.5"/><path d="M30 38 L70 38" stroke-width="2"/><path d="M30 38 L25 50 L30 62 M70 38 L75 50 L70 62" fill="none" stroke-width="2"/>`,
+  '倒吊人': `<path d="M35 22 L35 55 M65 22 L65 55 M35 22 L65 22" stroke-width="2"/><circle cx="50" cy="65" r="10" fill="none" stroke-width="2"/><path d="M50 55 L50 65" stroke-width="2"/>`,
+  '死神':   `<path d="M35 70 L50 28 L65 70 Z" fill="none" stroke-width="2"/><path d="M42 52 L58 52" stroke-width="1.5"/><circle cx="50" cy="22" r="6" fill="none" stroke-width="2"/>`,
+  '節制':   `<rect x="33" y="28" width="14" height="40" rx="7" fill="none" stroke-width="2"/><rect x="53" y="28" width="14" height="40" rx="7" fill="none" stroke-width="2"/><path d="M47 50 L53 50" stroke-width="2"/>`,
+  '惡魔':   `<path d="M50 20 L56 38 L76 38 L61 49 L67 67 L50 56 L33 67 L39 49 L24 38 L44 38 Z" fill="none" stroke-width="2" transform="scale(.6) translate(33,23)"/><path d="M38 62 L50 50 L62 62" fill="none" stroke-width="2"/>`,
+  '高塔':   `<rect x="36" y="28" width="28" height="44" rx="2" fill="none" stroke-width="2"/><path d="M32 28 L68 28 L62 18 L38 18 Z" fill="none" stroke-width="2"/><path d="M44 50 L56 50 M44 58 L56 58" stroke-width="1.5"/>`,
+  '星星':   `<path d="M50 20 L50 80 M20 50 L80 50 M29 29 L71 71 M71 29 L29 71" stroke-width="1.5" opacity=".6"/><circle cx="50" cy="50" r="8" fill="currentColor" opacity=".8"/>`,
+  '月亮':   `<path d="M35 50 A20 20 0 0 0 65 50 A14 14 0 0 1 35 50" fill="none" stroke-width="2"/><circle cx="50" cy="28" r="6" fill="none" stroke-width="1.5"/><path d="M35 68 L50 58 L65 68" fill="none" stroke-width="1.5"/>`,
+  '太陽':   `<circle cx="50" cy="48" r="16" fill="none" stroke-width="2.5"/><path d="M50 22 L50 26 M50 70 L50 74 M22 48 L26 48 M74 48 L78 48 M32 30 L35 33 M65 63 L68 66 M68 30 L65 33 M32 66 L35 63" stroke-width="2"/>`,
+  '審判':   `<path d="M50 20 L50 45" stroke-width="2.5"/><path d="M36 30 L64 30" stroke-width="2"/><path d="M32 52 L50 45 L68 52 L50 75 Z" fill="none" stroke-width="2"/>`,
+  '世界':   `<ellipse cx="50" cy="50" rx="24" ry="30" fill="none" stroke-width="2"/><circle cx="50" cy="50" r="8" fill="none" stroke-width="2"/><path d="M50 20 L50 26 M50 74 L50 80 M26 50 L32 50 M68 50 L74 50" stroke-width="1.5"/>`,
+  '愚者2':  `<path d="M30 70 L50 25 L70 70" fill="none" stroke-width="2"/><circle cx="65" cy="28" r="7" fill="none" stroke-width="2"/>`,
+};
+
+// Suit pip shapes
+function suitPath(suit){
+  const s={
+    '權':  `<path d="M50 28 L50 68 M38 42 Q50 32 62 42" fill="none" stroke-width="2.5"/>`,
+    '聖':  `<path d="M38 40 Q38 60 50 68 Q62 60 62 40 Q62 32 50 36 Q38 32 38 40 Z" fill="none" stroke-width="2"/>`,
+    '寶':  `<path d="M50 28 L62 50 L50 72 L38 50 Z" fill="none" stroke-width="2"/>`,
+    '星':  `<circle cx="50" cy="50" r="16" fill="none" stroke-width="2"/><path d="M50 34 L50 66 M34 50 L66 50" stroke-width="1.5"/>`,
+  };
+  return s[suit[0]]||s['星'];
+}
+
+function getCardSVG(card,mode){
+  const pal=getCardPalette(card,mode);
+  let symbol='';
+  if(mode==='tarot'){
+    if(MAJOR_NAMES.has(card.name)){
+      symbol=MAJOR_SYMBOLS[card.name]||MAJOR_SYMBOLS['愚者2']||'';
+    } else {
+      // For minor arcana, show pip + numeral
+      const suit=card.name.slice(0,2);
+      const num=card.name.slice(2)||card.name.slice(0,1);
+      symbol=`${suitPath(suit)}<text x="50" y="72" text-anchor="middle" font-size="11" fill="${pal.text}" opacity=".7" font-family="serif">${num}</text>`;
+    }
+  } else {
+    // Lenormand / Rana: show elegant symbol + number
+    symbol=`<text x="50" y="52" text-anchor="middle" font-size="24" fill="${pal.accent}">${card.sym||'✦'}</text>`;
+  }
+  return `<svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="96" height="86" rx="6" fill="${pal.bg}" stroke="${pal.border}" stroke-width="1.5"/>
+    <rect x="6" y="6" width="88" height="78" rx="4" fill="none" stroke="${pal.border}" stroke-width=".6" opacity=".5"/>
+    <g stroke="${pal.accent}" fill="${pal.accent}" color="${pal.accent}">
+      ${symbol}
+    </g>
+    <text x="8" y="18" font-size="9" fill="${pal.text}" opacity=".7" font-family="serif">${card.name[0]}</text>
+  </svg>`;
+}
+
 const TAROT_SPREADS=[
   {key:"two",     name:"雙牌組合",   positions:["主題","補充"],hint:"兩張牌相互補充解讀"},
   {key:"three",   name:"三牌陣",     positions:["過去","現在","未來"],hint:"最經典的時間流向牌陣"},
@@ -665,19 +833,122 @@ let customPositions=[];
 let posIdCounter=0;
 let generatedPrompt='';
 let cachedSpreadName='';
+let ratingStyle='gentle'; // 'gentle'|'balanced'|'strict'
 
 // ══════════════════════════════════════════
 //  STORAGE
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  FIREBASE INIT
+// ══════════════════════════════════════════
+const firebaseConfig={
+  apiKey:"AIzaSyBYNnTtzK7h3u0fZ9YddUZ-VXa-nD_rbXE",
+  authDomain:"tarotnote-55d57.firebaseapp.com",
+  projectId:"tarotnote-55d57",
+  storageBucket:"tarotnote-55d57.firebasestorage.app",
+  messagingSenderId:"723398261358",
+  appId:"1:723398261358:web:9b12416a89bcebf1bd047f",
+  measurementId:"G-RJVWGB5L8Y"
+};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let currentUser=null;
+let syncTimeout=null;
+
+function setSyncDot(state){ // 'ok'|'syncing'|'offline'
+  const dot=document.getElementById('syncDot');
+  if(!dot) return;
+  dot.className='sync-dot'+(state==='syncing'?' syncing':state==='offline'?' offline':'');
+}
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+function signInWithGoogle(){
+  const provider=new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(e=>alert('登入失敗：'+e.message));
+}
+function signOut(){
+  if(!confirm('確定要登出嗎？')) return;
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(async user=>{
+  currentUser=user;
+  const overlay=document.getElementById('authOverlay');
+  const navAuth=document.getElementById('navAuth');
+  if(user){
+    overlay.style.display='none';
+    navAuth.style.display='flex';
+    document.getElementById('navAvatar').src=user.photoURL||'';
+    document.getElementById('navUserName').textContent=user.displayName||user.email||'';
+    setSyncDot('ok');
+    // Load data from Firestore into localStorage for local use
+    await loadFromFirestore();
+  } else {
+    overlay.style.display='flex';
+    navAuth.style.display='none';
+  }
+});
+
+async function loadFromFirestore(){
+  if(!currentUser) return;
+  setSyncDot('syncing');
+  try{
+    const uid=currentUser.uid;
+    const [jSnap,dbSnap,dSnap]=await Promise.all([
+      db.collection('users').doc(uid).collection('data').doc('journal').get(),
+      db.collection('users').doc(uid).collection('data').doc('database').get(),
+      db.collection('users').doc(uid).collection('data').doc('diary').get(),
+    ]);
+    if(jSnap.exists && jSnap.data().value)
+      localStorage.setItem(JOURNAL_KEY, jSnap.data().value);
+    if(dbSnap.exists && dbSnap.data().value)
+      localStorage.setItem(DB_KEY, dbSnap.data().value);
+    if(dSnap.exists && dSnap.data().value)
+      localStorage.setItem(DIARY_KEY, dSnap.data().value);
+    setSyncDot('ok');
+  }catch(e){
+    console.warn('Firestore load error',e);
+    setSyncDot('offline');
+  }
+}
+
+function scheduleSync(){
+  clearTimeout(syncTimeout);
+  syncTimeout=setTimeout(syncToFirestore, 1500);
+}
+async function syncToFirestore(){
+  if(!currentUser) return;
+  setSyncDot('syncing');
+  try{
+    const uid=currentUser.uid;
+    const ref=db.collection('users').doc(uid).collection('data');
+    await Promise.all([
+      ref.doc('journal').set({value:localStorage.getItem(JOURNAL_KEY)||'[]',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
+      ref.doc('database').set({value:localStorage.getItem(DB_KEY)||'{}',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
+      ref.doc('diary').set({value:localStorage.getItem(DIARY_KEY)||'{}',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
+    ]);
+    setSyncDot('ok');
+  }catch(e){
+    console.warn('Firestore sync error',e);
+    setSyncDot('offline');
+  }
+}
+
+// ══════════════════════════════════════════
+//  STORAGE (localStorage + Firestore sync)
 // ══════════════════════════════════════════
 const JOURNAL_KEY='divination_journal_v5';
 const DB_KEY='divination_database_v2';
 const DIARY_KEY='tarot_diary_v1';
 function getJournal(){return JSON.parse(localStorage.getItem(JOURNAL_KEY)||'[]')}
-function saveJournal(d){localStorage.setItem(JOURNAL_KEY,JSON.stringify(d))}
+function saveJournal(d){localStorage.setItem(JOURNAL_KEY,JSON.stringify(d));scheduleSync();}
 function getDatabase(){return JSON.parse(localStorage.getItem(DB_KEY)||'{}')}
-function saveDatabase(d){localStorage.setItem(DB_KEY,JSON.stringify(d))}
+function saveDatabase(d){localStorage.setItem(DB_KEY,JSON.stringify(d));scheduleSync();}
 function getDiary(){return JSON.parse(localStorage.getItem(DIARY_KEY)||'{}')}
-function saveDiary(d){localStorage.setItem(DIARY_KEY,JSON.stringify(d))}
+function saveDiary(d){localStorage.setItem(DIARY_KEY,JSON.stringify(d));scheduleSync();}
 
 // ══════════════════════════════════════════
 //  NAV
@@ -872,11 +1143,15 @@ function drawCardsDigital(){
   const row=document.getElementById('cardsRow');
   row.className=isNine?'nine-grid':'cards-row';row.innerHTML='';
   drawnCards.forEach((d,i)=>{
-    const el=document.createElement('div');el.className='card';el.style.animationDelay=(i*0.08)+'s';
-    el.innerHTML=`<div class="card-pos">${d.position}</div>
-      <div class="card-sym">${d.card.sym}</div>
+    const el=document.createElement('div');
+    el.className='card'+(d.reversed?' reversed':'');
+    el.style.animationDelay=(i*0.08)+'s';
+    el.innerHTML=`<div class="card-inner">
+      <div class="card-pos">${d.position}</div>
+      <div class="card-art">${getCardSVG(d.card,currentMode)}</div>
       <div class="card-name">${d.card.name}</div>
-      <div class="card-orient">${d.reversed?'逆位':'正位'}</div>`;
+      <div class="card-orient">${d.reversed?'逆位':'正位'}</div>
+    </div>`;
     row.appendChild(el);
   });
   document.getElementById('cardsSection').style.display='block';
@@ -914,6 +1189,11 @@ function buildSpreadName(){
   const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
   return currentDrawMode==='digital'?(spreads.find(x=>x.key===currentSpread)?.name||'自訂牌陣'):'自訂牌陣';
 }
+function setRatingStyle(style,btn){
+  ratingStyle=style;
+  document.querySelectorAll('.rating-style-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
 function generatePrompt(){
   const interpText=document.getElementById('interpUnified').value.trim();
   if(!interpText){alert('請先填寫你的解讀喔！');return;}
@@ -923,7 +1203,20 @@ function generatePrompt(){
   const cardsSummary=drawnCards.map(d=>
     `${d.position}：${d.card.name}${currentMode==='tarot'?(d.reversed?' (逆位)':' (正位)'):''}`
   ).join('\n');
-  generatedPrompt=`你是一位溫暖專業的${modeName}老師，請評估以下學員的解牌練習。${drawTypeNote}
+
+  const styleInstructions={
+    gentle:`你是一位溫暖慈祥的${modeName}老師。請用溫柔鼓勵的語氣評分，充分肯定學員的努力，對於不足之處也要以輕柔、建設性的方式提示，讓學員感到被支持。`,
+    balanced:`你是一位公正客觀的${modeName}老師。請如實評分，做得好的地方給予明確肯定，不足或錯誤的地方直接指出並說明原因，不偏袒、不刻意美化，但語氣保持專業中立。`,
+    strict:`你是一位極為嚴格、毫不留情的${modeName}老師。你的任務是矯正解讀錯誤，不給任何稱讚，直接指出所有問題、誤解和不精確之處。你的標準極高，學員需要被挑戰才能進步。`
+  };
+
+  const styleFormat={
+    gentle:`評分：X/10\n\n✓ 做得好的地方：\n（1-2點，充分肯定學員的優點）\n\n♡ 輕柔建議：\n（1-2點，以溫和方式提示改進空間）\n\n老師鼓勵：\n（1-2句溫暖的結語）\n\n語氣溫暖親切，約200字內。`,
+    balanced:`評分：X/10\n\n✓ 正確之處：\n（1-2點，具體說明做得好的地方）\n\n✗ 需要改進：\n（1-2點，直接指出錯誤或不足，說明原因）\n\n補充說明：\n（對牌義或牌陣的客觀補充，2-3句）\n\n語氣中立專業，約250字內。`,
+    strict:`評分：X/10\n\n問題一：（直接點名第一個錯誤，說明正確解讀應為何）\n\n問題二：（直接點名第二個錯誤或不精確之處）\n\n問題三（若有）：（其他需要矯正的地方）\n\n正確解讀方向：\n（簡短說明這個牌陣的正確解讀思路）\n\n不給鼓勵，直接指出問題，語氣嚴格。約250字內。`
+  };
+
+  generatedPrompt=`${styleInstructions[ratingStyle]}${drawTypeNote}
 
 【練習情境】
 ${currentQuestion}
@@ -937,18 +1230,8 @@ ${interpText}
 
 請用繁體中文回應，依以下格式：
 
-評分：X/10
+${styleFormat[ratingStyle]}`;
 
-✓ 做得好的地方：
-（1-2點，具體說明優點）
-
-▲ 改進建議：
-（1-2點，針對牌義理解或牌陣連結的具體建議）
-
-老師補充：
-（對此牌陣整體訊息的補充洞見，2-3句）
-
-語氣溫暖鼓勵，約250字內。`;
   document.getElementById('promptText').textContent=generatedPrompt;
   document.getElementById('promptSection').style.display='block';
   document.getElementById('feedbackInput').value='';
@@ -1189,10 +1472,12 @@ function renderDiaryEditor(body,existing){
   diaryPhysCards=existing&&existing.drawMode==='physical'?(existing.cards||[]).map(c=>c.name):['',''];
 
   const cardsHtml=diaryDigitalCards.map((c,i)=>`
-    <div class="diary-card" style="animation-delay:${i*0.07}s">
-      <div class="diary-card-sym">${c.sym||'✦'}</div>
-      <div class="diary-card-name">${c.name}</div>
-      <div class="diary-card-orient">${c.reversed?'逆位':'正位'}</div>
+    <div class="diary-card${c.reversed?' reversed':''}" style="animation-delay:${i*0.07}s">
+      <div class="diary-card-inner">
+        <div class="diary-card-art">${getCardSVG(c,diaryDeckType==='lenormand'?'lenormand':'tarot')}</div>
+        <div class="diary-card-name">${c.name}</div>
+        <div class="diary-card-orient">${c.reversed?'逆位':'正位'}</div>
+      </div>
     </div>`).join('');
 
   const physRowsHtml=diaryPhysCards.map((name,i)=>`
@@ -1254,15 +1539,18 @@ function diaryDraw(){
   let pool;
   if(diaryDeckType==='tarot') pool=TAROT_ALL;
   else if(diaryDeckType==='lenormand') pool=getLenormand();
-  else pool=[...TAROT_ALL,...getLenormand()]; // mixed
+  else pool=[...TAROT_ALL,...getLenormand()];
   const shuffled=[...pool].sort(()=>Math.random()-0.5);
   diaryDigitalCards=shuffled.slice(0,n).map(c=>({...c,reversed:Math.random()>0.65}));
   const row=document.getElementById('diaryCardsRow');
+  const deckMode=diaryDeckType==='lenormand'?'lenormand':(diaryDeckType==='tarot'?'tarot':'tarot');
   row.innerHTML=diaryDigitalCards.map((c,i)=>`
-    <div class="diary-card" style="animation-delay:${i*0.08}s;opacity:0">
-      <div class="diary-card-sym">${c.sym}</div>
-      <div class="diary-card-name">${c.name}</div>
-      <div class="diary-card-orient">${c.reversed?'逆位':'正位'}</div>
+    <div class="diary-card${c.reversed?' reversed':''}" style="animation-delay:${i*0.08}s;opacity:0">
+      <div class="diary-card-inner">
+        <div class="diary-card-art">${getCardSVG(c,deckMode)}</div>
+        <div class="diary-card-name">${c.name}</div>
+        <div class="diary-card-orient">${c.reversed?'逆位':'正位'}</div>
+      </div>
     </div>`).join('');
 }
 
