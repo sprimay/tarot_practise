@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>塔羅練習筆記</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FDFCF9;--bg2:#F5F3EE;--bg3:#EDEAE2;
+  --text:#2C2C2A;--text2:#5F5E5A;--text3:#888780;
+  --border:#D3D1C7;--border2:#B4B2A9;
+  --r:10px;--rm:6px;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* NAV */
+.nav{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+.nav-logo{padding:12px 16px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;letter-spacing:0.02em}
+.nav-tabs{display:flex;flex:1}
+.nav-tab{padding:13px 14px;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.nav-tab:hover{color:var(--text2)}
+.nav-tab.active{color:var(--text);border-bottom:2px solid var(--text)}
+
+.page{display:none;max-width:720px;margin:0 auto;padding:24px 20px}
+.page.active{display:block}
+.sec-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+
+/* SHARED COMPONENTS */
+.mode-switch{display:flex;background:var(--bg2);border-radius:var(--r);padding:4px;margin-bottom:24px;border:1px solid var(--border)}
+.mode-btn{flex:1;padding:9px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;background:none;color:var(--text3)}
+.mode-btn.active{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.action-row-btn{width:100%;padding:13px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text);cursor:pointer;transition:all 0.15s;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center;gap:8px}
+.action-row-btn:hover{background:var(--bg2)}
+.action-row-btn:disabled{opacity:0.4;cursor:not-allowed}
+.reset-btn{width:100%;padding:11px;border:1px solid var(--border);border-radius:var(--r);background:transparent;font-size:13px;color:var(--text3);cursor:pointer;margin-top:10px;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.reset-btn:hover{background:var(--bg2)}
+.loading-dots{display:inline-flex;gap:5px;align-items:center}
+.loading-dots span{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:dot 1.2s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:0.2}40%{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* PRACTICE PAGE */
+.gen-btn{width:100%;padding:13px 20px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text);cursor:pointer;margin-bottom:16px;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:10px}
+.gen-btn:hover{background:var(--bg2)}
+.gen-btn:disabled{opacity:0.5;cursor:not-allowed}
+/* topic selector */
+.topic-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+.topic-btn{border:1px solid var(--border);border-radius:var(--r);padding:12px 4px 10px;background:var(--bg);cursor:pointer;text-align:center;transition:all 0.15s;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;align-items:center;gap:5px}
+.topic-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.topic-btn.active{border:1.5px solid var(--border2);background:var(--bg2)}
+.topic-icon{font-size:15px;color:var(--text2);line-height:1}
+.topic-name{font-size:11px;font-weight:500;color:var(--text)}
+.custom-topic-area{margin-bottom:10px}
+.custom-topic-input{width:100%;border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg2);resize:none;line-height:1.7;outline:none}
+.custom-topic-input:focus{border-color:var(--border2);background:var(--bg)}
+.question-display{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:20px;display:none}
+.q-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.q-text{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--text);line-height:1.5}
+.regen-link{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;margin-top:8px;display:inline-block}
+/* multi-select category chips */
+.q-cat-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.q-cat-chip{padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.q-cat-chip:hover{background:var(--bg2);border-color:var(--border2)}
+.q-cat-chip.active{border-color:var(--border2);background:var(--bg2);color:var(--text);font-weight:500}
+.draw-mode-section{display:none;margin-bottom:20px}
+.draw-mode-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.draw-mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.draw-mode-card{border:1px solid var(--border);border-radius:var(--r);padding:16px 14px;background:var(--bg);cursor:pointer;text-align:left;transition:all 0.15s;font-family:'DM Sans',sans-serif;width:100%}
+.draw-mode-card:hover{background:var(--bg2);border-color:var(--border2)}
+.draw-mode-card.active{border:1.5px solid var(--border2);background:var(--bg2)}
+.dmc-icon{font-size:22px;margin-bottom:8px;display:block}
+.dmc-title{font-size:14px;font-weight:500;color:var(--text);display:block;margin-bottom:4px}
+.dmc-desc{font-size:12px;color:var(--text3);line-height:1.5}
+.spread-section{display:none;margin-bottom:20px}
+.spread-select{width:100%;border:1px solid var(--border);border-radius:var(--rm);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888780' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.spread-select:focus{border-color:var(--border2)}
+.spread-hint{font-size:12px;color:var(--text3);margin-top:6px}
+.manual-section{display:none;margin-bottom:20px}
+.custom-spread-builder{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:12px}
+.csb-header{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.csb-title{font-size:12px;font-weight:500;color:var(--text2)}
+.csb-count{font-size:11px;color:var(--text3)}
+.csb-positions{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.csb-pos-row{display:flex;align-items:center;gap:8px}
+.csb-pos-num{font-size:11px;color:var(--text3);min-width:18px;font-family:'Cormorant Garamond',serif}
+.csb-pos-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg);outline:none}
+.csb-pos-input:focus{border-color:var(--border2)}
+.csb-del-btn{width:26px;height:26px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);color:var(--text3);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.csb-del-btn:hover{background:var(--bg3);color:#E24B4A;border-color:#E24B4A}
+.csb-footer{padding:8px 14px;border-top:1px solid var(--border)}
+.csb-add-btn{width:100%;padding:8px 12px;border:1px dashed var(--border2);border-radius:var(--rm);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text3);cursor:pointer;transition:all 0.15s}
+.csb-add-btn:hover{background:var(--bg2);color:var(--text2)}
+.preset-label{font-size:11px;color:var(--text3);margin-bottom:6px}
+.preset-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.preset-chip{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.preset-chip:hover{background:var(--bg2);border-color:var(--border2);color:var(--text)}
+.manual-card-rows{display:flex;flex-direction:column;gap:6px}
+.manual-card-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg)}
+.mcr-pos{font-size:11px;color:var(--text3);min-width:70px;font-family:'Cormorant Garamond',serif}
+.card-name-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text);background:var(--bg2);outline:none}
+.card-name-input:focus{border-color:var(--border2);background:var(--bg)}
+.orient-toggle{display:flex;border:1px solid var(--border);border-radius:var(--rm);overflow:hidden;flex-shrink:0}
+.orient-btn{padding:6px 10px;font-size:11px;font-family:'DM Sans',sans-serif;border:none;background:var(--bg);color:var(--text3);cursor:pointer;transition:all 0.15s}
+.orient-btn.active{background:var(--bg3);color:var(--text)}
+.p-action-btn{width:100%;padding:14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--text);cursor:pointer;transition:all 0.2s;letter-spacing:0.03em;display:none;margin-top:4px}
+.p-action-btn:hover{background:var(--bg2)}
+.p-action-btn:disabled{opacity:0.4;cursor:not-allowed}
+.cards-section{display:none;margin-top:24px}
+.cards-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:6px}
+.card{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);padding:12px 8px;text-align:center;min-width:72px;flex:1;max-width:110px;animation:fadeUp 0.35s ease forwards;opacity:0}
+.card-pos{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+.card-sym{font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1;margin-bottom:3px}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--text);font-weight:500}
+.card-orient{font-size:9px;color:var(--text3);margin-top:2px}
+.nine-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.nine-grid .card{max-width:none}
+.interp-section{display:none;margin-top:20px}
+.interp-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.interp-box-header{padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.interp-box-cards{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ibc-chip{font-size:11px;padding:3px 9px;border:1px solid var(--border);border-radius:20px;color:var(--text2);font-family:'Cormorant Garamond',serif;background:var(--bg)}
+.interp-hint{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5}
+textarea.interp-unified{width:100%;border:none;padding:16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:transparent;resize:none;min-height:180px;line-height:1.8;outline:none}
+.prompt-section{display:none;margin-top:20px}
+.prompt-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:12px}
+.prompt-box-header{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.prompt-box-label{font-size:12px;font-weight:500;color:var(--text2)}
+.copy-btn{padding:6px 14px;border:1px solid var(--border2);border-radius:var(--rm);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);cursor:pointer;transition:all 0.15s}
+.copy-btn:hover{background:var(--bg2)}
+.copy-btn.copied{color:#3B6D11;border-color:#639922}
+.prompt-text{padding:14px 16px;font-size:13px;line-height:1.8;color:var(--text2);white-space:pre-wrap;max-height:240px;overflow-y:auto}
+.platform-links{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.platform-label{font-size:12px;color:var(--text3)}
+.platform-link{padding:5px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);text-decoration:none;background:var(--bg);transition:all 0.15s}
+.platform-link:hover{background:var(--bg2);border-color:var(--border2)}
+.feedback-input-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:10px}
+textarea.feedback-input{width:100%;border:none;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:140px;line-height:1.8;outline:none}
+.result-section{display:none;margin-top:20px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.result-header{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.result-title{font-family:'Cormorant Garamond',serif;font-size:17px}
+.score{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--text)}
+.result-body{padding:18px}
+.result-text{font-size:14px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+.save-db-section{display:none;padding:14px 18px;border-top:1px solid var(--border)}
+.save-db-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px}
+.card-note-list{display:flex;flex-direction:column;gap:8px}
+.card-note-item{display:flex;align-items:flex-start;gap:8px}
+.card-note-label{font-size:12px;color:var(--text2);min-width:80px;padding-top:8px;font-family:'Cormorant Garamond',serif}
+textarea.note-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);resize:none;min-height:52px;outline:none;line-height:1.6}
+textarea.note-input:focus{border-color:var(--border2)}
+.save-db-btn{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);font-size:13px;color:var(--text2);cursor:pointer;margin-top:10px;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.save-db-btn:hover{background:var(--bg2)}
+.save-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
+
+/* ═══ PRACTICE RECORD PAGE ═══ */
+.pr-filter-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+.pr-filter-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pr-filter-divider{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.filter-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.filter-btn:hover{background:var(--bg2)}
+.filter-btn.active{border-color:var(--border2);color:var(--text);background:var(--bg2)}
+.clear-journal-btn{margin-left:auto;padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:#E24B4A;cursor:pointer;background:var(--bg);font-family:'DM Sans',sans-serif}
+.journal-empty{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px}
+.journal-list{display:flex;flex-direction:column;gap:12px}
+.journal-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.journal-header{padding:12px 16px;background:var(--bg2);display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:1px solid transparent;flex-wrap:wrap}
+.journal-header.open{border-bottom-color:var(--border)}
+.j-date{font-size:12px;color:var(--text3)}
+.j-tag{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg3);color:var(--text3)}
+.j-cat{font-size:10px;padding:2px 8px;border-radius:20px;color:var(--text3)}
+.j-spread{font-size:13px;color:var(--text);flex:1;font-family:'Cormorant Garamond',serif}
+.j-score{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500}
+.journal-body{display:none;padding:14px 16px}
+.journal-body.open{display:block}
+.j-question{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;margin-bottom:10px;color:var(--text2)}
+.j-cards-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.j-card-chip{font-size:12px;padding:3px 10px;border:1px solid var(--border);border-radius:20px;color:var(--text2);font-family:'Cormorant Garamond',serif}
+.j-interp{font-size:13px;line-height:1.7;color:var(--text2);margin-bottom:10px;padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid var(--border2);white-space:pre-wrap}
+.j-feedback{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+
+/* ═══ TAROT DIARY PAGE ═══ */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-nav-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.cal-nav-btn:hover{background:var(--bg2)}
+.cal-month{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:var(--text)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:20px}
+.cal-day-label{text-align:center;font-size:10px;color:var(--text3);padding:4px 0;font-weight:500}
+.cal-day{min-height:44px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;padding:4px 3px;position:relative}
+.cal-day:hover{background:var(--bg2);border-color:var(--border2)}
+.cal-day.other-month{opacity:0.3;cursor:default}
+.cal-day.other-month:hover{background:var(--bg);border-color:var(--border)}
+.cal-day.today{border-color:var(--border2);background:var(--bg2)}
+.cal-day.has-entry{border-color:var(--border2)}
+.cal-day-num{font-size:12px;color:var(--text2);font-weight:500;line-height:1.4}
+.cal-day.today .cal-day-num{color:var(--text);font-weight:600}
+.cal-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);margin-top:3px}
+.cal-card-preview{font-size:9px;color:var(--text3);text-align:center;line-height:1.3;margin-top:2px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+/* diary entry modal-like panel */
+.diary-panel{display:none;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:4px}
+.diary-panel-header{padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.diary-panel-date{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text)}
+.diary-close-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.diary-close-btn:hover{background:var(--bg3);color:var(--text)}
+.diary-panel-body{padding:16px}
+/* diary draw mode */
+.diary-mode-switch{display:flex;background:var(--bg2);border-radius:var(--r);padding:3px;margin-bottom:14px;border:1px solid var(--border)}
+.diary-mode-btn{flex:1;padding:7px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;background:none;color:var(--text3)}
+.diary-mode-btn.active{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+/* digital draw area */
+.diary-digital-area{display:none}
+.diary-draw-count{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.diary-count-label{font-size:12px;color:var(--text3)}
+.diary-count-input{width:60px;border:1px solid var(--border);border-radius:var(--rm);padding:6px 10px;font-size:13px;color:var(--text);background:var(--bg);outline:none;text-align:center}
+.diary-count-input:focus{border-color:var(--border2)}
+.diary-draw-btn{padding:8px 18px;border:1px solid var(--border2);border-radius:var(--rm);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text);cursor:pointer;transition:all 0.15s}
+.diary-draw-btn:hover{background:var(--bg2)}
+.diary-cards-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;min-height:10px}
+.diary-card{border:1px solid var(--border);border-radius:var(--rm);background:var(--bg2);padding:10px 8px;text-align:center;min-width:68px;flex:1;max-width:100px;animation:fadeUp 0.3s ease forwards;opacity:0}
+.diary-card-sym{font-size:20px;margin-bottom:3px}
+.diary-card-name{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:500}
+.diary-card-orient{font-size:9px;color:var(--text3);margin-top:2px}
+/* physical diary area */
+.diary-physical-area{display:none}
+.diary-phys-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.diary-phys-row{display:flex;align-items:center;gap:8px}
+.diary-phys-num{font-size:11px;color:var(--text3);min-width:16px}
+.diary-phys-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text);background:var(--bg2);outline:none}
+.diary-phys-input:focus{border-color:var(--border2);background:var(--bg)}
+.diary-phys-del{width:24px;height:24px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.diary-phys-del:hover{color:#E24B4A;border-color:#E24B4A}
+.diary-phys-add{width:100%;padding:7px;border:1px dashed var(--border2);border-radius:var(--rm);background:transparent;font-size:12px;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.diary-phys-add:hover{background:var(--bg2);color:var(--text2)}
+/* diary note */
+.diary-note-label{font-size:11px;color:var(--text3);margin-bottom:6px}
+.diary-note-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:12px}
+textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:130px;line-height:1.8;outline:none}
+.diary-save-btn{width:100%;padding:12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text);cursor:pointer;transition:all 0.15s}
+.diary-save-btn:hover{background:var(--bg2)}
+.diary-saved-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
+/* existing entry view */
+.diary-existing{padding:14px 16px;border-top:1px solid var(--border)}
+.diary-existing-cards{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.diary-existing-note{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.diary-edit-btn{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;margin-top:8px;display:inline-block}
+
+/* ═══ DATABASE PAGE ═══ */
+.db-search{width:100%;border:1px solid var(--border);border-radius:var(--rm);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);margin-bottom:16px;outline:none}
+.db-search:focus{border-color:var(--border2)}
+.db-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.db-tab{padding:9px 16px;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif}
+.db-tab.active{color:var(--text);border-bottom:2px solid var(--text)}
+.db-list{display:flex;flex-direction:column;gap:8px}
+.db-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.db-item-header{padding:10px 14px;background:var(--bg2);display:flex;align-items:center;gap:10px;cursor:pointer}
+.db-card-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text);flex:1}
+.db-count{font-size:11px;color:var(--text3)}
+.db-item-body{display:none;padding:12px 14px}
+.db-item-body.open{display:block}
+.db-note-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.7;color:var(--text)}
+.db-note-row:last-child{border-bottom:none}
+.db-note-date{font-size:11px;color:var(--text3);margin-top:2px}
+.db-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.db-del-btn{font-size:11px;color:#E24B4A;cursor:pointer;margin-top:4px;background:none;border:none;padding:0;font-family:'DM Sans',sans-serif}
+/* DB sub-filter (tarot suit) */
+.db-sub-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.db-sub-btn{padding:4px 12px;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.db-sub-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.db-sub-btn.active{border-color:var(--border2);color:var(--text);background:var(--bg2)}
+/* Lenormand system switcher (practice page) */
+.len-system-switch{display:flex;gap:6px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.len-system-label{font-size:11px;color:var(--text3)}
+.len-sys-btn{padding:5px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.len-sys-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.len-sys-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
+/* Diary deck selector */
+.diary-deck-row{display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.diary-deck-label{font-size:11px;color:var(--text3)}
+.diary-deck-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.diary-deck-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.diary-deck-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo">✦ 塔羅筆記</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goPage('practice')">練習</button>
+    <button class="nav-tab" onclick="goPage('record')">練習記錄</button>
+    <button class="nav-tab" onclick="goPage('diary')">塔羅日記</button>
+    <button class="nav-tab" onclick="goPage('database')">牌義庫</button>
+  </div>
+</nav>
+
+<!-- ═══ PRACTICE PAGE ═══ -->
+<div class="page active" id="page-practice">
+  <div class="mode-switch" style="margin-top:4px">
+    <button class="mode-btn active" id="mode-tarot" onclick="setMode('tarot')">🃏 塔羅牌</button>
+    <button class="mode-btn" id="mode-lenormand" onclick="setMode('lenormand')">🌹 雷諾曼</button>
+  </div>
+  <div class="len-system-switch" id="lenSystemSwitch" style="display:none">
+    <span class="len-system-label">體系：</span>
+    <button class="len-sys-btn active" id="lensys-36" onclick="setLenSystem('36',this)">傳統 36 張</button>
+    <button class="len-sys-btn" id="lensys-rana40" onclick="setLenSystem('rana40',this)">Rana 40 張</button>
+  </div>
+  <div class="sec-label">Step 1 — 今天想練習什麼主題</div>
+  <div class="topic-selector" id="topicSelector">
+    <div class="topic-grid">
+      <button class="topic-btn active" id="topic-random" data-topic="random" onclick="selectTopic('random',this)">
+        <span class="topic-icon">✦</span><span class="topic-name">隨機</span>
+      </button>
+      <button class="topic-btn" id="topic-love" data-topic="love" onclick="selectTopic('love',this)">
+        <span class="topic-icon">♡</span><span class="topic-name">戀愛</span>
+      </button>
+      <button class="topic-btn" id="topic-work" data-topic="work" onclick="selectTopic('work',this)">
+        <span class="topic-icon">◈</span><span class="topic-name">事業</span>
+      </button>
+      <button class="topic-btn" id="topic-money" data-topic="money" onclick="selectTopic('money',this)">
+        <span class="topic-icon">◇</span><span class="topic-name">金錢</span>
+      </button>
+      <button class="topic-btn" id="topic-social" data-topic="social" onclick="selectTopic('social',this)">
+        <span class="topic-icon">◎</span><span class="topic-name">人際</span>
+      </button>
+      <button class="topic-btn" id="topic-life" data-topic="life" onclick="selectTopic('life',this)">
+        <span class="topic-icon">○</span><span class="topic-name">生活</span>
+      </button>
+      <button class="topic-btn" id="topic-custom" data-topic="custom" onclick="selectTopic('custom',this)">
+        <span class="topic-icon">✎</span><span class="topic-name">自訂</span>
+      </button>
+    </div>
+    <div class="custom-topic-area" id="customTopicArea" style="display:none">
+      <textarea class="custom-topic-input" id="customTopicInput" placeholder="輸入你想練習的情境或問題，系統會以此為基礎出題…" rows="3"></textarea>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generateQuestion()"><span>✦</span><span>出題</span></button>
+  </div>
+  <div class="question-display" id="questionDisplay">
+    <div class="q-label">今日情境</div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-cat-row">
+      <span class="q-cat-label" style="font-size:11px;color:var(--text3);padding-top:3px">記錄分類（可複選）：</span>
+      <button class="q-cat-chip" data-cat="love" onclick="toggleCat('love',this)">戀愛</button>
+      <button class="q-cat-chip" data-cat="work" onclick="toggleCat('work',this)">事業</button>
+      <button class="q-cat-chip" data-cat="money" onclick="toggleCat('money',this)">金錢</button>
+      <button class="q-cat-chip" data-cat="social" onclick="toggleCat('social',this)">人際</button>
+      <button class="q-cat-chip" data-cat="life" onclick="toggleCat('life',this)">生活</button>
+      <button class="q-cat-chip" data-cat="other" onclick="toggleCat('other',this)">其他</button>
+    </div>
+    <span class="regen-link" onclick="generateQuestion()">換一題 ↺</span>
+  </div>
+  <div class="draw-mode-section" id="drawModeSection">
+    <div class="draw-mode-label">Step 2 — 選擇抽牌方式</div>
+    <div class="draw-mode-cards">
+      <button class="draw-mode-card" id="dmDigital" onclick="setDrawMode('digital')">
+        <span class="dmc-icon">💻</span><span class="dmc-title">電腦抽牌</span>
+        <span class="dmc-desc">由系統隨機抽牌，選擇內建牌陣</span>
+      </button>
+      <button class="draw-mode-card" id="dmPhysical" onclick="setDrawMode('physical')">
+        <span class="dmc-icon">🃏</span><span class="dmc-title">實體紙牌</span>
+        <span class="dmc-desc">自訂牌陣位置，手動輸入抽到的牌</span>
+      </button>
+    </div>
+  </div>
+  <div class="spread-section" id="spreadSection">
+    <div class="sec-label">Step 3 — 選擇牌陣</div>
+    <select class="spread-select" id="spreadSelect" onchange="onDigitalSpreadChange()"></select>
+    <div class="spread-hint" id="spreadHint"></div>
+  </div>
+  <div class="manual-section" id="manualSection">
+    <div class="sec-label">Step 3 — 自訂牌陣</div>
+    <div class="preset-label">快速套用預設牌陣：</div>
+    <div class="preset-chips" id="presetChips"></div>
+    <div class="custom-spread-builder">
+      <div class="csb-header"><span class="csb-title">牌陣位置</span><span class="csb-count" id="csbCount">0 個位置</span></div>
+      <div class="csb-positions" id="csbPositions"></div>
+      <div class="csb-footer"><button class="csb-add-btn" onclick="addCustomPosition()">＋ 新增位置</button></div>
+    </div>
+    <div class="sec-label" style="margin-top:16px">輸入你抽到的牌</div>
+    <div class="manual-card-rows" id="manualCardRows"></div>
+  </div>
+  <button class="p-action-btn" id="actionBtn" onclick="proceedToInterpretation()">✦ 開始解讀</button>
+  <div class="cards-section" id="cardsSection">
+    <div class="sec-label">抽到的牌</div>
+    <div id="cardsRow"></div>
+  </div>
+  <div class="interp-section" id="interpSection">
+    <div class="sec-label">整體解讀</div>
+    <div class="interp-box">
+      <div class="interp-box-header">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">本次牌陣</div>
+        <div class="interp-box-cards" id="interpCardChips"></div>
+        <div class="interp-hint" id="interpHint"></div>
+      </div>
+      <textarea class="interp-unified" id="interpUnified" placeholder="請以連貫的方式解讀整個牌陣…"></textarea>
+    </div>
+    <button class="action-row-btn" style="margin-top:8px" onclick="generatePrompt()">✦ 產生評分 Prompt</button>
+  </div>
+  <div class="prompt-section" id="promptSection">
+    <div class="sec-label">Step 5 — 複製 Prompt，貼到任意 AI 平台</div>
+    <div class="prompt-box">
+      <div class="prompt-box-header">
+        <span class="prompt-box-label">評分用 Prompt</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">複製</button>
+      </div>
+      <div class="prompt-text" id="promptText"></div>
+    </div>
+    <div class="platform-links">
+      <span class="platform-label">快速前往：</span>
+      <a class="platform-link" href="https://claude.ai" target="_blank">Claude</a>
+      <a class="platform-link" href="https://chatgpt.com" target="_blank">ChatGPT</a>
+      <a class="platform-link" href="https://gemini.google.com" target="_blank">Gemini</a>
+    </div>
+    <div class="sec-label" style="margin-top:4px">Step 6 — 貼上 AI 給你的回饋</div>
+    <div class="feedback-input-box">
+      <textarea class="feedback-input" id="feedbackInput" placeholder="將 AI 的回覆貼在這裡…"></textarea>
+    </div>
+    <button class="action-row-btn" style="margin-top:4px" onclick="saveFeedback()">✦ 儲存回饋與練習記錄</button>
+  </div>
+  <div class="result-section" id="resultSection">
+    <div class="result-header">
+      <span class="result-title">練習記錄已儲存</span>
+      <span class="score" id="scoreDisplay"></span>
+    </div>
+    <div class="result-body"><div class="result-text" id="resultText"></div></div>
+    <div class="save-db-section" id="saveDbSection">
+      <div class="save-db-title">📖 將修正重點記入牌義庫</div>
+      <div class="card-note-list" id="cardNoteList"></div>
+      <button class="save-db-btn" onclick="saveToDatabase()">儲存到牌義庫</button>
+      <div class="save-ok" id="saveOk">✓ 已儲存</div>
+    </div>
+    <div style="padding:0 18px 16px"><button class="reset-btn" onclick="resetAll()">再練習一次</button></div>
+  </div>
+</div>
+
+<!-- ═══ PRACTICE RECORD PAGE ═══ -->
+<div class="page" id="page-record">
+  <div class="pr-filter-row">
+    <div class="pr-filter-group" id="filterTypeGroup">
+      <button class="filter-btn active" onclick="filterRecord('all',this,'type')">全部</button>
+      <button class="filter-btn" onclick="filterRecord('tarot',this,'type')">塔羅</button>
+      <button class="filter-btn" onclick="filterRecord('lenormand',this,'type')">雷諾曼</button>
+      <button class="filter-btn" onclick="filterRecord('digital',this,'type')">電腦抽</button>
+      <button class="filter-btn" onclick="filterRecord('physical',this,'type')">實體牌</button>
+    </div>
+    <div class="pr-filter-divider"></div>
+    <div class="pr-filter-group" id="filterCatGroup">
+      <span style="font-size:11px;color:var(--text3);padding:2px 0">主題篩選：</span>
+      <button class="filter-btn cat-filter-btn" data-cat="love" onclick="toggleCatFilter('love',this)">戀愛</button>
+      <button class="filter-btn cat-filter-btn" data-cat="work" onclick="toggleCatFilter('work',this)">事業</button>
+      <button class="filter-btn cat-filter-btn" data-cat="money" onclick="toggleCatFilter('money',this)">金錢</button>
+      <button class="filter-btn cat-filter-btn" data-cat="social" onclick="toggleCatFilter('social',this)">人際</button>
+      <button class="filter-btn cat-filter-btn" data-cat="life" onclick="toggleCatFilter('life',this)">生活</button>
+      <button class="filter-btn cat-filter-btn" data-cat="other" onclick="toggleCatFilter('other',this)">其他</button>
+    </div>
+    <button class="clear-journal-btn" onclick="clearJournal()">清除全部</button>
+  </div>
+  <div id="journalList" class="journal-list"></div>
+</div>
+
+<!-- ═══ TAROT DIARY PAGE ═══ -->
+<div class="page" id="page-diary">
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+    <span class="cal-month" id="calMonth"></span>
+    <button class="cal-nav-btn" onclick="calNext()">›</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="diary-panel" id="diaryPanel">
+    <div class="diary-panel-header">
+      <span class="diary-panel-date" id="diaryPanelDate"></span>
+      <button class="diary-close-btn" onclick="closeDiaryPanel()">✕</button>
+    </div>
+    <div class="diary-panel-body" id="diaryPanelBody"></div>
+  </div>
+</div>
+
+<!-- ═══ DATABASE PAGE ═══ -->
+<div class="page" id="page-database">
+  <input class="db-search" id="dbSearch" placeholder="搜尋牌名…" oninput="renderDatabase()">
+  <div class="db-tabs">
+    <button class="db-tab active" id="dbtab-tarot" onclick="setDbTab('tarot')">塔羅牌</button>
+    <button class="db-tab" id="dbtab-lenormand" onclick="setDbTab('lenormand')">雷諾曼</button>
+  </div>
+  <!-- Tarot suit sub-filter -->
+  <div class="db-sub-filter" id="dbTarotFilter">
+    <button class="db-sub-btn active" onclick="setDbTarotFilter('all',this)">全部</button>
+    <button class="db-sub-btn" onclick="setDbTarotFilter('major',this)">大阿爾克納</button>
+    <button class="db-sub-btn" onclick="setDbTarotFilter('wands',this)">權杖</button>
+    <button class="db-sub-btn" onclick="setDbTarotFilter('cups',this)">聖杯</button>
+    <button class="db-sub-btn" onclick="setDbTarotFilter('swords',this)">寶劍</button>
+    <button class="db-sub-btn" onclick="setDbTarotFilter('coins',this)">星幣</button>
+  </div>
+  <!-- Lenormand system sub-filter -->
+  <div class="db-sub-filter" id="dbLenFilter" style="display:none">
+    <button class="db-sub-btn active" onclick="setDbLenFilter('all',this)">全部</button>
+    <button class="db-sub-btn" onclick="setDbLenFilter('36',this)">傳統 36 張</button>
+    <button class="db-sub-btn" onclick="setDbLenFilter('rana4',this)">Rana 擴充 4 張</button>
+  </div>
+  <div id="dbList" class="db-list"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CARD DATA
+// ══════════════════════════════════════════
+const TAROT_MAJOR=[
+  {name:"愚者",sym:"0"},{name:"魔術師",sym:"I"},{name:"女祭司",sym:"II"},
+  {name:"女皇",sym:"III"},{name:"皇帝",sym:"IV"},{name:"教皇",sym:"V"},
+  {name:"戀人",sym:"VI"},{name:"戰車",sym:"VII"},{name:"力量",sym:"VIII"},
+  {name:"隱士",sym:"IX"},{name:"命運之輪",sym:"X"},{name:"正義",sym:"XI"},
+  {name:"倒吊人",sym:"XII"},{name:"死神",sym:"XIII"},{name:"節制",sym:"XIV"},
+  {name:"惡魔",sym:"XV"},{name:"高塔",sym:"XVI"},{name:"星星",sym:"XVII"},
+  {name:"月亮",sym:"XVIII"},{name:"太陽",sym:"XIX"},{name:"審判",sym:"XX"},
+  {name:"世界",sym:"XXI"}
+];
+const SUITS=["權杖","聖杯","寶劍","星幣"];
+const NUMS=["A","2","3","4","5","6","7","8","9","10","侍者","騎士","王后","國王"];
+const TAROT_ALL=[...TAROT_MAJOR];
+SUITS.forEach(s=>NUMS.forEach(n=>TAROT_ALL.push({name:s+n,sym:s[0]})));
+const LENORMAND_36=[
+  {name:"騎士",sym:"🐎"},{name:"幸運草",sym:"🍀"},{name:"船",sym:"⛵"},
+  {name:"房屋",sym:"🏠"},{name:"樹",sym:"🌲"},{name:"烏雲",sym:"☁️"},
+  {name:"蛇",sym:"🐍"},{name:"棺材",sym:"⬛"},{name:"花束",sym:"💐"},
+  {name:"大鐮刀",sym:"🌾"},{name:"鞭子",sym:"⚡"},{name:"鳥",sym:"🐦"},
+  {name:"孩子",sym:"🌱"},{name:"狐狸",sym:"🦊"},{name:"熊",sym:"🐻"},
+  {name:"星星",sym:"⭐"},{name:"鸛鶴",sym:"🦢"},{name:"狗",sym:"🐕"},
+  {name:"塔",sym:"🗼"},{name:"花園",sym:"🌸"},{name:"山",sym:"⛰️"},
+  {name:"十字路口",sym:"🛤️"},{name:"老鼠",sym:"🐭"},{name:"心",sym:"❤️"},
+  {name:"戒指",sym:"💍"},{name:"書本",sym:"📖"},{name:"書信",sym:"✉️"},
+  {name:"男人",sym:"👨"},{name:"女人",sym:"👩"},{name:"百合花",sym:"🌷"},
+  {name:"太陽",sym:"☀️"},{name:"月亮",sym:"🌙"},{name:"鑰匙",sym:"🔑"},
+  {name:"魚",sym:"🐟"},{name:"錨",sym:"⚓"},{name:"十字架",sym:"✝️"}
+];
+const LENORMAND_RANA4=[
+  {name:"靈體",sym:"👻"},{name:"香爐",sym:"🪔"},{name:"床",sym:"🛏️"},{name:"市場",sym:"🏪"}
+];
+const LENORMAND_40=[...LENORMAND_36,...LENORMAND_RANA4];
+// Active lenormand pool (set by system switcher)
+let lenSystem='36'; // '36' | 'rana40'
+function getLenormand(){return lenSystem==='rana40'?LENORMAND_40:LENORMAND_36;}
+
+const TAROT_SPREADS=[
+  {key:"two",     name:"雙牌組合",   positions:["主題","補充"],hint:"兩張牌相互補充解讀"},
+  {key:"three",   name:"三牌陣",     positions:["過去","現在","未來"],hint:"最經典的時間流向牌陣"},
+  {key:"cross",   name:"十字牌陣",   positions:["核心","阻礙","基礎","未來","建議"],hint:"五張牌深入分析核心議題"},
+  {key:"either",  name:"二擇一牌陣", positions:["選項A現況","選項A結果","選項B現況","選項B結果"],hint:"兩個選擇的對比分析"},
+  {key:"relation",name:"關係牌陣",   positions:["自己","對方","關係現況","阻礙","建議"],hint:"五張牌剖析人際或愛情關係"},
+  {key:"celtic",  name:"凱爾特十字", positions:["核心","跨越","遠因","近因","過去","未來","自我","環境","希望恐懼","結果"],hint:"十張牌，最完整的全面解析"}
+];
+// 雷諾曼五牌一列：位置只顯示編號，不附語意標籤
+const LEN_SPREADS=[
+  {key:"two",    name:"雙牌組合", positions:["第1張","第2張"],hint:"雷諾曼最基礎的雙牌解讀"},
+  {key:"three",  name:"三牌陣",   positions:["第1張","第2張","第3張"],hint:"三牌連貫解讀"},
+  {key:"line5",  name:"五牌一列", positions:["第1張","第2張","第3張","第4張","第5張"],hint:"五張牌橫向連貫解讀"},
+  {key:"either", name:"二擇一",   positions:["選項A","選項B","建議"],hint:"三張牌協助二選一決策"},
+  {key:"nine",   name:"九宮格",   positions:["左上","中上","右上","左中","中心","右中","左下","中下","右下"],hint:"九張牌，以中心牌為核心向四方延伸解讀"}
+];
+const PHYSICAL_PRESETS_TAROT=[
+  {name:"三牌陣",    positions:["過去","現在","未來"]},
+  {name:"十字牌陣",  positions:["核心","阻礙","基礎","未來","建議"]},
+  {name:"二擇一",    positions:["選項A現況","選項A結果","選項B現況","選項B結果"]},
+  {name:"關係牌陣",  positions:["自己","對方","關係現況","阻礙","建議"]},
+  {name:"凱爾特十字",positions:["核心","跨越","遠因","近因","過去","未來","自我","環境","希望恐懼","結果"]},
+];
+const PHYSICAL_PRESETS_LEN=[
+  {name:"雙牌組合",positions:["第1張","第2張"]},
+  {name:"三牌陣",  positions:["第1張","第2張","第3張"]},
+  {name:"五牌一列",positions:["第1張","第2張","第3張","第4張","第5張"]},
+  {name:"二擇一",  positions:["選項A","選項B","建議"]},
+  {name:"九宮格",  positions:["左上","中上","右上","左中","中心","右中","左下","中下","右下"]},
+];
+
+const CAT_LABELS={love:"戀愛",work:"事業",money:"金錢",social:"人際",life:"生活",other:"其他"};
+const CAT_COLORS={love:"#F09595",work:"#97C459",money:"#EF9F27",social:"#85B7EB",life:"#B4B2A9",other:"#AFA9EC"};
+
+// ══════════════════════════════════════════
+//  QUESTION BANKS (organised by topic)
+// ══════════════════════════════════════════
+const TAROT_Q_BANK={
+  love:[
+    "阿明與交往三年的女友最近爭吵頻繁，彼此都感到疲憊。他想問：這段關係的現狀與未來走向是什麼？",
+    "小安剛結束一段長達兩年的感情，至今仍難以走出失戀的低潮。她想了解：自己現在需要什麼來療癒？",
+    "阿玲正面臨是否要搬去外縣市與男友同居的決定，家人也有意見。她想知道：這個決定對她意味著什麼？",
+    "小俊在一次聚會中認識了一個讓他心動的人，但不確定對方是否有同樣的感覺。他想問：這段緣分值得追求嗎？",
+    "阿蕊和現任男友交往兩年，最近卻開始懷疑兩人是否真的合適。她想了解：這段感情的未來方向在哪裡？"
+  ],
+  work:[
+    "小雨最近換了一份新工作，但適應得不太順利，和同事之間的關係也有些緊張。她想知道：這份工作值得繼續努力嗎？",
+    "小琳一直夢想創業開一家咖啡廳，但資金與時機讓她猶豫不決。她想了解：現在是適合跨出這一步的時機嗎？",
+    "大偉在公司已待了五年，升遷卻始終沒有消息，他開始懷疑自己的努力是否被看見。他想問：目前的職場狀態如何？",
+    "阿蓉最近收到了兩份工作邀約，薪水和發展方向各有優劣。她想了解：哪一份工作更適合她？",
+    "阿哲今年考研究所落榜，重考或是直接就業讓他陷入兩難。他想問：哪條路更適合他目前的狀態？"
+  ],
+  money:[
+    "小傑最近因為衝動消費讓帳戶見底，壓力很大。他想了解：目前的財務狀態與改善的方向是什麼？",
+    "阿芸正在考慮是否要把積蓄投入一個看起來不錯的投資機會，但心裡有些不安。她想問：這個決策目前的能量如何？",
+    "大明剛換工作薪水縮水，加上房租上漲，生活越來越緊。他想了解：近期的財務流向與突破方向。",
+    "小晴接到一個副業機會，有機會增加收入但也需要投入時間精力。她想問：這個機會值得把握嗎？",
+    "阿志最近有筆意外之財，不知道該儲蓄、投資還是還債。他想了解：最適合自己現在狀態的金錢運用方式。"
+  ],
+  social:[
+    "小慧與媽媽之間長期存在溝通障礙，每次見面都充滿壓力。她想了解：如何改善與母親之間的關係？",
+    "阿菁發現自己在人際關係中總是扮演給予者，卻很少被好好對待。她想了解：這個模式從何而來，又該如何改變？",
+    "小威最近和多年好友發生了嚴重的口角，雙方都沉默了很久。他想問：這段友誼有挽回的可能嗎？",
+    "阿靜進入了一個新的工作環境，發現自己很難融入團隊氣氛。她想了解：目前的人際狀態與建議。",
+    "小宇最近覺得自己的人際圈越來越窄，交不到真心朋友。他想問：是什麼讓他在人際上感到困難？"
+  ],
+  life:[
+    "小涵最近對生活感到麻木，什麼都提不起勁，也不知道自己真正想要什麼。她想問：她現在的內在狀態是什麼？",
+    "阿芸計畫年底出國唸書，但簽證和財務問題讓她感到不安。她想了解：這次出國計畫的整體能量如何？",
+    "小威的父親最近生病住院，讓他在照顧家人與維持工作之間蠟燭兩頭燒。他想問：如何在這段時期找到平衡？",
+    "阿哲剛從長期住的城市搬回家鄉，適應得比想像中困難。他想了解：這個轉換期帶給他什麼？",
+    "小綾對自己的人生方向越來越迷茫，不知道哪條路才是對的。她想問：現在的能量狀態與前進的建議。"
+  ]
+};
+const LEN_Q_BANK={
+  love:[
+    "阿明計畫今年底向女友求婚，但擔心時機與家人態度。他想問：這個決定目前的能量如何？",
+    "阿玲懷疑另一半最近對她有所隱瞞，溝通也越來越少。她想問：這段感情目前的真實狀況是什麼？",
+    "小蕊暗戀一個同事很久了，不確定對方對她是否有意思。她想了解：這段緣分的現狀。"
+  ],
+  work:[
+    "小雨最近換了工作，與新主管相處得不融洽，心情低落。她想知道：近期的職場環境對她是否友善？",
+    "小琳正在考慮是否要和朋友合夥做生意，但雙方個性差異不小。她想了解：這段合作關係的潛力與風險。",
+    "大偉已經求職三個月仍沒有好消息，信心開始動搖。他想了解：近期求職的整體狀況與建議。"
+  ],
+  money:[
+    "阿哲最近財務出現缺口，壓力頗大，想知道：近期的金錢流向與解決方向是什麼？",
+    "小傑考慮報名一個昂貴的線上課程來提升技能，但不確定值不值得。他想了解：這個學習機會對他的意義。",
+    "阿晴有一筆閒置資金，想投入某個項目，但心裡猶豫。她想問：目前的財務決策能量如何？"
+  ],
+  social:[
+    "小安最近與好朋友之間產生了誤會，關係變得疏遠。她想知道：這段友誼目前的狀態與走向。",
+    "阿靜進了新工作後發現很難融入同事之間的互動。她想了解：近期的人際狀況。",
+    "小慧搬進新住所後，感覺家裡氣氛有些不對勁，也睡得不太好。她想問：目前的居家環境能量如何？"
+  ],
+  life:[
+    "阿芸長期感到身體不舒服，但醫生檢查都說沒問題。她想問：身心目前的狀態與需要注意的地方。",
+    "大偉已在同一個城市生活十年，最近萌生移居的念頭。他想了解：這個改變對他的意義。",
+    "小涵最近對日常生活感到厭倦，希望有所改變卻不知從何開始。她想問：目前的狀態與前進方向。"
+  ]
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentMode='tarot';
+let currentDrawMode=null;
+let currentSpread='two';
+let currentQuestion='';
+let selectedTopic='random';   // 'random'|'love'|'work'|'money'|'social'|'life'|'custom'
+let currentCats=[];           // multi-select array, e.g. ['work','social']
+let drawnCards=[];
+let currentAIResponse='';
+let currentDbTab='tarot';
+let dbTarotFilter='all';
+let dbLenFilter='all';
+let recordFilterType='all';
+let recordFilterCats=new Set(); // multi-select for record page
+let customPositions=[];
+let posIdCounter=0;
+let generatedPrompt='';
+let cachedSpreadName='';
+
+// ══════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════
+const JOURNAL_KEY='divination_journal_v5';
+const DB_KEY='divination_database_v2';
+const DIARY_KEY='tarot_diary_v1';
+function getJournal(){return JSON.parse(localStorage.getItem(JOURNAL_KEY)||'[]')}
+function saveJournal(d){localStorage.setItem(JOURNAL_KEY,JSON.stringify(d))}
+function getDatabase(){return JSON.parse(localStorage.getItem(DB_KEY)||'{}')}
+function saveDatabase(d){localStorage.setItem(DB_KEY,JSON.stringify(d))}
+function getDiary(){return JSON.parse(localStorage.getItem(DIARY_KEY)||'{}')}
+function saveDiary(d){localStorage.setItem(DIARY_KEY,JSON.stringify(d))}
+
+// ══════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const tabs=document.querySelectorAll('.nav-tab');
+  const idx={practice:0,record:1,diary:2,database:3}[p];
+  if(idx!==undefined) tabs[idx].classList.add('active');
+  if(p==='record') renderJournal();
+  if(p==='database') renderDatabase();
+  if(p==='diary') renderCalendar();
+}
+function setMode(m){
+  currentMode=m;
+  document.getElementById('mode-tarot').classList.toggle('active',m==='tarot');
+  document.getElementById('mode-lenormand').classList.toggle('active',m==='lenormand');
+  document.getElementById('lenSystemSwitch').style.display=m==='lenormand'?'flex':'none';
+  resetAll(true);
+}
+function setLenSystem(sys,btn){
+  lenSystem=sys;
+  document.querySelectorAll('.len-sys-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  resetFromStep2();
+}
+
+// ══════════════════════════════════════════
+//  QUESTION GENERATION
+// ══════════════════════════════════════════
+function selectTopic(topic,btn){
+  selectedTopic=topic;
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const ca=document.getElementById('customTopicArea');
+  if(ca) ca.style.display=topic==='custom'?'block':'none';
+}
+function toggleCat(cat,btn){
+  btn.classList.toggle('active');
+  if(btn.classList.contains('active')){
+    if(!currentCats.includes(cat)) currentCats.push(cat);
+  } else {
+    currentCats=currentCats.filter(c=>c!==cat);
+  }
+}
+function syncCatChips(){
+  document.querySelectorAll('.q-cat-chip').forEach(btn=>{
+    const cat=btn.dataset.cat;
+    btn.classList.toggle('active', currentCats.includes(cat));
+  });
+}
+async function generateQuestion(){
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  btn.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
+  resetFromStep2();
+  const qBank=currentMode==='tarot'?TAROT_Q_BANK:LEN_Q_BANK;
+  let chosenQ='', defaultCats=[];
+  if(selectedTopic==='custom'){
+    const customText=(document.getElementById('customTopicInput')||{}).value?.trim();
+    chosenQ=customText||'請用這個牌陣幫我做一次自由解讀。';
+    defaultCats=['other'];
+  } else {
+    const keys=Object.keys(qBank);
+    const topicKey=selectedTopic==='random'?keys[Math.floor(Math.random()*keys.length)]:selectedTopic;
+    const pool=qBank[topicKey]||qBank[keys[0]];
+    let idx=Math.floor(Math.random()*pool.length);
+    if(pool[idx]===currentQuestion && pool.length>1) idx=(idx+1)%pool.length;
+    chosenQ=pool[idx];
+    defaultCats=[topicKey];
+  }
+  currentQuestion=chosenQ;
+  currentCats=[...defaultCats];
+  await new Promise(r=>setTimeout(r,300));
+  document.getElementById('qText').textContent=currentQuestion;
+  syncCatChips();
+  document.getElementById('questionDisplay').style.display='block';
+  document.getElementById('drawModeSection').style.display='block';
+  btn.disabled=false;
+  btn.innerHTML='<span>✦</span><span>出題</span>';
+}
+
+// ══════════════════════════════════════════
+//  DRAW MODE
+// ══════════════════════════════════════════
+function setDrawMode(mode){
+  currentDrawMode=mode;
+  document.getElementById('dmDigital').classList.toggle('active',mode==='digital');
+  document.getElementById('dmPhysical').classList.toggle('active',mode==='physical');
+  ['spreadSection','manualSection','actionBtn','cardsSection','interpSection','promptSection','resultSection']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
+  if(mode==='digital'){
+    const sel=document.getElementById('spreadSelect');
+    sel.innerHTML='';
+    spreads.forEach(s=>{const o=document.createElement('option');o.value=s.key;o.textContent=s.name+' — '+s.positions.length+'張';sel.appendChild(o);});
+    currentSpread=spreads[0].key;
+    updateSpreadHint();
+    document.getElementById('spreadSection').style.display='block';
+    const btn=document.getElementById('actionBtn');
+    btn.textContent='✦ 電腦抽牌，開始解讀';
+    btn.style.display='block';btn.disabled=false;
+  } else {
+    customPositions=[];
+    renderPresetChips();
+    applyPreset((currentMode==='tarot'?PHYSICAL_PRESETS_TAROT:PHYSICAL_PRESETS_LEN)[0]);
+    document.getElementById('manualSection').style.display='block';
+    const btn=document.getElementById('actionBtn');
+    btn.textContent='✦ 確認並開始解讀';
+    btn.style.display='block';btn.disabled=false;
+  }
+}
+function onDigitalSpreadChange(){currentSpread=document.getElementById('spreadSelect').value;updateSpreadHint();}
+function updateSpreadHint(){
+  const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
+  const s=spreads.find(x=>x.key===currentSpread);
+  document.getElementById('spreadHint').textContent=s?s.hint:'';
+}
+function applyPreset(preset){
+  customPositions=preset.positions.map(p=>({id:posIdCounter++,label:p}));
+  renderCustomBuilder();renderManualCardRows();
+}
+function renderPresetChips(){
+  const presets=currentMode==='tarot'?PHYSICAL_PRESETS_TAROT:PHYSICAL_PRESETS_LEN;
+  const cont=document.getElementById('presetChips');cont.innerHTML='';
+  presets.forEach(p=>{
+    const chip=document.createElement('button');chip.className='preset-chip';
+    chip.textContent=p.name+' ('+p.positions.length+'張)';
+    chip.onclick=()=>applyPreset(p);cont.appendChild(chip);
+  });
+}
+function renderCustomBuilder(){
+  const cont=document.getElementById('csbPositions');cont.innerHTML='';
+  customPositions.forEach((pos,i)=>{
+    const row=document.createElement('div');row.className='csb-pos-row';
+    row.innerHTML=`<span class="csb-pos-num">${i+1}</span>
+      <input class="csb-pos-input" value="${pos.label}" placeholder="位置名稱…" oninput="customPositions[${i}].label=this.value;syncManualCardRows()">
+      <button class="csb-del-btn" onclick="removeCustomPosition(${i})">✕</button>`;
+    cont.appendChild(row);
+  });
+  document.getElementById('csbCount').textContent=customPositions.length+' 個位置';
+}
+function addCustomPosition(){
+  customPositions.push({id:posIdCounter++,label:''});
+  renderCustomBuilder();renderManualCardRows();
+  const inputs=document.querySelectorAll('.csb-pos-input');
+  if(inputs.length) inputs[inputs.length-1].focus();
+}
+function removeCustomPosition(i){customPositions.splice(i,1);renderCustomBuilder();renderManualCardRows();}
+function syncManualCardRows(){
+  customPositions.forEach((pos,i)=>{
+    const label=document.querySelector(`#manualCardRows .manual-card-row:nth-child(${i+1}) .mcr-pos`);
+    if(label) label.textContent=pos.label||('位置'+(i+1));
+  });
+}
+function renderManualCardRows(){
+  const cont=document.getElementById('manualCardRows');cont.innerHTML='';
+  const showOrient=currentMode==='tarot';
+  customPositions.forEach((pos,i)=>{
+    const row=document.createElement('div');row.className='manual-card-row';
+    row.innerHTML=`<span class="mcr-pos">${pos.label||('位置'+(i+1))}</span>
+      <input class="card-name-input" id="mcard_${i}" placeholder="牌名…" autocomplete="off">
+      ${showOrient?`<div class="orient-toggle">
+        <button class="orient-btn active" id="orient_${i}_u" onclick="setOrient(${i},'upright')">正位</button>
+        <button class="orient-btn" id="orient_${i}_r" onclick="setOrient(${i},'reversed')">逆位</button>
+      </div>`:''}`;
+    cont.appendChild(row);
+  });
+}
+function setOrient(i,val){
+  document.getElementById('orient_'+i+'_u').classList.toggle('active',val==='upright');
+  document.getElementById('orient_'+i+'_r').classList.toggle('active',val==='reversed');
+}
+
+// ══════════════════════════════════════════
+//  DRAW & INTERPRET
+// ══════════════════════════════════════════
+function proceedToInterpretation(){
+  if(currentDrawMode==='digital') drawCardsDigital(); else collectManualCards();
+}
+function drawCardsDigital(){
+  const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
+  const spread=spreads.find(x=>x.key===currentSpread);
+  const pool=currentMode==='tarot'?TAROT_ALL:getLenormand();
+  const shuffled=[...pool].sort(()=>Math.random()-0.5);
+  drawnCards=shuffled.slice(0,spread.positions.length).map((c,i)=>({
+    card:c,position:spread.positions[i],reversed:currentMode==='tarot'&&Math.random()>0.65
+  }));
+  const isNine=currentSpread==='nine';
+  const row=document.getElementById('cardsRow');
+  row.className=isNine?'nine-grid':'cards-row';row.innerHTML='';
+  drawnCards.forEach((d,i)=>{
+    const el=document.createElement('div');el.className='card';el.style.animationDelay=(i*0.08)+'s';
+    el.innerHTML=`<div class="card-pos">${d.position}</div>
+      <div class="card-sym">${d.card.sym}</div>
+      <div class="card-name">${d.card.name}</div>
+      <div class="card-orient">${d.reversed?'逆位':'正位'}</div>`;
+    row.appendChild(el);
+  });
+  document.getElementById('cardsSection').style.display='block';
+  buildInterpBox();
+}
+function collectManualCards(){
+  if(customPositions.length<1){alert('請至少新增一個牌陣位置！');return;}
+  drawnCards=customPositions.map((pos,i)=>{
+    const name=(document.getElementById('mcard_'+i)||{}).value?.trim()||'（未填寫）';
+    const uBtn=document.getElementById('orient_'+i+'_u');
+    const reversed=uBtn?!uBtn.classList.contains('active'):false;
+    return {card:{name,sym:''},position:pos.label||('位置'+(i+1)),reversed};
+  });
+  buildInterpBox();
+}
+function buildInterpBox(){
+  const chips=document.getElementById('interpCardChips');chips.innerHTML='';
+  drawnCards.forEach(d=>{
+    const chip=document.createElement('span');chip.className='ibc-chip';
+    const o=currentMode==='tarot'?(d.reversed?' ↓':' ↑'):'';
+    chip.textContent=d.position+' · '+d.card.name+o;chips.appendChild(chip);
+  });
+  document.getElementById('interpHint').textContent='以連貫的敘述解讀整個牌陣，說明各牌意義與彼此關聯，最後給出整體訊息。';
+  document.getElementById('interpUnified').value='';
+  document.getElementById('interpSection').style.display='block';
+  document.getElementById('resultSection').style.display='none';
+  document.getElementById('actionBtn').disabled=true;
+  document.getElementById('interpSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══════════════════════════════════════════
+//  PROMPT GENERATION
+// ══════════════════════════════════════════
+function buildSpreadName(){
+  const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
+  return currentDrawMode==='digital'?(spreads.find(x=>x.key===currentSpread)?.name||'自訂牌陣'):'自訂牌陣';
+}
+function generatePrompt(){
+  const interpText=document.getElementById('interpUnified').value.trim();
+  if(!interpText){alert('請先填寫你的解讀喔！');return;}
+  const modeName=currentMode==='tarot'?'塔羅牌':'雷諾曼牌';
+  const drawTypeNote=currentDrawMode==='physical'?'（使用實體紙牌）':'';
+  cachedSpreadName=buildSpreadName();
+  const cardsSummary=drawnCards.map(d=>
+    `${d.position}：${d.card.name}${currentMode==='tarot'?(d.reversed?' (逆位)':' (正位)'):''}`
+  ).join('\n');
+  generatedPrompt=`你是一位溫暖專業的${modeName}老師，請評估以下學員的解牌練習。${drawTypeNote}
+
+【練習情境】
+${currentQuestion}
+
+【牌陣】${cachedSpreadName}
+【牌面】
+${cardsSummary}
+
+【學員的整體解讀】
+${interpText}
+
+請用繁體中文回應，依以下格式：
+
+評分：X/10
+
+✓ 做得好的地方：
+（1-2點，具體說明優點）
+
+▲ 改進建議：
+（1-2點，針對牌義理解或牌陣連結的具體建議）
+
+老師補充：
+（對此牌陣整體訊息的補充洞見，2-3句）
+
+語氣溫暖鼓勵，約250字內。`;
+  document.getElementById('promptText').textContent=generatedPrompt;
+  document.getElementById('promptSection').style.display='block';
+  document.getElementById('feedbackInput').value='';
+  document.getElementById('resultSection').style.display='none';
+  document.getElementById('copyBtn').textContent='複製';document.getElementById('copyBtn').classList.remove('copied');
+  document.getElementById('promptSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function copyPrompt(){
+  if(!generatedPrompt) return;
+  navigator.clipboard.writeText(generatedPrompt).then(()=>{
+    const btn=document.getElementById('copyBtn');btn.textContent='✓ 已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=generatedPrompt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    const btn=document.getElementById('copyBtn');btn.textContent='✓ 已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);
+  });
+}
+function saveFeedback(){
+  const feedbackText=document.getElementById('feedbackInput').value.trim();
+  if(!feedbackText){alert('請先把 AI 的回饋貼進來喔！');return;}
+  currentAIResponse=feedbackText;
+  const interpText=document.getElementById('interpUnified').value.trim();
+  const m=feedbackText.match(/評分[：:]\s*(\d+)\s*[\/／]\s*10/);
+  const score=m?parseInt(m[1]):null;
+  document.getElementById('scoreDisplay').textContent=score!=null?score+'/10':'';
+  document.getElementById('resultText').textContent=feedbackText;
+  document.getElementById('saveDbSection').style.display='none';
+  document.getElementById('resultSection').style.display='block';
+  document.getElementById('resultSection').scrollIntoView({behavior:'smooth',block:'nearest'});
+  const journal=getJournal();
+  journal.unshift({
+    id:Date.now(),mode:currentMode,drawMode:currentDrawMode,
+    spread:cachedSpreadName||buildSpreadName(),question:currentQuestion,cats:currentCats.length?currentCats:['other'],
+    cards:drawnCards.map(d=>({name:d.card.name,position:d.position,reversed:d.reversed})),
+    interpText,aiResponse:feedbackText,score,
+    date:new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'}),
+    isoDate:new Date().toISOString().slice(0,10)
+  });
+  saveJournal(journal);
+  renderSaveDbSection();
+}
+function renderSaveDbSection(){
+  const section=document.getElementById('saveDbSection');
+  const list=document.getElementById('cardNoteList');list.innerHTML='';
+  drawnCards.forEach((d,i)=>{
+    if(d.card.name==='（未填寫）') return;
+    const row=document.createElement('div');row.className='card-note-item';
+    row.innerHTML=`<span class="card-note-label">${d.card.name}</span>
+      <textarea class="note-input" id="note_${i}" placeholder="修正重點…"></textarea>`;
+    list.appendChild(row);
+  });
+  section.style.display='block';document.getElementById('saveOk').style.display='none';
+}
+function saveToDatabase(){
+  const db=getDatabase();
+  const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
+  drawnCards.forEach((d,i)=>{
+    const el=document.getElementById('note_'+i);const note=el?.value?.trim();
+    if(!note) return;
+    const key=currentMode+'::'+d.card.name;
+    if(!db[key]) db[key]=[];
+    db[key].push({note,date:today,mode:currentMode});
+  });
+  saveDatabase(db);
+  document.getElementById('saveOk').style.display='block';
+  setTimeout(()=>document.getElementById('saveOk').style.display='none',2500);
+}
+function resetFromStep2(){
+  currentDrawMode=null;drawnCards=[];generatedPrompt='';cachedSpreadName='';
+  ['dmDigital','dmPhysical'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ['drawModeSection','spreadSection','manualSection','actionBtn','cardsSection','interpSection','promptSection','resultSection']
+    .forEach(id=>document.getElementById(id).style.display='none');
+}
+function resetAll(silent){
+  currentQuestion='';currentAIResponse='';currentCats=[];
+  document.getElementById('questionDisplay').style.display='none';
+  resetFromStep2();
+  if(!silent) window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════
+//  PRACTICE RECORD
+// ══════════════════════════════════════════
+function filterRecord(f,btn,group){
+  if(group==='type'){
+    recordFilterType=f;
+    document.querySelectorAll('#filterTypeGroup .filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderJournal();
+}
+function toggleCatFilter(cat,btn){
+  if(recordFilterCats.has(cat)){
+    recordFilterCats.delete(cat);
+    btn.classList.remove('active');
+  } else {
+    recordFilterCats.add(cat);
+    btn.classList.add('active');
+  }
+  renderJournal();
+}
+function renderJournal(){
+  const journal=getJournal();
+  const list=document.getElementById('journalList');
+  const filtered=journal.filter(j=>{
+    const typeOk=recordFilterType==='all'||
+      (['tarot','lenormand'].includes(recordFilterType)?j.mode===recordFilterType:j.drawMode===recordFilterType);
+    // cats: entry may have old .cat (string) or new .cats (array)
+    const entryCats=j.cats||(j.cat?[j.cat]:[]);
+    const catOk=recordFilterCats.size===0 || [...recordFilterCats].some(fc=>entryCats.includes(fc));
+    return typeOk&&catOk;
+  });
+  if(!filtered.length){list.innerHTML='<div class="journal-empty">還沒有符合的練習記錄。</div>';return;}
+  list.innerHTML='';
+  filtered.forEach(entry=>{
+    const item=document.createElement('div');item.className='journal-item';
+    const entryCats=entry.cats||(entry.cat?[entry.cat]:[]);
+    const catTagsHtml=entryCats.map(c=>{
+      const label=CAT_LABELS[c]||c;
+      const color=CAT_COLORS[c]||CAT_COLORS.other;
+      return `<span class="j-cat" style="background:${color}22;color:${color};padding:2px 8px;border-radius:20px;font-size:10px">${label}</span>`;
+    }).join('');
+    item.innerHTML=`<div class="journal-header" onclick="toggleJournal(this)">
+      <span class="j-date">${entry.date}</span>
+      <span class="j-tag">${entry.mode==='tarot'?'塔羅':'雷諾曼'}</span>
+      <span class="j-tag">${entry.drawMode==='physical'?'實體牌':'電腦抽'}</span>
+      ${catTagsHtml}
+      <span class="j-spread">${entry.spread}</span>
+      <span class="j-score">${entry.score!=null?entry.score+'/10':''}</span>
+      <span style="font-size:12px;color:var(--text3)">▾</span>
+    </div>
+    <div class="journal-body">
+      <div class="j-question">${entry.question}</div>
+      <div class="j-cards-row">${(entry.cards||[]).map(c=>`<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`).join('')}</div>
+      ${entry.interpText?`<div class="j-interp">${entry.interpText}</div>`:''}
+      <div class="j-feedback">${entry.aiResponse}</div>
+    </div>`;
+    list.appendChild(item);
+  });
+}
+function toggleJournal(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
+function clearJournal(){if(confirm('確定要清除所有練習記錄嗎？')){saveJournal([]);renderJournal();}}
+
+// ══════════════════════════════════════════
+//  TAROT DIARY — CALENDAR
+// ══════════════════════════════════════════
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth();
+let activeDiaryDate=null;
+let diaryDrawMode='digital';
+let diaryDeckType='tarot';
+let diaryPhysCards=[];
+let diaryDigitalCards=[];
+
+function renderCalendar(){
+  const diary=getDiary();
+  const today=new Date();
+  const firstDay=new Date(calYear,calMonth,1);
+  const lastDay=new Date(calYear,calMonth+1,0);
+  document.getElementById('calMonth').textContent=
+    calYear+'年 '+(calMonth+1)+'月';
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  // Day labels
+  ['日','一','二','三','四','五','六'].forEach(d=>{
+    const lbl=document.createElement('div');lbl.className='cal-day-label';lbl.textContent=d;grid.appendChild(lbl);
+  });
+  // Empty cells before first day
+  for(let i=0;i<firstDay.getDay();i++){
+    const emp=document.createElement('div');emp.className='cal-day other-month';grid.appendChild(emp);
+  }
+  // Day cells
+  for(let d=1;d<=lastDay.getDate();d++){
+    const dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const entry=diary[dateStr];
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const cell=document.createElement('div');
+    cell.className='cal-day'+(isToday?' today':'')+(entry?' has-entry':'');
+    cell.innerHTML=`<span class="cal-day-num">${d}</span>`+
+      (entry?`<span class="cal-dot"></span><span class="cal-card-preview">${(entry.cards||[]).map(c=>c.name).slice(0,2).join('·')}</span>`:'');
+    cell.onclick=()=>openDiaryPanel(dateStr);
+    grid.appendChild(cell);
+  }
+}
+function calPrev(){if(calMonth===0){calYear--;calMonth=11;}else calMonth--;renderCalendar();}
+function calNext(){if(calMonth===11){calYear++;calMonth=0;}else calMonth++;renderCalendar();}
+
+function openDiaryPanel(dateStr){
+  activeDiaryDate=dateStr;
+  const [y,m,d]=dateStr.split('-');
+  document.getElementById('diaryPanelDate').textContent=y+'年'+parseInt(m)+'月'+parseInt(d)+'日';
+  const diary=getDiary();
+  const entry=diary[dateStr];
+  const body=document.getElementById('diaryPanelBody');
+  if(entry){
+    renderDiaryView(body,entry,dateStr);
+  } else {
+    renderDiaryEditor(body,null);
+  }
+  document.getElementById('diaryPanel').style.display='block';
+  document.getElementById('diaryPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeDiaryPanel(){
+  document.getElementById('diaryPanel').style.display='none';
+  activeDiaryDate=null;
+}
+
+function renderDiaryView(body,entry,dateStr){
+  const deckLabels={tarot:'塔羅',lenormand:'雷諾曼',mixed:'塔羅＋雷諾曼'};
+  const deckLabel=deckLabels[entry.deckType]||'塔羅';
+  const cardsHtml=(entry.cards||[]).map(c=>
+    `<span class="j-card-chip">${c.name}${c.reversed?' ↓':''}</span>`
+  ).join('');
+  body.innerHTML=`<div class="diary-existing">
+    <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">
+      抽到的牌 <span style="font-size:10px;padding:1px 8px;border-radius:10px;background:var(--bg3);color:var(--text3);text-transform:none;letter-spacing:0">${deckLabel}</span>
+    </div>
+    <div class="diary-existing-cards">${cardsHtml}</div>
+    <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:12px">日記</div>
+    <div class="diary-existing-note">${entry.note||'（無文字記錄）'}</div>
+    <span class="diary-edit-btn" onclick="openDiaryEdit('${dateStr}')">編輯這天的日記</span>
+  </div>`;
+}
+
+function openDiaryEdit(dateStr){
+  const diary=getDiary();
+  const entry=diary[dateStr]||null;
+  const body=document.getElementById('diaryPanelBody');
+  renderDiaryEditor(body,entry);
+}
+
+function renderDiaryEditor(body,existing){
+  diaryDrawMode=existing?.drawMode||'digital';
+  diaryDeckType=existing?.deckType||'tarot'; // 'tarot'|'lenormand'|'mixed'
+  diaryDigitalCards=existing?.cards||[];
+  diaryPhysCards=existing&&existing.drawMode==='physical'?(existing.cards||[]).map(c=>c.name):['',''];
+
+  const cardsHtml=diaryDigitalCards.map((c,i)=>`
+    <div class="diary-card" style="animation-delay:${i*0.07}s">
+      <div class="diary-card-sym">${c.sym||'✦'}</div>
+      <div class="diary-card-name">${c.name}</div>
+      <div class="diary-card-orient">${c.reversed?'逆位':'正位'}</div>
+    </div>`).join('');
+
+  const physRowsHtml=diaryPhysCards.map((name,i)=>`
+    <div class="diary-phys-row" id="dpr_${i}">
+      <span class="diary-phys-num">${i+1}</span>
+      <input class="diary-phys-input" id="dpi_${i}" value="${name}" placeholder="牌名…" autocomplete="off">
+      <button class="diary-phys-del" onclick="diaryPhysDel(${i})">✕</button>
+    </div>`).join('');
+
+  body.innerHTML=`
+    <div class="diary-mode-switch">
+      <button class="diary-mode-btn ${diaryDrawMode==='digital'?'active':''}" onclick="switchDiaryMode('digital',this)">電腦抽牌</button>
+      <button class="diary-mode-btn ${diaryDrawMode==='physical'?'active':''}" onclick="switchDiaryMode('physical',this)">紙本抽牌</button>
+    </div>
+    <div class="diary-deck-row">
+      <span class="diary-deck-label">牌組：</span>
+      <button class="diary-deck-btn ${diaryDeckType==='tarot'?'active':''}" onclick="setDiaryDeck('tarot',this)">塔羅</button>
+      <button class="diary-deck-btn ${diaryDeckType==='lenormand'?'active':''}" onclick="setDiaryDeck('lenormand',this)">雷諾曼</button>
+      <button class="diary-deck-btn ${diaryDeckType==='mixed'?'active':''}" onclick="setDiaryDeck('mixed',this)">塔羅＋雷諾曼</button>
+    </div>
+    <div class="diary-digital-area" id="diaryDigitalArea" style="display:${diaryDrawMode==='digital'?'block':'none'}">
+      <div class="diary-draw-count">
+        <span class="diary-count-label">抽幾張牌</span>
+        <input class="diary-count-input" id="diaryCountInput" type="number" min="1" max="4" value="${diaryDigitalCards.length||1}">
+        <button class="diary-draw-btn" onclick="diaryDraw()">✦ 電腦抽牌</button>
+      </div>
+      <div class="cards-row diary-cards-row" id="diaryCardsRow">${cardsHtml}</div>
+    </div>
+    <div class="diary-physical-area" id="diaryPhysicalArea" style="display:${diaryDrawMode==='physical'?'block':'none'}">
+      <div class="diary-phys-rows" id="diaryPhysRows">${physRowsHtml}</div>
+      <button class="diary-phys-add" onclick="diaryPhysAdd()">＋ 新增牌</button>
+    </div>
+    <div style="margin-top:14px">
+      <div class="diary-note-label">今日日記</div>
+      <div class="diary-note-box">
+        <textarea class="diary-note" id="diaryNoteInput" placeholder="記錄今天抽到的牌，以及你的感受、靈感或解讀…">${existing?.note||''}</textarea>
+      </div>
+      <button class="diary-save-btn" onclick="saveDiaryEntry()">✦ 儲存今日日記</button>
+      <div class="diary-saved-ok" id="diarySavedOk">✓ 已儲存</div>
+    </div>`;
+}
+
+function setDiaryDeck(deck,btn){
+  diaryDeckType=deck;
+  document.querySelectorAll('.diary-deck-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function switchDiaryMode(mode,btn){
+  diaryDrawMode=mode;
+  document.querySelectorAll('.diary-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('diaryDigitalArea').style.display=mode==='digital'?'block':'none';
+  document.getElementById('diaryPhysicalArea').style.display=mode==='physical'?'block':'none';
+}
+
+function diaryDraw(){
+  const n=Math.min(4,Math.max(1,parseInt(document.getElementById('diaryCountInput').value)||1));
+  let pool;
+  if(diaryDeckType==='tarot') pool=TAROT_ALL;
+  else if(diaryDeckType==='lenormand') pool=getLenormand();
+  else pool=[...TAROT_ALL,...getLenormand()]; // mixed
+  const shuffled=[...pool].sort(()=>Math.random()-0.5);
+  diaryDigitalCards=shuffled.slice(0,n).map(c=>({...c,reversed:Math.random()>0.65}));
+  const row=document.getElementById('diaryCardsRow');
+  row.innerHTML=diaryDigitalCards.map((c,i)=>`
+    <div class="diary-card" style="animation-delay:${i*0.08}s;opacity:0">
+      <div class="diary-card-sym">${c.sym}</div>
+      <div class="diary-card-name">${c.name}</div>
+      <div class="diary-card-orient">${c.reversed?'逆位':'正位'}</div>
+    </div>`).join('');
+}
+
+function diaryPhysAdd(){
+  diaryPhysCards.push('');
+  const cont=document.getElementById('diaryPhysRows');
+  const i=diaryPhysCards.length-1;
+  const row=document.createElement('div');row.className='diary-phys-row';row.id='dpr_'+i;
+  row.innerHTML=`<span class="diary-phys-num">${i+1}</span>
+    <input class="diary-phys-input" id="dpi_${i}" value="" placeholder="牌名…" autocomplete="off">
+    <button class="diary-phys-del" onclick="diaryPhysDel(${i})">✕</button>`;
+  cont.appendChild(row);
+  document.getElementById('dpi_'+i).focus();
+}
+function diaryPhysDel(i){
+  diaryPhysCards.splice(i,1);
+  // re-render all rows
+  const cont=document.getElementById('diaryPhysRows');
+  // collect current values first
+  const vals=[];
+  document.querySelectorAll('.diary-phys-input').forEach(inp=>vals.push(inp.value));
+  vals.splice(i,1);
+  diaryPhysCards=vals;
+  cont.innerHTML=diaryPhysCards.map((v,idx)=>`
+    <div class="diary-phys-row" id="dpr_${idx}">
+      <span class="diary-phys-num">${idx+1}</span>
+      <input class="diary-phys-input" id="dpi_${idx}" value="${v}" placeholder="牌名…" autocomplete="off">
+      <button class="diary-phys-del" onclick="diaryPhysDel(${idx})">✕</button>
+    </div>`).join('');
+}
+
+function saveDiaryEntry(){
+  if(!activeDiaryDate) return;
+  const note=document.getElementById('diaryNoteInput').value.trim();
+  let cards=[];
+  if(diaryDrawMode==='digital'){
+    cards=diaryDigitalCards.map(c=>({name:c.name,sym:c.sym||'',reversed:c.reversed||false}));
+  } else {
+    document.querySelectorAll('.diary-phys-input').forEach(inp=>{
+      const v=inp.value.trim();if(v) cards.push({name:v,sym:'',reversed:false});
+    });
+  }
+  const diary=getDiary();
+  diary[activeDiaryDate]={cards,note,drawMode:diaryDrawMode,deckType:diaryDeckType,savedAt:new Date().toISOString()};
+  saveDiary(diary);
+  document.getElementById('diarySavedOk').style.display='block';
+  setTimeout(()=>{
+    document.getElementById('diarySavedOk').style.display='none';
+    renderCalendar();
+    // Switch to view mode
+    renderDiaryView(document.getElementById('diaryPanelBody'),diary[activeDiaryDate],activeDiaryDate);
+  },1200);
+}
+
+// ══════════════════════════════════════════
+//  DATABASE
+// ══════════════════════════════════════════
+const MAJOR_NAMES=new Set(TAROT_MAJOR.map(c=>c.name));
+const RANA4_NAMES=new Set(LENORMAND_RANA4.map(c=>c.name));
+
+function setDbTab(tab){
+  currentDbTab=tab;
+  document.querySelectorAll('.db-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('dbtab-'+tab).classList.add('active');
+  document.getElementById('dbTarotFilter').style.display=tab==='tarot'?'flex':'none';
+  document.getElementById('dbLenFilter').style.display=tab==='lenormand'?'flex':'none';
+  renderDatabase();
+}
+function setDbTarotFilter(f,btn){
+  dbTarotFilter=f;
+  document.querySelectorAll('#dbTarotFilter .db-sub-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDatabase();
+}
+function setDbLenFilter(f,btn){
+  dbLenFilter=f;
+  document.querySelectorAll('#dbLenFilter .db-sub-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDatabase();
+}
+
+function cardMatchesTarotFilter(name){
+  if(dbTarotFilter==='all') return true;
+  if(dbTarotFilter==='major') return MAJOR_NAMES.has(name);
+  if(dbTarotFilter==='wands') return name.startsWith('權杖');
+  if(dbTarotFilter==='cups')  return name.startsWith('聖杯');
+  if(dbTarotFilter==='swords')return name.startsWith('寶劍');
+  if(dbTarotFilter==='coins') return name.startsWith('星幣');
+  return true;
+}
+function cardMatchesLenFilter(name){
+  if(dbLenFilter==='all') return true;
+  if(dbLenFilter==='36') return !RANA4_NAMES.has(name);
+  if(dbLenFilter==='rana4') return RANA4_NAMES.has(name);
+  return true;
+}
+
+function renderDatabase(){
+  const db=getDatabase();
+  const query=(document.getElementById('dbSearch').value||'').toLowerCase();
+  const list=document.getElementById('dbList');
+  const entries=Object.entries(db)
+    .filter(([k])=>k.startsWith(currentDbTab+'::'))
+    .map(([k,notes])=>({name:k.split('::')[1],notes,key:k}))
+    .filter(e=>{
+      if(query && !e.name.toLowerCase().includes(query)) return false;
+      if(currentDbTab==='tarot') return cardMatchesTarotFilter(e.name);
+      if(currentDbTab==='lenormand') return cardMatchesLenFilter(e.name);
+      return true;
+    });
+  if(!entries.length){
+    list.innerHTML=`<div class="db-empty">這個分類還沒有牌義記錄。</div>`;return;
+  }
+  list.innerHTML='';
+  entries.forEach(e=>{
+    const item=document.createElement('div');item.className='db-item';
+    const isRana=RANA4_NAMES.has(e.name);
+    const tagHtml=currentDbTab==='lenormand'&&isRana?
+      ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:#FAC77533;color:#BA7517;margin-left:4px">Rana</span>':'';
+    item.innerHTML=`<div class="db-item-header" onclick="toggleDb(this)">
+      <span class="db-card-name">${e.name}${tagHtml}</span>
+      <span class="db-count">${e.notes.length} 筆</span>
+      <span style="font-size:11px;color:var(--text3)">▾</span>
+    </div>
+    <div class="db-item-body">${e.notes.map((n,i)=>`<div class="db-note-row">
+      ${n.note}<div class="db-note-date">${n.date}</div>
+      <button class="db-del-btn" onclick="deleteDbNote('${e.key}',${i},event)">刪除此筆</button>
+    </div>`).join('')}</div>`;
+    list.appendChild(item);
+  });
+}
+function toggleDb(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
+function deleteDbNote(key,idx,e){
+  e.stopPropagation();
+  const db=getDatabase();if(!db[key]) return;
+  db[key].splice(idx,1);if(!db[key].length) delete db[key];
+  saveDatabase(db);renderDatabase();
+}
+</script>
+</body>
+</html>
