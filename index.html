@@ -1158,10 +1158,47 @@ async function loadFromFirestore(){
     if(dbSnap.exists && dbSnap.data().value) localStorage.setItem(DB_KEY, dbSnap.data().value);
     if(dSnap.exists && dSnap.data().value) localStorage.setItem(DIARY_KEY, dSnap.data().value);
     if(rSnap.exists && rSnap.data().value) localStorage.setItem(READING_KEY, rSnap.data().value);
+    migrateLenormandNames(); // 自動移轉舊格式名稱
     setSyncDot('ok');
   }catch(e){
     console.warn('Firestore load error',e);
     setSyncDot('offline');
+  }
+}
+
+// ── 雷諾曼牌名移轉：舊格式（無編號）→ 新格式（有編號）──
+function migrateLenormandNames(){
+  // Build lookup: 舊名 → 新名
+  const nameMap={};
+  LENORMAND_40.forEach(c=>{
+    const oldName=c.name.replace(/^\d+\s/,''); // 去掉編號得到舊名
+    nameMap[oldName]=c.name; // e.g. '熊' → '15 熊'
+  });
+
+  let changed=false;
+  const db2=getDatabase();
+  const newDb={};
+
+  Object.entries(db2).forEach(([key,notes])=>{
+    if(key.startsWith('lenormand::')){
+      const cardName=key.split('::')[1];
+      const newName=nameMap[cardName]; // 如果舊名能對到新名
+      if(newName && cardName!==newName){
+        const newKey='lenormand::'+newName;
+        // 合併（若新 key 已存在則 concat，否則直接設定）
+        newDb[newKey]=[...(newDb[newKey]||db2[newKey]||[]),...notes];
+        changed=true;
+      } else {
+        newDb[key]=notes; // 已是新格式或找不到對應，原樣保留
+      }
+    } else {
+      newDb[key]=notes; // 塔羅牌資料原樣保留
+    }
+  });
+
+  if(changed){
+    saveDatabase(newDb);
+    console.log('雷諾曼牌義庫名稱移轉完成');
   }
 }
 
