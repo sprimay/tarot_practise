@@ -482,7 +482,6 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 .rl-clear-btn{font-size:11px;color:#E24B4A;cursor:pointer;background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-family:'DM Sans',sans-serif}
 .rl-save-ok{font-size:13px;color:#639922;text-align:center;padding:10px;display:none}
 .rl-db-save-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
-</style>
 
 /* ═══ LOADING SCREEN ═══ */
 #loadingScreen{
@@ -532,14 +531,13 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
   position:absolute;right:-2px;top:50%;transform:translateY(-50%);
   font-size:14px;line-height:1;
 }
-
+</style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
 <!-- ═══ LOADING SCREEN ═══ -->
 <div id="loadingScreen">
   <div class="ls-bg"></div>
@@ -2758,25 +2756,25 @@ function deleteDbNote(key,idx,e){
   saveDatabase(db);renderDatabase();
 }
 
+
 // ═══ LOADING SCREEN ═══
 (function(){
   const bar=document.getElementById('lsBarInner');
   const screen=document.getElementById('loadingScreen');
+  if(!bar||!screen) return;
   let pct=0;
   const iv=setInterval(()=>{
-    // Fast at start, slow near end
     const step=pct<60?3.5:pct<85?1.2:0.4;
     pct=Math.min(pct+step,96);
     bar.style.width=pct+'%';
   },60);
-  // When page is fully loaded, finish bar and fade out
   function finish(){
     clearInterval(iv);
     bar.style.transition='width 0.35s ease';
     bar.style.width='100%';
     setTimeout(()=>{
       screen.classList.add('fade-out');
-      setTimeout(()=>screen.style.display='none',650);
+      setTimeout(()=>{screen.style.display='none';},650);
     },350);
   }
   if(document.readyState==='complete'){
@@ -2785,7 +2783,6 @@ function deleteDbNote(key,idx,e){
     window.addEventListener('load',()=>setTimeout(finish,400));
   }
 })();
-
 </script>
 </body>
 </html>
