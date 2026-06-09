@@ -514,9 +514,9 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
     </div>
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="goPage('practice')">練習</button>
+    <button class="nav-tab active" onclick="goPage('practice')">解讀練習</button>
+    <button class="nav-tab" onclick="goPage('reading')">實占紀錄</button>
     <button class="nav-tab" onclick="goPage('record')">練習記錄</button>
-    <button class="nav-tab" onclick="goPage('reading')">解讀紀錄</button>
     <button class="nav-tab" onclick="goPage('diary')">塔羅日記</button>
     <button class="nav-tab" onclick="goPage('database')">牌義庫</button>
   </div>
@@ -690,6 +690,7 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 
   <!-- LIST VIEW FILTERS -->
   <div id="recListFilters">
+    <input class="db-search" id="journalSearch" placeholder="搜尋問題關鍵字…" oninput="renderJournal()" style="margin-bottom:10px">
     <div class="pr-filter-row">
       <div class="pr-filter-group" id="filterTypeGroup">
         <button class="filter-btn active" onclick="filterRecord('all',this,'type')">全部</button>
@@ -697,6 +698,7 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
         <button class="filter-btn" onclick="filterRecord('lenormand',this,'type')">雷諾曼</button>
         <button class="filter-btn" onclick="filterRecord('digital',this,'type')">電腦抽</button>
         <button class="filter-btn" onclick="filterRecord('physical',this,'type')">實體牌</button>
+        <button class="filter-btn" onclick="filterRecord('reading',this,'type')">實占紀錄</button>
       </div>
       <div class="pr-filter-divider"></div>
       <div class="pr-filter-group" id="filterCatGroup">
@@ -733,8 +735,14 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 
 </div>
 
-<!-- ═══ READING LOG PAGE ═══ -->
+<!-- ═══ READING LOG PAGE (實占紀錄) ═══ -->
 <div class="page" id="page-reading">
+
+  <!-- Mode switch: tarot / lenormand -->
+  <div class="mode-switch" style="margin-top:4px;margin-bottom:16px">
+    <button class="mode-btn active" id="rl-mode-tarot" onclick="setRlMode('tarot')">🃏 塔羅牌</button>
+    <button class="mode-btn" id="rl-mode-lenormand" onclick="setRlMode('lenormand')">🌹 雷諾曼</button>
+  </div>
 
   <!-- NEW ENTRY FORM -->
   <div id="readingForm">
@@ -761,12 +769,23 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
       </div>
       <textarea class="interp-unified" id="rlInterpInput" placeholder="寫下你對這次牌陣的完整解讀…"></textarea>
     </div>
-    <button class="action-row-btn" onclick="saveReadingLog()">✦ 儲存解讀紀錄</button>
+    <button class="action-row-btn" onclick="saveReadingLog()">✦ 儲存實占紀錄</button>
   </div>
 
   <!-- SAVED ENTRIES LIST -->
   <div id="readingLogList" style="margin-top:24px"></div>
 
+</div>
+
+<!-- EDIT MODAL -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;overflow-y:auto;padding:20px">
+  <div style="max-width:680px;margin:0 auto;background:var(--bg);border-radius:var(--r);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.15)">
+    <div style="padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:17px">編輯紀錄</span>
+      <button onclick="closeEditModal()" style="width:28px;height:28px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text3)">✕</button>
+    </div>
+    <div style="padding:18px" id="editModalBody"></div>
+  </div>
 </div>
 
 <!-- ═══ TAROT DIARY PAGE ═══ -->
@@ -1276,7 +1295,7 @@ function goPage(p){
   document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   const tabs=document.querySelectorAll('.nav-tab');
-  const idx={practice:0,record:1,reading:2,diary:3,database:4}[p];
+  const idx={practice:0,reading:1,record:2,diary:3,database:4}[p];
   if(idx!==undefined) tabs[idx].classList.add('active');
   if(p==='record'){
     if(recordView==='cal') renderRecordCalendar(); else renderJournal();
@@ -1674,12 +1693,15 @@ function toggleCatFilter(cat,btn){
 }
 
 function getFilteredJournal(){
+  const keyword=(document.getElementById('journalSearch')?.value||'').toLowerCase();
   return getJournal().filter(j=>{
     const typeOk=recordFilterType==='all'||
-      (['tarot','lenormand'].includes(recordFilterType)?j.mode===recordFilterType:j.drawMode===recordFilterType);
+      (recordFilterType==='reading'?j.source==='reading':
+      ['tarot','lenormand'].includes(recordFilterType)?j.mode===recordFilterType:j.drawMode===recordFilterType);
     const entryCats=j.cats||(j.cat?[j.cat]:[]);
     const catOk=recordFilterCats.size===0||[...recordFilterCats].some(fc=>entryCats.includes(fc));
-    return typeOk&&catOk;
+    const searchOk=!keyword||(j.question||'').toLowerCase().includes(keyword)||(j.interpText||'').toLowerCase().includes(keyword);
+    return typeOk&&catOk&&searchOk;
   });
 }
 
@@ -1696,8 +1718,10 @@ function renderJournal(){
       const color=CAT_COLORS[c]||CAT_COLORS.other;
       return `<span class="j-cat" style="background:${color}22;color:${color};padding:2px 8px;border-radius:20px;font-size:10px">${label}</span>`;
     }).join('');
+    const sourceTag=entry.source==='reading'?`<span class="j-tag" style="background:#C4A88222;color:#9A7040">實占</span>`:'';
     item.innerHTML=`<div class="journal-header" onclick="toggleJournal(this)">
       <span class="j-date">${entry.date}</span>
+      ${sourceTag}
       <span class="j-tag">${entry.mode==='tarot'?'塔羅':'雷諾曼'}</span>
       <span class="j-tag">${entry.drawMode==='physical'?'實體牌':'電腦抽'}</span>
       ${catTagsHtml}
@@ -1709,7 +1733,10 @@ function renderJournal(){
       <div class="j-question">${entry.question}</div>
       <div class="j-cards-row">${(entry.cards||[]).map(c=>`<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`).join('')}</div>
       ${entry.interpText?`<div class="j-interp">${entry.interpText}</div>`:''}
-      <div class="j-feedback">${entry.aiResponse}</div>
+      <div class="j-feedback">${entry.aiResponse||''}</div>
+      <div style="margin-top:8px">
+        <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
+      </div>
     </div>`;
     list.appendChild(item);
   });
@@ -1806,6 +1833,73 @@ function closeRecDayPanel(){document.getElementById('recDayPanel').style.display
 
 function toggleJournal(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
 function clearJournal(){if(confirm('確定要清除所有練習記錄嗎？')){saveJournal([]);renderJournal();}}
+
+// ── Journal Edit ──────────────────────────
+function openJournalEdit(id){
+  const entry=getJournal().find(e=>e.id===id);
+  if(!entry) return;
+  const body=document.getElementById('editModalBody');
+  const showOrient=entry.mode==='tarot';
+  const cardsHtml=(entry.cards||[]).map((c,i)=>`
+    <div class="manual-card-row" style="margin-bottom:6px">
+      <input class="csb-pos-input" id="epos_${i}" value="${c.position}" placeholder="位置名稱" style="max-width:110px">
+      <input class="card-name-input" id="ecard_${i}" value="${c.name}" placeholder="牌名" style="flex:1">
+      ${showOrient?`<div class="orient-toggle">
+        <button class="orient-btn ${!c.reversed?'active':''}" id="eor_${i}_u" onclick="eSetOrient(${i},'upright')">正位</button>
+        <button class="orient-btn ${c.reversed?'active':''}" id="eor_${i}_r" onclick="eSetOrient(${i},'reversed')">逆位</button>
+      </div>`:''}
+    </div>`).join('');
+
+  body.innerHTML=`
+    <div class="sec-label" style="margin-bottom:8px">問題</div>
+    <div class="rl-input-box" style="margin-bottom:14px">
+      <textarea class="rl-question-input" id="editQuestion" rows="2">${entry.question}</textarea>
+    </div>
+    <div class="sec-label" style="margin-bottom:8px">牌面</div>
+    <div id="editCards" style="margin-bottom:14px">${cardsHtml}</div>
+    <div class="sec-label" style="margin-bottom:8px">解讀內容</div>
+    <div class="interp-box" style="margin-bottom:14px">
+      <textarea class="interp-unified" id="editInterp" style="min-height:140px">${entry.interpText||entry.interp||''}</textarea>
+    </div>
+    <button class="action-row-btn" onclick="saveJournalEdit(${id})">✦ 儲存修改</button>
+    <div style="font-size:12px;color:#639922;margin-top:8px;display:none;text-align:center" id="editSaveOk">✓ 已儲存</div>`;
+  document.getElementById('editModal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function eSetOrient(i,val){
+  document.getElementById('eor_'+i+'_u').classList.toggle('active',val==='upright');
+  document.getElementById('eor_'+i+'_r').classList.toggle('active',val==='reversed');
+}
+
+function saveJournalEdit(id){
+  const journal=getJournal();
+  const entry=journal.find(e=>e.id===id);
+  if(!entry) return;
+  entry.question=document.getElementById('editQuestion').value.trim()||entry.question;
+  entry.interpText=document.getElementById('editInterp').value.trim();
+  // Update cards
+  const showOrient=entry.mode==='tarot';
+  entry.cards=(entry.cards||[]).map((c,i)=>{
+    const pos=(document.getElementById('epos_'+i)||{}).value?.trim()||c.position;
+    const name=(document.getElementById('ecard_'+i)||{}).value?.trim()||c.name;
+    const uBtn=showOrient?document.getElementById('eor_'+i+'_u'):null;
+    const reversed=uBtn?!uBtn.classList.contains('active'):false;
+    return {name,position:pos,reversed};
+  });
+  saveJournal(journal);
+  document.getElementById('editSaveOk').style.display='block';
+  setTimeout(()=>{
+    closeEditModal();
+    renderJournal();
+    renderReadingLog();
+  },900);
+}
+
+function closeEditModal(){
+  document.getElementById('editModal').style.display='none';
+  document.body.style.overflow='';
+}
 
 // ══════════════════════════════════════════
 //  TAROT DIARY — CALENDAR
@@ -2164,18 +2258,29 @@ function saveDiaryFeedback(dateStr){
 }
 
 // ══════════════════════════════════════════
-//  READING LOG
+//  READING LOG (實占紀錄)
 // ══════════════════════════════════════════
 let rlPositions=[];
 let rlPosCounter=0;
 let rlCurrentPrompt='';
 let rlCurrentEntryId=null;
+let rlMode='tarot'; // 'tarot' | 'lenormand'
 
-// Init spread builder on page load
+function setRlMode(m){
+  rlMode=m;
+  document.getElementById('rl-mode-tarot').classList.toggle('active',m==='tarot');
+  document.getElementById('rl-mode-lenormand').classList.toggle('active',m==='lenormand');
+  // Reset preset chips and card rows for the new mode
+  const pChips=document.getElementById('rlPresetChips');
+  if(pChips) pChips.innerHTML='';
+  rlInitSpread();
+}
+
 function rlInitSpread(){
-  const presets=PHYSICAL_PRESETS_TAROT;
+  const presets=rlMode==='lenormand'?PHYSICAL_PRESETS_LEN:PHYSICAL_PRESETS_TAROT;
   const chips=document.getElementById('rlPresetChips');
-  if(!chips||chips.children.length>0) return;
+  if(!chips) return;
+  chips.innerHTML='';
   presets.forEach(p=>{
     const chip=document.createElement('button');
     chip.className='preset-chip';
@@ -2183,7 +2288,7 @@ function rlInitSpread(){
     chip.onclick=()=>rlApplyPreset(p);
     chips.appendChild(chip);
   });
-  rlApplyPreset(PHYSICAL_PRESETS_TAROT[0]);
+  rlApplyPreset(presets[0]);
 }
 function rlApplyPreset(preset){
   rlPositions=preset.positions.map(p=>({id:rlPosCounter++,label:p}));
@@ -2215,14 +2320,15 @@ function rlSyncCardLabels(){
 }
 function rlRenderCardRows(){
   const cont=document.getElementById('rlCardRows');cont.innerHTML='';
+  const showOrient=rlMode==='tarot';
   rlPositions.forEach((pos,i)=>{
     const row=document.createElement('div');row.className='manual-card-row';
     row.innerHTML=`<span class="mcr-pos">${pos.label||('位置'+(i+1))}</span>
       <input class="card-name-input" id="rlcard_${i}" placeholder="牌名…" autocomplete="off">
-      <div class="orient-toggle">
+      ${showOrient?`<div class="orient-toggle">
         <button class="orient-btn active" id="rlor_${i}_u" onclick="rlSetOrient(${i},'upright')">正位</button>
         <button class="orient-btn" id="rlor_${i}_r" onclick="rlSetOrient(${i},'reversed')">逆位</button>
-      </div>`;
+      </div>`:''}`;
     cont.appendChild(row);
   });
 }
@@ -2240,21 +2346,30 @@ function saveReadingLog(){
 
   const cards=rlPositions.map((pos,i)=>{
     const name=(document.getElementById('rlcard_'+i)||{}).value?.trim()||'（未填寫）';
-    const uBtn=document.getElementById('rlor_'+i+'_u');
+    const showOrient=rlMode==='tarot';
+    const uBtn=showOrient?document.getElementById('rlor_'+i+'_u'):null;
     const reversed=uBtn?!uBtn.classList.contains('active'):false;
     return {name,position:pos.label||('位置'+(i+1)),reversed};
   });
 
-  const log=getReadingLog();
+  const spreadName=rlPositions.map(p=>p.label).filter(Boolean).join('·')||rlPositions.length+'張自訂牌陣';
+  const journal=getJournal();
   const entry={
     id:Date.now(),
-    question,cards,interp,
-    teacherFeedback:'',
+    source:'reading',
+    rlMode,                  // 'tarot' | 'lenormand'
+    mode:rlMode,
+    drawMode:'physical',
+    spread:spreadName,
+    question, cards,
+    interpText:interp,
+    aiResponse:'', score:null,
+    cats:['other'],
     date:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'}),
     isoDate:new Date().toISOString().slice(0,10)
   };
-  log.unshift(entry);
-  saveReadingLog2(log);
+  journal.unshift(entry);
+  saveJournal(journal);
 
   // Reset form
   document.getElementById('rlQuestionInput').value='';
@@ -2262,7 +2377,6 @@ function saveReadingLog(){
   rlApplyPreset(PHYSICAL_PRESETS_TAROT[0]);
 
   renderReadingLog();
-  // Scroll to saved entry
   setTimeout(()=>{
     const list=document.getElementById('readingLogList');
     if(list) list.scrollIntoView({behavior:'smooth',block:'start'});
@@ -2271,7 +2385,7 @@ function saveReadingLog(){
 
 function renderReadingLog(){
   rlInitSpread();
-  const log=getReadingLog();
+  const log=getJournal().filter(j=>j.source==='reading');
   const cont=document.getElementById('readingLogList');
   if(!log.length){cont.innerHTML='';return;}
   cont.innerHTML=`<div class="rl-list-header">
@@ -2285,6 +2399,8 @@ function renderReadingLog(){
     const cardsHtml=(entry.cards||[]).map(c=>
       `<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`
     ).join('');
+    const interp=entry.interpText||entry.interp||'';
+    const feedback=entry.aiResponse||entry.teacherFeedback||'';
     item.innerHTML=`<div class="rl-item-header" onclick="toggleRlItem(this)">
       <span class="rl-date">${entry.date}</span>
       <span class="rl-question-preview">${entry.question}</span>
@@ -2293,9 +2409,10 @@ function renderReadingLog(){
     <div class="rl-item-body">
       <div class="rl-q-full">${entry.question}</div>
       <div class="rl-cards-row">${cardsHtml}</div>
-      <div class="rl-interp">${entry.interp}</div>
-      ${entry.teacherFeedback?`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div class="rl-teacher-box">${entry.teacherFeedback}</div>`:''}
+      ${interp?`<div class="rl-interp">${interp}</div>`:''}
+      ${feedback?`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div class="rl-teacher-box">${feedback}</div>`:''}
       <div class="rl-action-row">
+        <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
         <button class="rl-action-link" onclick="rlGeneratePrompt(${entry.id})">✦ 產生老師提點 Prompt</button>
         <button class="rl-action-link" onclick="rlDeleteEntry(${entry.id})">刪除此筆</button>
       </div>
@@ -2312,23 +2429,24 @@ function toggleRlItem(header){
 
 function rlDeleteEntry(id){
   if(!confirm('確定要刪除這筆紀錄嗎？')) return;
-  const log=getReadingLog().filter(e=>e.id!==id);
-  saveReadingLog2(log);renderReadingLog();
+  const log=getJournal().filter(e=>e.id!==id);
+  saveJournal(log);renderReadingLog();
 }
 function clearReadingLog(){
-  if(!confirm('確定要清除所有解讀紀錄嗎？')) return;
-  saveReadingLog2([]);renderReadingLog();
+  if(!confirm('確定要清除所有實占紀錄嗎？')) return;
+  const log=getJournal().filter(e=>e.source!=='reading');
+  saveJournal(log);renderReadingLog();
 }
 
 function rlGeneratePrompt(id){
-  const entry=getReadingLog().find(e=>e.id===id);
+  const entry=getJournal().find(e=>e.id===id);
   if(!entry) return;
   rlCurrentEntryId=id;
   const cardsSummary=(entry.cards||[]).map(c=>
-    `${c.position}：${c.name}${c.reversed?' (逆位)':' (正位)'}`
+    `${c.position}：${c.name}${entry.rlMode==='tarot'?(c.reversed?' (逆位)':' (正位)'):''}`
   ).join('\n');
 
-  rlCurrentPrompt=`你是一位溫暖且專業的塔羅老師。學員使用實體紙牌進行了一次真實占卜，並記錄了自己的解讀。請根據牌義給予提點與訂正，幫助學員更準確地理解牌意。
+  rlCurrentPrompt=`你是一位溫暖且專業的${entry.rlMode==='lenormand'?'雷諾曼':'塔羅'}老師。學員使用實體紙牌進行了一次真實占卜，並記錄了自己的解讀。請根據牌義給予提點與訂正，幫助學員更準確地理解牌意。
 
 【問題】
 ${entry.question}
@@ -2337,7 +2455,7 @@ ${entry.question}
 ${cardsSummary}
 
 【學員的解讀】
-${entry.interp}
+${entry.interpText||entry.interp||''}
 
 請用繁體中文回應，格式如下：
 
@@ -2411,21 +2529,20 @@ function rlSaveFeedback(id){
   const feedbackEl=document.getElementById('rl-feedback-'+id);
   const feedback=feedbackEl?.value?.trim();
   if(!feedback){alert('請先貼上 AI 的回饋喔！');return;}
-  // Save feedback to entry
-  const log=getReadingLog();
+  const log=getJournal();
   const entry=log.find(e=>e.id===id);
-  if(entry) entry.teacherFeedback=feedback;
-  saveReadingLog2(log);
-  // Save card notes to database
+  if(entry) entry.aiResponse=feedback;
+  saveJournal(log);
   const db2=getDatabase();
   const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
+  const deckMode=entry?.rlMode==='lenormand'?'lenormand':'tarot';
   (entry?.cards||[]).forEach((c,i)=>{
     const el=document.getElementById(`rl-note-${id}-${i}`);
     const note=el?.value?.trim();
     if(!note) return;
-    const key='tarot::'+c.name;
+    const key=deckMode+'::'+c.name;
     if(!db2[key]) db2[key]=[];
-    db2[key].push({note,date:today,mode:'tarot'});
+    db2[key].push({note,date:today,mode:deckMode});
   });
   saveDatabase(db2);
   const okEl=document.getElementById('rl-db-ok-'+id);
