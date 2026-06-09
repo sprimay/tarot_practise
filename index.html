@@ -180,6 +180,13 @@ textarea.note-input:focus{border-color:var(--border2)}
 .clear-journal-btn{margin-left:auto;padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:#E24B4A;cursor:pointer;background:var(--bg);font-family:'DM Sans',sans-serif}
 .journal-empty{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px}
 .journal-list{display:flex;flex-direction:column;gap:12px}
+/* Swipe to delete wrapper */
+.swipe-wrap{position:relative;overflow:hidden;border-radius:var(--r);margin-bottom:12px}
+.swipe-delete-btn{position:absolute;right:0;top:0;bottom:0;width:72px;background:#E24B4A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transform:translateX(100%);transition:transform 0.2s;border-radius:0 var(--r) var(--r) 0;flex-direction:column;gap:3px}
+.swipe-delete-btn svg{width:16px;height:16px}
+.swipe-inner{transition:transform 0.2s;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;touch-action:pan-y}
+.swipe-wrap.swiped .swipe-inner{transform:translateX(-72px)}
+.swipe-wrap.swiped .swipe-delete-btn{transform:translateX(0)}
 .journal-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
 .journal-header{padding:12px 16px;background:var(--bg2);display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:1px solid transparent;flex-wrap:wrap}
 .journal-header.open{border-bottom-color:var(--border)}
@@ -1705,13 +1712,57 @@ function getFilteredJournal(){
   });
 }
 
+// ── Swipe to delete ──────────────────────
+function makeSwipeable(el, onDelete){
+  const wrap=document.createElement('div');
+  wrap.className='swipe-wrap';
+  const inner=document.createElement('div');
+  inner.className='swipe-inner';
+  const delBtn=document.createElement('div');
+  delBtn.className='swipe-delete-btn';
+  delBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span>刪除</span>`;
+
+  // Move original el into inner
+  inner.appendChild(el);
+  wrap.appendChild(inner);
+  wrap.appendChild(delBtn);
+
+  // Touch swipe
+  let startX=0,startY=0,dragging=false;
+  inner.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    dragging=true;
+  },{passive:true});
+  inner.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=Math.abs(e.touches[0].clientY-startY);
+    if(dy>20){dragging=false;return;} // vertical scroll, ignore
+    if(dx<-20) wrap.classList.add('swiped');
+    if(dx>20) wrap.classList.remove('swiped');
+  },{passive:true});
+  inner.addEventListener('touchend',()=>{dragging=false;});
+
+  // Click outside to close
+  document.addEventListener('click',e=>{
+    if(!wrap.contains(e.target)) wrap.classList.remove('swiped');
+  });
+
+  // Delete button
+  delBtn.addEventListener('click',()=>{
+    if(confirm('確定要刪除這筆記錄嗎？')) onDelete();
+  });
+
+  return wrap;
+}
+
 function renderJournal(){
   const filtered=getFilteredJournal();
   const list=document.getElementById('journalList');
   if(!filtered.length){list.innerHTML='<div class="journal-empty">還沒有符合的練習記錄。</div>';return;}
   list.innerHTML='';
   filtered.forEach(entry=>{
-    const item=document.createElement('div');item.className='journal-item';
     const entryCats=entry.cats||(entry.cat?[entry.cat]:[]);
     const catTagsHtml=entryCats.map(c=>{
       const label=CAT_LABELS[c]||c;
@@ -1719,6 +1770,8 @@ function renderJournal(){
       return `<span class="j-cat" style="background:${color}22;color:${color};padding:2px 8px;border-radius:20px;font-size:10px">${label}</span>`;
     }).join('');
     const sourceTag=entry.source==='reading'?`<span class="j-tag" style="background:#C4A88222;color:#9A7040">實占</span>`:'';
+    const item=document.createElement('div');
+    item.className='journal-item';
     item.innerHTML=`<div class="journal-header" onclick="toggleJournal(this)">
       <span class="j-date">${entry.date}</span>
       ${sourceTag}
@@ -1738,7 +1791,11 @@ function renderJournal(){
         <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
       </div>
     </div>`;
-    list.appendChild(item);
+    const wrapped=makeSwipeable(item,()=>{
+      const log=getJournal().filter(e=>e.id!==entry.id);
+      saveJournal(log);renderJournal();
+    });
+    list.appendChild(wrapped);
   });
 }
 
@@ -2414,11 +2471,14 @@ function renderReadingLog(){
       <div class="rl-action-row">
         <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
         <button class="rl-action-link" onclick="rlGeneratePrompt(${entry.id})">✦ 產生老師提點 Prompt</button>
-        <button class="rl-action-link" onclick="rlDeleteEntry(${entry.id})">刪除此筆</button>
       </div>
       <div class="rl-prompt-section" id="rl-prompt-${entry.id}"></div>
     </div>`;
-    inner.appendChild(item);
+    const wrapped=makeSwipeable(item,()=>{
+      const log2=getJournal().filter(e=>e.id!==entry.id);
+      saveJournal(log2);renderReadingLog();
+    });
+    inner.appendChild(wrapped);
   });
 }
 
