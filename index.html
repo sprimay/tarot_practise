@@ -440,6 +440,12 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
   .card-note-label{min-width:64px;font-size:11px}
 }
 
+/* ═══ PRACTICE RECORD VIEW TOGGLE ═══ */
+.rec-view-toggle{display:flex;gap:6px;margin-bottom:14px}
+.rec-view-btn{padding:7px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.rec-view-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.rec-view-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
+
 /* ═══ READING LOG ═══ */
 .rl-input-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
 textarea.rl-question-input{width:100%;border:none;padding:14px 16px;font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:var(--text);background:transparent;resize:none;line-height:1.6;outline:none}
@@ -675,27 +681,56 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 
 <!-- ═══ PRACTICE RECORD PAGE ═══ -->
 <div class="page" id="page-record">
-  <div class="pr-filter-row">
-    <div class="pr-filter-group" id="filterTypeGroup">
-      <button class="filter-btn active" onclick="filterRecord('all',this,'type')">全部</button>
-      <button class="filter-btn" onclick="filterRecord('tarot',this,'type')">塔羅</button>
-      <button class="filter-btn" onclick="filterRecord('lenormand',this,'type')">雷諾曼</button>
-      <button class="filter-btn" onclick="filterRecord('digital',this,'type')">電腦抽</button>
-      <button class="filter-btn" onclick="filterRecord('physical',this,'type')">實體牌</button>
-    </div>
-    <div class="pr-filter-divider"></div>
-    <div class="pr-filter-group" id="filterCatGroup">
-      <span style="font-size:11px;color:var(--text3);padding:2px 0">主題篩選：</span>
-      <button class="filter-btn cat-filter-btn" data-cat="love" onclick="toggleCatFilter('love',this)">戀愛</button>
-      <button class="filter-btn cat-filter-btn" data-cat="work" onclick="toggleCatFilter('work',this)">事業</button>
-      <button class="filter-btn cat-filter-btn" data-cat="money" onclick="toggleCatFilter('money',this)">金錢</button>
-      <button class="filter-btn cat-filter-btn" data-cat="social" onclick="toggleCatFilter('social',this)">人際</button>
-      <button class="filter-btn cat-filter-btn" data-cat="life" onclick="toggleCatFilter('life',this)">生活</button>
-      <button class="filter-btn cat-filter-btn" data-cat="other" onclick="toggleCatFilter('other',this)">其他</button>
-    </div>
-    <button class="clear-journal-btn" onclick="clearJournal()">清除全部</button>
+
+  <!-- VIEW TOGGLE -->
+  <div class="rec-view-toggle">
+    <button class="rec-view-btn active" id="recViewList" onclick="setRecordView('list')">☰ 條列</button>
+    <button class="rec-view-btn" id="recViewCal" onclick="setRecordView('cal')">⊞ 月曆</button>
   </div>
-  <div id="journalList" class="journal-list"></div>
+
+  <!-- LIST VIEW FILTERS -->
+  <div id="recListFilters">
+    <div class="pr-filter-row">
+      <div class="pr-filter-group" id="filterTypeGroup">
+        <button class="filter-btn active" onclick="filterRecord('all',this,'type')">全部</button>
+        <button class="filter-btn" onclick="filterRecord('tarot',this,'type')">塔羅</button>
+        <button class="filter-btn" onclick="filterRecord('lenormand',this,'type')">雷諾曼</button>
+        <button class="filter-btn" onclick="filterRecord('digital',this,'type')">電腦抽</button>
+        <button class="filter-btn" onclick="filterRecord('physical',this,'type')">實體牌</button>
+      </div>
+      <div class="pr-filter-divider"></div>
+      <div class="pr-filter-group" id="filterCatGroup">
+        <span style="font-size:11px;color:var(--text3);padding:2px 0">主題：</span>
+        <button class="filter-btn cat-filter-btn" data-cat="love" onclick="toggleCatFilter('love',this)">戀愛</button>
+        <button class="filter-btn cat-filter-btn" data-cat="work" onclick="toggleCatFilter('work',this)">事業</button>
+        <button class="filter-btn cat-filter-btn" data-cat="money" onclick="toggleCatFilter('money',this)">金錢</button>
+        <button class="filter-btn cat-filter-btn" data-cat="social" onclick="toggleCatFilter('social',this)">人際</button>
+        <button class="filter-btn cat-filter-btn" data-cat="life" onclick="toggleCatFilter('life',this)">生活</button>
+        <button class="filter-btn cat-filter-btn" data-cat="other" onclick="toggleCatFilter('other',this)">其他</button>
+      </div>
+      <button class="clear-journal-btn" onclick="clearJournal()">清除全部</button>
+    </div>
+    <div id="journalList" class="journal-list"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div id="recCalView" style="display:none">
+    <div class="cal-nav" style="margin-bottom:14px">
+      <button class="cal-nav-btn" onclick="recCalPrev()">‹</button>
+      <span class="cal-month" id="recCalMonth"></span>
+      <button class="cal-nav-btn" onclick="recCalNext()">›</button>
+    </div>
+    <div class="cal-grid" id="recCalGrid"></div>
+    <!-- Day detail panel -->
+    <div class="diary-panel" id="recDayPanel" style="display:none">
+      <div class="diary-panel-header">
+        <span class="diary-panel-date" id="recDayPanelDate"></span>
+        <button class="diary-close-btn" onclick="closeRecDayPanel()">✕</button>
+      </div>
+      <div class="diary-panel-body" id="recDayPanelBody"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══ READING LOG PAGE ═══ -->
@@ -795,21 +830,21 @@ const NUMS=["A","2","3","4","5","6","7","8","9","10","侍者","騎士","王后",
 const TAROT_ALL=[...TAROT_MAJOR];
 SUITS.forEach(s=>NUMS.forEach(n=>TAROT_ALL.push({name:s+n,sym:s[0]})));
 const LENORMAND_36=[
-  {name:"騎士",sym:"🐎"},{name:"幸運草",sym:"🍀"},{name:"船",sym:"⛵"},
-  {name:"房屋",sym:"🏠"},{name:"樹",sym:"🌲"},{name:"烏雲",sym:"☁️"},
-  {name:"蛇",sym:"🐍"},{name:"棺材",sym:"⬛"},{name:"花束",sym:"💐"},
-  {name:"大鐮刀",sym:"🌾"},{name:"鞭子",sym:"⚡"},{name:"鳥",sym:"🐦"},
-  {name:"孩子",sym:"🌱"},{name:"狐狸",sym:"🦊"},{name:"熊",sym:"🐻"},
-  {name:"星星",sym:"⭐"},{name:"鸛鶴",sym:"🦢"},{name:"狗",sym:"🐕"},
-  {name:"塔",sym:"🗼"},{name:"花園",sym:"🌸"},{name:"山",sym:"⛰️"},
-  {name:"十字路口",sym:"🛤️"},{name:"老鼠",sym:"🐭"},{name:"心",sym:"❤️"},
-  {name:"戒指",sym:"💍"},{name:"書本",sym:"📖"},{name:"書信",sym:"✉️"},
-  {name:"男人",sym:"👨"},{name:"女人",sym:"👩"},{name:"百合花",sym:"🌷"},
-  {name:"太陽",sym:"☀️"},{name:"月亮",sym:"🌙"},{name:"鑰匙",sym:"🔑"},
-  {name:"魚",sym:"🐟"},{name:"錨",sym:"⚓"},{name:"十字架",sym:"✝️"}
+  {name:"01 騎士",sym:"🐎"},{name:"02 幸運草",sym:"🍀"},{name:"03 船",sym:"⛵"},
+  {name:"04 房屋",sym:"🏠"},{name:"05 樹",sym:"🌲"},{name:"06 烏雲",sym:"☁️"},
+  {name:"07 蛇",sym:"🐍"},{name:"08 棺材",sym:"⬛"},{name:"09 花束",sym:"💐"},
+  {name:"10 大鐮刀",sym:"🌾"},{name:"11 鞭子",sym:"⚡"},{name:"12 鳥",sym:"🐦"},
+  {name:"13 孩子",sym:"🌱"},{name:"14 狐狸",sym:"🦊"},{name:"15 熊",sym:"🐻"},
+  {name:"16 星星",sym:"⭐"},{name:"17 鸛鶴",sym:"🦢"},{name:"18 狗",sym:"🐕"},
+  {name:"19 塔",sym:"🗼"},{name:"20 花園",sym:"🌸"},{name:"21 山",sym:"⛰️"},
+  {name:"22 十字路口",sym:"🛤️"},{name:"23 老鼠",sym:"🐭"},{name:"24 心",sym:"❤️"},
+  {name:"25 戒指",sym:"💍"},{name:"26 書本",sym:"📖"},{name:"27 書信",sym:"✉️"},
+  {name:"28 男人",sym:"👨"},{name:"29 女人",sym:"👩"},{name:"30 百合花",sym:"🌷"},
+  {name:"31 太陽",sym:"☀️"},{name:"32 月亮",sym:"🌙"},{name:"33 鑰匙",sym:"🔑"},
+  {name:"34 魚",sym:"🐟"},{name:"35 錨",sym:"⚓"},{name:"36 十字架",sym:"✝️"}
 ];
 const LENORMAND_RANA4=[
-  {name:"靈體",sym:"👻"},{name:"香爐",sym:"🪔"},{name:"床",sym:"🛏️"},{name:"市場",sym:"🏪"}
+  {name:"37 靈體",sym:"👻"},{name:"38 香爐",sym:"🪔"},{name:"39 床",sym:"🛏️"},{name:"40 市場",sym:"🏪"}
 ];
 const LENORMAND_40=[...LENORMAND_36,...LENORMAND_RANA4];
 // Active lenormand pool (set by system switcher)
@@ -831,7 +866,8 @@ const CARD_PALETTE={
 };
 function getCardPalette(card,mode){
   if(mode==='lenormand'){
-    return RANA4_NAMES.has(card.name)?CARD_PALETTE.rana:CARD_PALETTE.len;
+    const num=parseInt(card.name);
+    return (!isNaN(num)&&num>=37)?CARD_PALETTE.rana:CARD_PALETTE.len;
   }
   if(MAJOR_NAMES.has(card.name)) return CARD_PALETTE.major;
   if(card.name.startsWith('權杖')) return CARD_PALETTE.wands;
@@ -1203,7 +1239,9 @@ function goPage(p){
   const tabs=document.querySelectorAll('.nav-tab');
   const idx={practice:0,record:1,reading:2,diary:3,database:4}[p];
   if(idx!==undefined) tabs[idx].classList.add('active');
-  if(p==='record') renderJournal();
+  if(p==='record'){
+    if(recordView==='cal') renderRecordCalendar(); else renderJournal();
+  }
   if(p==='database') renderDatabase();
   if(p==='diary') renderCalendar();
   if(p==='reading'){renderReadingLog();}
@@ -1563,6 +1601,20 @@ function resetAll(silent){
 // ══════════════════════════════════════════
 //  PRACTICE RECORD
 // ══════════════════════════════════════════
+let recordView='list'; // 'list' | 'cal'
+let recCalYear=new Date().getFullYear();
+let recCalMonth=new Date().getMonth();
+
+function setRecordView(v){
+  recordView=v;
+  document.getElementById('recViewList').classList.toggle('active',v==='list');
+  document.getElementById('recViewCal').classList.toggle('active',v==='cal');
+  document.getElementById('recListFilters').style.display=v==='list'?'block':'none';
+  document.getElementById('recCalView').style.display=v==='cal'?'block':'none';
+  if(v==='cal') renderRecordCalendar();
+  else renderJournal();
+}
+
 function filterRecord(f,btn,group){
   if(group==='type'){
     recordFilterType=f;
@@ -1581,17 +1633,20 @@ function toggleCatFilter(cat,btn){
   }
   renderJournal();
 }
-function renderJournal(){
-  const journal=getJournal();
-  const list=document.getElementById('journalList');
-  const filtered=journal.filter(j=>{
+
+function getFilteredJournal(){
+  return getJournal().filter(j=>{
     const typeOk=recordFilterType==='all'||
       (['tarot','lenormand'].includes(recordFilterType)?j.mode===recordFilterType:j.drawMode===recordFilterType);
-    // cats: entry may have old .cat (string) or new .cats (array)
     const entryCats=j.cats||(j.cat?[j.cat]:[]);
-    const catOk=recordFilterCats.size===0 || [...recordFilterCats].some(fc=>entryCats.includes(fc));
+    const catOk=recordFilterCats.size===0||[...recordFilterCats].some(fc=>entryCats.includes(fc));
     return typeOk&&catOk;
   });
+}
+
+function renderJournal(){
+  const filtered=getFilteredJournal();
+  const list=document.getElementById('journalList');
   if(!filtered.length){list.innerHTML='<div class="journal-empty">還沒有符合的練習記錄。</div>';return;}
   list.innerHTML='';
   filtered.forEach(entry=>{
@@ -1620,6 +1675,96 @@ function renderJournal(){
     list.appendChild(item);
   });
 }
+
+// ── Record Calendar ───────────────────────
+function renderRecordCalendar(){
+  const journal=getJournal();
+  // Build a map: isoDate → [entries]
+  const dayMap={};
+  journal.forEach(j=>{
+    if(!j.isoDate) return;
+    if(!dayMap[j.isoDate]) dayMap[j.isoDate]=[];
+    dayMap[j.isoDate].push(j);
+  });
+
+  const today=new Date();
+  const firstDay=new Date(recCalYear,recCalMonth,1);
+  const lastDay=new Date(recCalYear,recCalMonth+1,0);
+  document.getElementById('recCalMonth').textContent=recCalYear+'年 '+(recCalMonth+1)+'月';
+
+  const grid=document.getElementById('recCalGrid');
+  grid.innerHTML='';
+  ['日','一','二','三','四','五','六'].forEach(d=>{
+    const lbl=document.createElement('div');lbl.className='cal-day-label';lbl.textContent=d;grid.appendChild(lbl);
+  });
+  // Empty cells
+  for(let i=0;i<firstDay.getDay();i++){
+    const emp=document.createElement('div');emp.className='cal-day other-month';grid.appendChild(emp);
+  }
+  // Day cells
+  for(let d=1;d<=lastDay.getDate();d++){
+    const dateStr=recCalYear+'-'+String(recCalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const entries=dayMap[dateStr]||[];
+    const isToday=today.getFullYear()===recCalYear&&today.getMonth()===recCalMonth&&today.getDate()===d;
+    const cell=document.createElement('div');
+    cell.className='cal-day'+(isToday?' today':'')+(entries.length?' has-entry':'');
+    // Show cat color dots for entries
+    const dotsHtml=entries.slice(0,3).map(e=>{
+      const cats=e.cats||(e.cat?[e.cat]:[]);
+      const color=CAT_COLORS[cats[0]]||CAT_COLORS.other;
+      return `<span style="width:5px;height:5px;border-radius:50%;background:${color};display:inline-block;margin:0 1px"></span>`;
+    }).join('');
+    const scoreHtml=entries.length?`<span style="font-size:8px;color:var(--text3)">${entries.length}筆</span>`:'';
+    cell.innerHTML=`<span class="cal-day-num">${d}</span>${entries.length?`<div style="display:flex;gap:1px;margin-top:2px;flex-wrap:wrap;justify-content:center">${dotsHtml}</div>${scoreHtml}`:'' }`;
+    if(entries.length) cell.onclick=()=>openRecDayPanel(dateStr,entries);
+    grid.appendChild(cell);
+  }
+  document.getElementById('recDayPanel').style.display='none';
+}
+
+function recCalPrev(){
+  if(recCalMonth===0){recCalYear--;recCalMonth=11;}else recCalMonth--;
+  renderRecordCalendar();
+}
+function recCalNext(){
+  if(recCalMonth===11){recCalYear++;recCalMonth=0;}else recCalMonth++;
+  renderRecordCalendar();
+}
+
+function openRecDayPanel(dateStr,entries){
+  const [y,m,d]=dateStr.split('-');
+  document.getElementById('recDayPanelDate').textContent=y+'年'+parseInt(m)+'月'+parseInt(d)+'日 — '+entries.length+'筆練習';
+  const body=document.getElementById('recDayPanelBody');
+  body.innerHTML='';
+  entries.forEach(entry=>{
+    const entryCats=entry.cats||(entry.cat?[entry.cat]:[]);
+    const catTagsHtml=entryCats.map(c=>{
+      const color=CAT_COLORS[c]||CAT_COLORS.other;
+      return `<span style="background:${color}22;color:${color};padding:2px 8px;border-radius:20px;font-size:10px">${CAT_LABELS[c]||c}</span>`;
+    }).join('');
+    const div=document.createElement('div');
+    div.style.cssText='border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px';
+    div.innerHTML=`<div style="padding:10px 14px;background:var(--bg2);display:flex;align-items:center;gap:6px;flex-wrap:wrap;cursor:pointer" onclick="this.nextElementSibling.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.classList.contains('open')?'block':'none'">
+      <span style="font-size:10px;color:var(--text3)">${entry.spread}</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--text3)">${entry.mode==='tarot'?'塔羅':'雷諾曼'}</span>
+      ${catTagsHtml}
+      ${entry.score!=null?`<span style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;margin-left:auto">${entry.score}/10</span>`:''}
+      <span style="font-size:12px;color:var(--text3)">▾</span>
+    </div>
+    <div style="display:none;padding:12px 14px">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--text2);margin-bottom:8px">${entry.question}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">${(entry.cards||[]).map(c=>`<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`).join('')}</div>
+      ${entry.interpText?`<div class="j-interp">${entry.interpText}</div>`:''}
+      <div class="j-feedback">${entry.aiResponse||''}</div>
+    </div>`;
+    body.appendChild(div);
+  });
+  const panel=document.getElementById('recDayPanel');
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeRecDayPanel(){document.getElementById('recDayPanel').style.display='none';}
+
 function toggleJournal(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
 function clearJournal(){if(confirm('確定要清除所有練習記錄嗎？')){saveJournal([]);renderJournal();}}
 
@@ -2283,8 +2428,10 @@ function cardMatchesTarotFilter(name){
 }
 function cardMatchesLenFilter(name){
   if(dbLenFilter==='all') return true;
-  if(dbLenFilter==='36') return !RANA4_NAMES.has(name);
-  if(dbLenFilter==='rana4') return RANA4_NAMES.has(name);
+  // Rana4 cards are numbered 37-40
+  const num=parseInt(name);
+  if(dbLenFilter==='36') return isNaN(num)||num<=36;
+  if(dbLenFilter==='rana4') return !isNaN(num)&&num>=37;
   return true;
 }
 
@@ -2307,7 +2454,8 @@ function renderDatabase(){
   list.innerHTML='';
   entries.forEach(e=>{
     const item=document.createElement('div');item.className='db-item';
-    const isRana=RANA4_NAMES.has(e.name);
+    const num=parseInt(e.name);
+    const isRana=!isNaN(num)&&num>=37;
     const tagHtml=currentDbTab==='lenormand'&&isRana?
       ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:#FAC77533;color:#BA7517;margin-left:4px">Rana</span>':'';
     item.innerHTML=`<div class="db-item-header" onclick="toggleDb(this)">
