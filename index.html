@@ -482,6 +482,13 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 .rl-clear-btn{font-size:11px;color:#E24B4A;cursor:pointer;background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-family:'DM Sans',sans-serif}
 .rl-save-ok{font-size:13px;color:#639922;text-align:center;padding:10px;display:none}
 .rl-db-save-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
+/* reading log saved notice */
+.rl-saved-notice{text-align:center;padding:20px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);margin-bottom:16px}
+.rl-saved-icon{font-size:24px;margin-bottom:8px;color:var(--text2)}
+.rl-saved-text{font-size:14px;color:var(--text2);margin-bottom:12px;font-family:'Cormorant Garamond',serif}
+.rl-saved-goto{padding:7px 18px;border:1px solid var(--border2);border-radius:20px;background:var(--bg);font-size:13px;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.rl-saved-goto:hover{background:var(--bg2)}
+.rl-ai-section{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);padding:14px}
 
 /* ═══ LOADING SCREEN ═══ */
 #loadingScreen{position:fixed;inset:0;z-index:9999;background:#A8C8E8;transition:opacity 0.7s ease;}
@@ -1822,8 +1829,9 @@ function renderJournal(){
       <div class="j-cards-row">${(entry.cards||[]).map(c=>`<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`).join('')}</div>
       ${entry.interpText?`<div class="j-interp">${entry.interpText}</div>`:''}
       <div class="j-feedback">${entry.aiResponse||''}</div>
-      <div style="margin-top:8px">
+      <div style="margin-top:8px;display:flex;gap:12px;align-items:center">
         <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
+        <button class="rl-action-link journal-del-desktop" style="color:#E24B4A" onclick="deleteJournalEntry(${entry.id})">✕ 刪除</button>
       </div>
     </div>`;
     const wrapped=makeSwipeable(item,()=>{
@@ -1925,6 +1933,11 @@ function closeRecDayPanel(){document.getElementById('recDayPanel').style.display
 
 function toggleJournal(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
 function clearJournal(){if(confirm('確定要清除所有練習記錄嗎？')){saveJournal([]);renderJournal();}}
+function deleteJournalEntry(id){
+  if(!confirm('確定要刪除這筆記錄嗎？')) return;
+  saveJournal(getJournal().filter(e=>e.id!==id));
+  renderJournal();
+}
 
 // ── Journal Edit ──────────────────────────
 function openJournalEdit(id){
@@ -2445,76 +2458,125 @@ function saveReadingLog(){
   });
 
   const spreadName=rlPositions.map(p=>p.label).filter(Boolean).join('·')||rlPositions.length+'張自訂牌陣';
+  const entryId=Date.now();
   const journal=getJournal();
   const entry={
-    id:Date.now(),
-    source:'reading',
-    rlMode,                  // 'tarot' | 'lenormand'
-    mode:rlMode,
-    drawMode:'physical',
-    spread:spreadName,
-    question, cards,
-    interpText:interp,
-    aiResponse:'', score:null,
-    cats:['other'],
+    id:entryId,
+    source:'reading', rlMode, mode:rlMode,
+    drawMode:'physical', spread:spreadName,
+    question, cards, interpText:interp,
+    aiResponse:'', score:null, cats:['other'],
     date:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'}),
     isoDate:new Date().toISOString().slice(0,10)
   };
   journal.unshift(entry);
   saveJournal(journal);
 
-  // Reset form
+  // Show saved notice + AI prompt area
+  const cont=document.getElementById('readingLogList');
+  const cardsSummary=cards.map(c=>
+    `${c.position}：${c.name}${rlMode==='tarot'?(c.reversed?' (逆位)':' (正位)'):''}`
+  ).join('\n');
+  const aiPrompt=`你是一位溫暖且專業的${rlMode==='lenormand'?'雷諾曼':'塔羅'}老師。學員使用實體紙牌進行了一次真實占卜，並記錄了自己的解讀。請根據牌義給予提點與訂正，幫助學員更準確地理解牌意。
+
+【問題】
+${question}
+
+【牌陣與牌面】
+${cardsSummary}
+
+【學員的解讀】
+${interp}
+
+請用繁體中文回應，格式如下：
+
+✦ 牌義提點：
+（針對各張牌在此位置的核心意義給予說明，2-3句）
+
+▲ 解讀訂正：
+（若學員解讀有偏離牌義之處，直接但溫和地指出，說明正確理解方向）
+
+♡ 整體洞見：
+（結合整個牌陣，給出更完整的訊息，2-3句）
+
+語氣溫暖但清晰，約250字內。`;
+
+  cont.innerHTML=`
+    <div class="rl-saved-notice">
+      <div class="rl-saved-icon">✦</div>
+      <div class="rl-saved-text">紀錄已保存到練習記錄頁面</div>
+      <button class="rl-saved-goto" onclick="goPage('record')">前往查看 →</button>
+    </div>
+    <div class="rl-ai-section">
+      <div class="sec-label">AI 批改解讀（選用）</div>
+      <div class="prompt-box" style="margin-bottom:10px">
+        <div class="prompt-box-header">
+          <span class="prompt-box-label">複製 Prompt，貼到 AI 平台取得批改</span>
+          <button class="copy-btn" id="rlSavedCopyBtn" onclick="rlCopySavedPrompt()">複製</button>
+        </div>
+        <div class="prompt-text" style="max-height:180px">${aiPrompt}</div>
+      </div>
+      <div class="platform-links" style="margin-bottom:14px">
+        <span class="platform-label">快速前往：</span>
+        <a class="platform-link" href="https://claude.ai" target="_blank">Claude</a>
+        <a class="platform-link" href="https://chatgpt.com" target="_blank">ChatGPT</a>
+        <a class="platform-link" href="https://gemini.google.com" target="_blank">Gemini</a>
+      </div>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">貼上 AI 的批改回饋</div>
+      <div class="feedback-input-box">
+        <textarea class="feedback-input" id="rlSavedFeedback" placeholder="將 AI 的批改貼在這裡，儲存後可在練習記錄查看…"></textarea>
+      </div>
+      <button class="action-row-btn" style="margin-top:6px" onclick="rlSaveSavedFeedback(${entryId})">✦ 儲存批改結果</button>
+      <div style="font-size:12px;color:#639922;margin-top:8px;display:none;text-align:center" id="rlSavedFbOk">✓ 批改已儲存到練習記錄</div>
+    </div>
+    <div style="margin-top:16px;text-align:center">
+      <button class="reset-btn" onclick="rlResetForm()">✦ 新增下一筆實占紀錄</button>
+    </div>`;
+
+  // Store prompt for copy
+  window._rlSavedPrompt=aiPrompt;
+  cont.scrollIntoView({behavior:'smooth',block:'start'});
+
+  // Reset form fields but keep visible until user clicks new entry
   document.getElementById('rlQuestionInput').value='';
   document.getElementById('rlInterpInput').value='';
-  rlApplyPreset(PHYSICAL_PRESETS_TAROT[0]);
+  rlApplyPreset(rlMode==='lenormand'?PHYSICAL_PRESETS_LEN[0]:PHYSICAL_PRESETS_TAROT[0]);
+}
 
-  renderReadingLog();
-  setTimeout(()=>{
-    const list=document.getElementById('readingLogList');
-    if(list) list.scrollIntoView({behavior:'smooth',block:'start'});
-  },200);
+function rlCopySavedPrompt(){
+  const p=window._rlSavedPrompt||'';
+  if(!p) return;
+  navigator.clipboard.writeText(p).then(()=>{
+    const btn=document.getElementById('rlSavedCopyBtn');
+    if(btn){btn.textContent='✓ 已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);}
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=p;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+}
+
+function rlSaveSavedFeedback(id){
+  const feedback=(document.getElementById('rlSavedFeedback')||{}).value?.trim();
+  if(!feedback){alert('請先貼上 AI 的批改內容喔！');return;}
+  const log=getJournal();
+  const entry=log.find(e=>e.id===id);
+  if(entry) entry.aiResponse=feedback;
+  saveJournal(log);
+  const ok=document.getElementById('rlSavedFbOk');
+  if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2500);}
+}
+
+function rlResetForm(){
+  document.getElementById('readingLogList').innerHTML='';
+  window.scrollTo({top:document.getElementById('page-reading').offsetTop,behavior:'smooth'});
 }
 
 function renderReadingLog(){
   rlInitSpread();
-  const log=getJournal().filter(j=>j.source==='reading');
+  // Clear any previous saved notice when re-entering the page
   const cont=document.getElementById('readingLogList');
-  if(!log.length){cont.innerHTML='';return;}
-  cont.innerHTML=`<div class="rl-list-header">
-    <span class="rl-list-title">過往紀錄（${log.length} 筆）</span>
-    <button class="rl-clear-btn" onclick="clearReadingLog()">清除全部</button>
-  </div>
-  <div class="rl-list" id="rlListInner"></div>`;
-  const inner=document.getElementById('rlListInner');
-  log.forEach(entry=>{
-    const item=document.createElement('div');item.className='rl-item';
-    const cardsHtml=(entry.cards||[]).map(c=>
-      `<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`
-    ).join('');
-    const interp=entry.interpText||entry.interp||'';
-    const feedback=entry.aiResponse||entry.teacherFeedback||'';
-    item.innerHTML=`<div class="rl-item-header" onclick="toggleRlItem(this)">
-      <span class="rl-date">${entry.date}</span>
-      <span class="rl-question-preview">${entry.question}</span>
-      <span style="font-size:12px;color:var(--text3)">▾</span>
-    </div>
-    <div class="rl-item-body">
-      <div class="rl-q-full">${entry.question}</div>
-      <div class="rl-cards-row">${cardsHtml}</div>
-      ${interp?`<div class="rl-interp">${interp}</div>`:''}
-      ${feedback?`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div class="rl-teacher-box">${feedback}</div>`:''}
-      <div class="rl-action-row">
-        <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
-        <button class="rl-action-link" onclick="rlGeneratePrompt(${entry.id})">✦ 產生老師提點 Prompt</button>
-      </div>
-      <div class="rl-prompt-section" id="rl-prompt-${entry.id}"></div>
-    </div>`;
-    const wrapped=makeSwipeable(item,()=>{
-      const log2=getJournal().filter(e=>e.id!==entry.id);
-      saveJournal(log2);renderReadingLog();
-    });
-    inner.appendChild(wrapped);
-  });
+  if(cont) cont.innerHTML='';
 }
 
 function toggleRlItem(header){
