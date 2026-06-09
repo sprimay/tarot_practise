@@ -258,6 +258,18 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
 .diary-save-btn{width:100%;padding:12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text);cursor:pointer;transition:all 0.15s}
 .diary-save-btn:hover{background:var(--bg2)}
 .diary-saved-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
+/* diary prompt section */
+.diary-prompt-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;display:none}
+.diary-prompt-title{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:10px}
+.diary-prompt-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:10px}
+.diary-prompt-header{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.diary-prompt-text{padding:12px 14px;font-size:12px;line-height:1.8;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.diary-feedback-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:8px}
+textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:110px;line-height:1.7;outline:none}
+.diary-save-feedback-btn{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);font-size:13px;color:var(--text2);cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.diary-save-feedback-btn:hover{background:var(--bg2)}
+.diary-db-note-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.diary-db-save-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
 /* existing entry view */
 .diary-existing{padding:14px 16px;border-top:1px solid var(--border)}
 .diary-existing-cards{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -573,11 +585,8 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
       </div>
       <textarea class="interp-unified" id="interpUnified" placeholder="請以連貫的方式解讀整個牌陣…"></textarea>
     </div>
-    <button class="action-row-btn" style="margin-top:8px" onclick="generatePrompt()">✦ 產生評分 Prompt</button>
-  </div>
-  <div class="prompt-section" id="promptSection">
-    <div class="sec-label">Step 5 — 選擇評分風格</div>
-    <div class="rating-style-grid">
+    <div class="sec-label" style="margin-top:14px">選擇評分風格</div>
+    <div class="rating-style-grid" style="margin-bottom:10px">
       <button class="rating-style-btn active" id="rs-gentle" data-style="gentle" onclick="setRatingStyle('gentle',this)">
         <span class="rs-icon">🌸</span>
         <span class="rs-name">溫柔老師</span>
@@ -594,7 +603,10 @@ textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM San
         <span class="rs-desc">不給稱讚，專注矯正所有解讀錯誤</span>
       </button>
     </div>
-    <div class="sec-label" style="margin-top:16px">複製 Prompt，貼到任意 AI 平台</div>
+    <button class="action-row-btn" style="margin-top:4px" onclick="generatePrompt()">✦ 產生評分 Prompt</button>
+  </div>
+  <div class="prompt-section" id="promptSection">
+    <div class="sec-label">複製 Prompt，貼到任意 AI 平台</div>
     <div class="prompt-box">
       <div class="prompt-box-header">
         <span class="prompt-box-label">評分用 Prompt</span>
@@ -1342,6 +1354,8 @@ function setRatingStyle(style,btn){
   ratingStyle=style;
   document.querySelectorAll('.rating-style-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  // Auto-regenerate if prompt was already produced
+  if(generatedPrompt) generatePrompt();
 }
 function generatePrompt(){
   const interpText=document.getElementById('interpUnified').value.trim();
@@ -1603,7 +1617,11 @@ function renderDiaryView(body,entry,dateStr){
     <div class="diary-existing-cards">${cardsHtml}</div>
     <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:12px">日記</div>
     <div class="diary-existing-note">${entry.note||'（無文字記錄）'}</div>
-    <span class="diary-edit-btn" onclick="openDiaryEdit('${dateStr}')">編輯這天的日記</span>
+    ${entry.teacherFeedback?`<div style="margin-top:12px;font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid var(--border2)">${entry.teacherFeedback}</div>`:''}
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <span class="diary-edit-btn" onclick="openDiaryEdit('${dateStr}')">編輯日記</span>
+      <span class="diary-edit-btn" onclick="generateDiaryPrompt('${dateStr}')">✦ 產生老師提點 Prompt</span>
+    </div>
   </div>`;
 }
 
@@ -1616,7 +1634,7 @@ function openDiaryEdit(dateStr){
 
 function renderDiaryEditor(body,existing){
   diaryDrawMode=existing?.drawMode||'digital';
-  diaryDeckType=existing?.deckType||'tarot'; // 'tarot'|'lenormand'|'mixed'
+  diaryDeckType=(existing?.deckType==='mixed'?'tarot':existing?.deckType)||'tarot'; // 'tarot'|'lenormand' only
   diaryDigitalCards=existing?.cards||[];
   diaryPhysCards=existing&&existing.drawMode==='physical'?(existing.cards||[]).map(c=>c.name):['',''];
 
@@ -1645,7 +1663,6 @@ function renderDiaryEditor(body,existing){
       <span class="diary-deck-label">牌組：</span>
       <button class="diary-deck-btn ${diaryDeckType==='tarot'?'active':''}" onclick="setDiaryDeck('tarot',this)">塔羅</button>
       <button class="diary-deck-btn ${diaryDeckType==='lenormand'?'active':''}" onclick="setDiaryDeck('lenormand',this)">雷諾曼</button>
-      <button class="diary-deck-btn ${diaryDeckType==='mixed'?'active':''}" onclick="setDiaryDeck('mixed',this)">塔羅＋雷諾曼</button>
     </div>
     <div class="diary-digital-area" id="diaryDigitalArea" style="display:${diaryDrawMode==='digital'?'block':'none'}">
       <div class="diary-draw-count">
@@ -1687,8 +1704,7 @@ function diaryDraw(){
   const n=Math.min(4,Math.max(1,parseInt(document.getElementById('diaryCountInput').value)||1));
   let pool;
   if(diaryDeckType==='tarot') pool=TAROT_ALL;
-  else if(diaryDeckType==='lenormand') pool=getLenormand();
-  else pool=[...TAROT_ALL,...getLenormand()];
+  else pool=getLenormand();
   const shuffled=[...pool].sort(()=>Math.random()-0.5);
   diaryDigitalCards=shuffled.slice(0,n).map(c=>({...c,reversed:Math.random()>0.65}));
   const row=document.getElementById('diaryCardsRow');
@@ -1749,9 +1765,135 @@ function saveDiaryEntry(){
   setTimeout(()=>{
     document.getElementById('diarySavedOk').style.display='none';
     renderCalendar();
-    // Switch to view mode
     renderDiaryView(document.getElementById('diaryPanelBody'),diary[activeDiaryDate],activeDiaryDate);
   },1200);
+}
+
+// ── Diary Prompt ──────────────────────────────
+let diaryGeneratedPrompt='';
+let diaryPromptCards=[];
+let diaryPromptNote='';
+
+function generateDiaryPrompt(dateStr){
+  const diary=getDiary();
+  const entry=diary[dateStr];
+  if(!entry) return;
+  diaryPromptCards=entry.cards||[];
+  diaryPromptNote=entry.note||'';
+  const deckName=entry.deckType==='lenormand'?'雷諾曼':'塔羅';
+  const cardsSummary=diaryPromptCards.map(c=>
+    `${c.name}${entry.deckType!=='lenormand'?(c.reversed?' (逆位)':' (正位)'):''}`
+  ).join('、');
+
+  diaryGeneratedPrompt=`你是一位溫暖且知識豐富的${deckName}老師。學員在今天的塔羅日記中抽了以下牌，並寫下了自己的感受與解讀。請根據牌義給予提點與訂正，幫助學員更準確地理解牌意，避免過度主觀的解讀。
+
+【今日抽到的牌】
+${cardsSummary}
+
+【學員的日記內容】
+${diaryPromptNote||'（無文字記錄）'}
+
+請用繁體中文回應，格式如下：
+
+✦ 牌義提點：
+（針對每張牌，說明核心牌義與在日常生活中的實際意義，2-3句）
+
+▲ 解讀訂正：
+（若學員的解讀有偏離牌義之處，直接但溫和地指出，並說明正確理解方向）
+
+♡ 老師叮嚀：
+（1-2句鼓勵學員繼續觀察與記錄的話語）
+
+語氣溫暖但清晰，約200字內。`;
+
+  // Render the prompt section in diary view
+  const body=document.getElementById('diaryPanelBody');
+  const existing=body.querySelector('.diary-prompt-section');
+  if(existing){existing.style.display='block';return;}
+  const section=document.createElement('div');
+  section.className='diary-prompt-section';
+  section.style.display='block';
+  section.innerHTML=`
+    <div class="diary-prompt-title">📖 老師提點 Prompt</div>
+    <div class="diary-prompt-box">
+      <div class="diary-prompt-header">
+        <span style="font-size:11px;color:var(--text2)">複製後貼到 AI 平台</span>
+        <button class="copy-btn" id="diaryPromptCopyBtn" onclick="copyDiaryPrompt()">複製</button>
+      </div>
+      <div class="diary-prompt-text" id="diaryPromptText">${diaryGeneratedPrompt}</div>
+    </div>
+    <div class="platform-links" style="margin-bottom:14px">
+      <span class="platform-label">快速前往：</span>
+      <a class="platform-link" href="https://claude.ai" target="_blank">Claude</a>
+      <a class="platform-link" href="https://chatgpt.com" target="_blank">ChatGPT</a>
+      <a class="platform-link" href="https://gemini.google.com" target="_blank">Gemini</a>
+    </div>
+    <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">貼上 AI 的回饋</div>
+    <div class="diary-feedback-box">
+      <textarea class="diary-feedback-input" id="diaryFeedbackInput" placeholder="將 AI 的提點與訂正貼在這裡…"></textarea>
+    </div>
+    <button class="diary-save-feedback-btn" onclick="saveDiaryFeedback('${dateStr}')">儲存回饋 + 加入牌義庫</button>
+    <div class="diary-db-note-list" id="diaryDbNoteList"></div>
+    <div class="diary-db-save-ok" id="diaryDbSaveOk">✓ 已儲存到牌義庫</div>`;
+  body.appendChild(section);
+  renderDiaryDbNotes(dateStr);
+}
+
+function copyDiaryPrompt(){
+  if(!diaryGeneratedPrompt) return;
+  navigator.clipboard.writeText(diaryGeneratedPrompt).then(()=>{
+    const btn=document.getElementById('diaryPromptCopyBtn');
+    btn.textContent='✓ 已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=diaryGeneratedPrompt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    const btn=document.getElementById('diaryPromptCopyBtn');
+    btn.textContent='✓ 已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);
+  });
+}
+
+function renderDiaryDbNotes(dateStr){
+  const list=document.getElementById('diaryDbNoteList');
+  if(!list) return;
+  list.innerHTML='';
+  const diary=getDiary();
+  const entry=diary[dateStr];
+  if(!entry||!entry.cards?.length) return;
+  const deckMode=entry.deckType==='lenormand'?'lenormand':'tarot';
+  list.innerHTML=`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin:10px 0 8px">將訂正重點記入牌義庫（選填）</div>`;
+  entry.cards.forEach((c,i)=>{
+    const row=document.createElement('div');row.className='card-note-item';
+    row.innerHTML=`<span class="card-note-label" style="font-size:11px;min-width:72px">${c.name}</span>
+      <textarea class="note-input" id="diary_note_${i}" placeholder="訂正重點…"></textarea>`;
+    list.appendChild(row);
+  });
+}
+
+function saveDiaryFeedback(dateStr){
+  const feedbackText=(document.getElementById('diaryFeedbackInput')||{}).value?.trim();
+  if(!feedbackText){alert('請先貼上 AI 的回饋喔！');return;}
+  // Save feedback into diary entry
+  const diary=getDiary();
+  if(diary[dateStr]) diary[dateStr].teacherFeedback=feedbackText;
+  saveDiary(diary);
+  // Save card notes to database
+  const db=getDatabase();
+  const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
+  const entry=diary[dateStr];
+  const deckMode=entry?.deckType==='lenormand'?'lenormand':'tarot';
+  (entry?.cards||[]).forEach((c,i)=>{
+    const el=document.getElementById('diary_note_'+i);
+    const note=el?.value?.trim();
+    if(!note) return;
+    const key=deckMode+'::'+c.name;
+    if(!db[key]) db[key]=[];
+    db[key].push({note,date:today,mode:deckMode});
+  });
+  saveDatabase(db);
+  document.getElementById('diaryDbSaveOk').style.display='block';
+  setTimeout(()=>document.getElementById('diaryDbSaveOk').style.display='none',2500);
 }
 
 // ══════════════════════════════════════════
