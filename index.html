@@ -439,6 +439,36 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
   .save-db-section{padding:12px 14px}
   .card-note-label{min-width:64px;font-size:11px}
 }
+
+/* ═══ READING LOG ═══ */
+.rl-input-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+textarea.rl-question-input{width:100%;border:none;padding:14px 16px;font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:var(--text);background:transparent;resize:none;line-height:1.6;outline:none}
+textarea.rl-question-input:focus{outline:none}
+.rl-list{display:flex;flex-direction:column;gap:12px}
+.rl-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.rl-item-header{padding:12px 16px;background:var(--bg2);display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:1px solid transparent;flex-wrap:wrap}
+.rl-item-header.open{border-bottom-color:var(--border)}
+.rl-date{font-size:12px;color:var(--text3)}
+.rl-question-preview{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.rl-item-body{display:none;padding:14px 16px}
+.rl-item-body.open{display:block}
+.rl-q-full{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.rl-cards-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.rl-interp{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid var(--border2);margin-bottom:8px}
+.rl-teacher-box{padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid #C4A882;margin-top:8px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.rl-action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.rl-action-link{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
+.rl-prompt-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
+.rl-prompt-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:10px}
+.rl-prompt-header{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.rl-prompt-text{padding:12px 14px;font-size:12px;line-height:1.8;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.rl-feedback-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:8px}
+textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:110px;line-height:1.7;outline:none}
+.rl-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.rl-list-title{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.rl-clear-btn{font-size:11px;color:#E24B4A;cursor:pointer;background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-family:'DM Sans',sans-serif}
+.rl-save-ok{font-size:13px;color:#639922;text-align:center;padding:10px;display:none}
+.rl-db-save-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
 </style>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -480,6 +510,7 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="goPage('practice')">練習</button>
     <button class="nav-tab" onclick="goPage('record')">練習記錄</button>
+    <button class="nav-tab" onclick="goPage('reading')">解讀紀錄</button>
     <button class="nav-tab" onclick="goPage('diary')">塔羅日記</button>
     <button class="nav-tab" onclick="goPage('database')">牌義庫</button>
   </div>
@@ -665,6 +696,42 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
     <button class="clear-journal-btn" onclick="clearJournal()">清除全部</button>
   </div>
   <div id="journalList" class="journal-list"></div>
+</div>
+
+<!-- ═══ READING LOG PAGE ═══ -->
+<div class="page" id="page-reading">
+
+  <!-- NEW ENTRY FORM -->
+  <div id="readingForm">
+    <div class="sec-label">Step 1 — 輸入問題</div>
+    <div class="rl-input-box" style="margin-bottom:16px">
+      <textarea class="rl-question-input" id="rlQuestionInput" placeholder="今天的問題是什麼？例如：關於工作轉換的能量…" rows="3"></textarea>
+    </div>
+
+    <div class="sec-label">Step 2 — 設定牌陣</div>
+    <div class="preset-label">快速套用預設牌陣：</div>
+    <div class="preset-chips" id="rlPresetChips"></div>
+    <div class="custom-spread-builder">
+      <div class="csb-header"><span class="csb-title">牌陣位置</span><span class="csb-count" id="rlCsbCount">0 個位置</span></div>
+      <div class="csb-positions" id="rlCsbPositions"></div>
+      <div class="csb-footer"><button class="csb-add-btn" onclick="rlAddPosition()">＋ 新增位置</button></div>
+    </div>
+    <div class="sec-label" style="margin-top:14px">輸入抽到的牌</div>
+    <div class="manual-card-rows" id="rlCardRows"></div>
+
+    <div class="sec-label" style="margin-top:16px">Step 3 — 你的解讀</div>
+    <div class="interp-box" style="margin-bottom:10px">
+      <div class="interp-box-header">
+        <div style="font-size:11px;color:var(--text3)">以連貫的敘述解讀整個牌陣，說明各牌意義與彼此關聯，最後給出整體訊息。</div>
+      </div>
+      <textarea class="interp-unified" id="rlInterpInput" placeholder="寫下你對這次牌陣的完整解讀…"></textarea>
+    </div>
+    <button class="action-row-btn" onclick="saveReadingLog()">✦ 儲存解讀紀錄</button>
+  </div>
+
+  <!-- SAVED ENTRIES LIST -->
+  <div id="readingLogList" style="margin-top:24px"></div>
+
 </div>
 
 <!-- ═══ TAROT DIARY PAGE ═══ -->
@@ -1045,17 +1112,16 @@ async function loadFromFirestore(){
   setSyncDot('syncing');
   try{
     const uid=currentUser.uid;
-    const [jSnap,dbSnap,dSnap]=await Promise.all([
+    const [jSnap,dbSnap,dSnap,rSnap]=await Promise.all([
       db.collection('users').doc(uid).collection('data').doc('journal').get(),
       db.collection('users').doc(uid).collection('data').doc('database').get(),
       db.collection('users').doc(uid).collection('data').doc('diary').get(),
+      db.collection('users').doc(uid).collection('data').doc('reading').get(),
     ]);
-    if(jSnap.exists && jSnap.data().value)
-      localStorage.setItem(JOURNAL_KEY, jSnap.data().value);
-    if(dbSnap.exists && dbSnap.data().value)
-      localStorage.setItem(DB_KEY, dbSnap.data().value);
-    if(dSnap.exists && dSnap.data().value)
-      localStorage.setItem(DIARY_KEY, dSnap.data().value);
+    if(jSnap.exists && jSnap.data().value) localStorage.setItem(JOURNAL_KEY, jSnap.data().value);
+    if(dbSnap.exists && dbSnap.data().value) localStorage.setItem(DB_KEY, dbSnap.data().value);
+    if(dSnap.exists && dSnap.data().value) localStorage.setItem(DIARY_KEY, dSnap.data().value);
+    if(rSnap.exists && rSnap.data().value) localStorage.setItem(READING_KEY, rSnap.data().value);
     setSyncDot('ok');
   }catch(e){
     console.warn('Firestore load error',e);
@@ -1077,6 +1143,7 @@ async function syncToFirestore(){
       ref.doc('journal').set({value:localStorage.getItem(JOURNAL_KEY)||'[]',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
       ref.doc('database').set({value:localStorage.getItem(DB_KEY)||'{}',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
       ref.doc('diary').set({value:localStorage.getItem(DIARY_KEY)||'{}',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
+      ref.doc('reading').set({value:localStorage.getItem(READING_KEY)||'[]',updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
     ]);
     setSyncDot('ok');
   }catch(e){
@@ -1091,17 +1158,20 @@ async function syncToFirestore(){
 const JOURNAL_KEY='divination_journal_v5';
 const DB_KEY='divination_database_v2';
 const DIARY_KEY='tarot_diary_v1';
+const READING_KEY='reading_log_v1';
 function getJournal(){return JSON.parse(localStorage.getItem(JOURNAL_KEY)||'[]')}
 function saveJournal(d){localStorage.setItem(JOURNAL_KEY,JSON.stringify(d));scheduleSync();}
 function getDatabase(){return JSON.parse(localStorage.getItem(DB_KEY)||'{}')}
 function saveDatabase(d){localStorage.setItem(DB_KEY,JSON.stringify(d));scheduleSync();}
 function getDiary(){return JSON.parse(localStorage.getItem(DIARY_KEY)||'{}')}
 function saveDiary(d){localStorage.setItem(DIARY_KEY,JSON.stringify(d));scheduleSync();}
+function getReadingLog(){return JSON.parse(localStorage.getItem(READING_KEY)||'[]')}
+function saveReadingLog2(d){localStorage.setItem(READING_KEY,JSON.stringify(d));scheduleSync();}
 
 // ══════════════════════════════════════════
 //  NAV
 // ══════════════════════════════════════════
-const PROTECTED_PAGES=new Set(['record','diary','database']);
+const PROTECTED_PAGES=new Set(['record','reading','diary','database']);
 
 function showLoginGate(){
   document.querySelectorAll('.page').forEach(el=>el.style.display='none');
@@ -1131,11 +1201,12 @@ function goPage(p){
   document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   const tabs=document.querySelectorAll('.nav-tab');
-  const idx={practice:0,record:1,diary:2,database:3}[p];
+  const idx={practice:0,record:1,reading:2,diary:3,database:4}[p];
   if(idx!==undefined) tabs[idx].classList.add('active');
   if(p==='record') renderJournal();
   if(p==='database') renderDatabase();
   if(p==='diary') renderCalendar();
+  if(p==='reading'){renderReadingLog();}
 }
 function setMode(m){
   currentMode=m;
@@ -1909,8 +1980,274 @@ function saveDiaryFeedback(dateStr){
 }
 
 // ══════════════════════════════════════════
-//  DATABASE
+//  READING LOG
 // ══════════════════════════════════════════
+let rlPositions=[];
+let rlPosCounter=0;
+let rlCurrentPrompt='';
+let rlCurrentEntryId=null;
+
+// Init spread builder on page load
+function rlInitSpread(){
+  const presets=PHYSICAL_PRESETS_TAROT;
+  const chips=document.getElementById('rlPresetChips');
+  if(!chips||chips.children.length>0) return;
+  presets.forEach(p=>{
+    const chip=document.createElement('button');
+    chip.className='preset-chip';
+    chip.textContent=p.name+' ('+p.positions.length+'張)';
+    chip.onclick=()=>rlApplyPreset(p);
+    chips.appendChild(chip);
+  });
+  rlApplyPreset(PHYSICAL_PRESETS_TAROT[0]);
+}
+function rlApplyPreset(preset){
+  rlPositions=preset.positions.map(p=>({id:rlPosCounter++,label:p}));
+  rlRenderBuilder();rlRenderCardRows();
+}
+function rlRenderBuilder(){
+  const cont=document.getElementById('rlCsbPositions');cont.innerHTML='';
+  rlPositions.forEach((pos,i)=>{
+    const row=document.createElement('div');row.className='csb-pos-row';
+    row.innerHTML=`<span class="csb-pos-num">${i+1}</span>
+      <input class="csb-pos-input" value="${pos.label}" placeholder="位置名稱…" oninput="rlPositions[${i}].label=this.value;rlSyncCardLabels()">
+      <button class="csb-del-btn" onclick="rlDelPosition(${i})">✕</button>`;
+    cont.appendChild(row);
+  });
+  document.getElementById('rlCsbCount').textContent=rlPositions.length+' 個位置';
+}
+function rlAddPosition(){
+  rlPositions.push({id:rlPosCounter++,label:''});
+  rlRenderBuilder();rlRenderCardRows();
+  const inputs=document.querySelectorAll('#rlCsbPositions .csb-pos-input');
+  if(inputs.length) inputs[inputs.length-1].focus();
+}
+function rlDelPosition(i){rlPositions.splice(i,1);rlRenderBuilder();rlRenderCardRows();}
+function rlSyncCardLabels(){
+  rlPositions.forEach((pos,i)=>{
+    const el=document.querySelector(`#rlCardRows .manual-card-row:nth-child(${i+1}) .mcr-pos`);
+    if(el) el.textContent=pos.label||('位置'+(i+1));
+  });
+}
+function rlRenderCardRows(){
+  const cont=document.getElementById('rlCardRows');cont.innerHTML='';
+  rlPositions.forEach((pos,i)=>{
+    const row=document.createElement('div');row.className='manual-card-row';
+    row.innerHTML=`<span class="mcr-pos">${pos.label||('位置'+(i+1))}</span>
+      <input class="card-name-input" id="rlcard_${i}" placeholder="牌名…" autocomplete="off">
+      <div class="orient-toggle">
+        <button class="orient-btn active" id="rlor_${i}_u" onclick="rlSetOrient(${i},'upright')">正位</button>
+        <button class="orient-btn" id="rlor_${i}_r" onclick="rlSetOrient(${i},'reversed')">逆位</button>
+      </div>`;
+    cont.appendChild(row);
+  });
+}
+function rlSetOrient(i,val){
+  document.getElementById('rlor_'+i+'_u').classList.toggle('active',val==='upright');
+  document.getElementById('rlor_'+i+'_r').classList.toggle('active',val==='reversed');
+}
+
+function saveReadingLog(){
+  const question=document.getElementById('rlQuestionInput').value.trim();
+  if(!question){alert('請先填寫問題喔！');return;}
+  if(rlPositions.length<1){alert('請至少新增一個牌陣位置！');return;}
+  const interp=document.getElementById('rlInterpInput').value.trim();
+  if(!interp){alert('請填寫你的解讀喔！');return;}
+
+  const cards=rlPositions.map((pos,i)=>{
+    const name=(document.getElementById('rlcard_'+i)||{}).value?.trim()||'（未填寫）';
+    const uBtn=document.getElementById('rlor_'+i+'_u');
+    const reversed=uBtn?!uBtn.classList.contains('active'):false;
+    return {name,position:pos.label||('位置'+(i+1)),reversed};
+  });
+
+  const log=getReadingLog();
+  const entry={
+    id:Date.now(),
+    question,cards,interp,
+    teacherFeedback:'',
+    date:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'}),
+    isoDate:new Date().toISOString().slice(0,10)
+  };
+  log.unshift(entry);
+  saveReadingLog2(log);
+
+  // Reset form
+  document.getElementById('rlQuestionInput').value='';
+  document.getElementById('rlInterpInput').value='';
+  rlApplyPreset(PHYSICAL_PRESETS_TAROT[0]);
+
+  renderReadingLog();
+  // Scroll to saved entry
+  setTimeout(()=>{
+    const list=document.getElementById('readingLogList');
+    if(list) list.scrollIntoView({behavior:'smooth',block:'start'});
+  },200);
+}
+
+function renderReadingLog(){
+  rlInitSpread();
+  const log=getReadingLog();
+  const cont=document.getElementById('readingLogList');
+  if(!log.length){cont.innerHTML='';return;}
+  cont.innerHTML=`<div class="rl-list-header">
+    <span class="rl-list-title">過往紀錄（${log.length} 筆）</span>
+    <button class="rl-clear-btn" onclick="clearReadingLog()">清除全部</button>
+  </div>
+  <div class="rl-list" id="rlListInner"></div>`;
+  const inner=document.getElementById('rlListInner');
+  log.forEach(entry=>{
+    const item=document.createElement('div');item.className='rl-item';
+    const cardsHtml=(entry.cards||[]).map(c=>
+      `<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`
+    ).join('');
+    item.innerHTML=`<div class="rl-item-header" onclick="toggleRlItem(this)">
+      <span class="rl-date">${entry.date}</span>
+      <span class="rl-question-preview">${entry.question}</span>
+      <span style="font-size:12px;color:var(--text3)">▾</span>
+    </div>
+    <div class="rl-item-body">
+      <div class="rl-q-full">${entry.question}</div>
+      <div class="rl-cards-row">${cardsHtml}</div>
+      <div class="rl-interp">${entry.interp}</div>
+      ${entry.teacherFeedback?`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div class="rl-teacher-box">${entry.teacherFeedback}</div>`:''}
+      <div class="rl-action-row">
+        <button class="rl-action-link" onclick="rlGeneratePrompt(${entry.id})">✦ 產生老師提點 Prompt</button>
+        <button class="rl-action-link" onclick="rlDeleteEntry(${entry.id})">刪除此筆</button>
+      </div>
+      <div class="rl-prompt-section" id="rl-prompt-${entry.id}"></div>
+    </div>`;
+    inner.appendChild(item);
+  });
+}
+
+function toggleRlItem(header){
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+}
+
+function rlDeleteEntry(id){
+  if(!confirm('確定要刪除這筆紀錄嗎？')) return;
+  const log=getReadingLog().filter(e=>e.id!==id);
+  saveReadingLog2(log);renderReadingLog();
+}
+function clearReadingLog(){
+  if(!confirm('確定要清除所有解讀紀錄嗎？')) return;
+  saveReadingLog2([]);renderReadingLog();
+}
+
+function rlGeneratePrompt(id){
+  const entry=getReadingLog().find(e=>e.id===id);
+  if(!entry) return;
+  rlCurrentEntryId=id;
+  const cardsSummary=(entry.cards||[]).map(c=>
+    `${c.position}：${c.name}${c.reversed?' (逆位)':' (正位)'}`
+  ).join('\n');
+
+  rlCurrentPrompt=`你是一位溫暖且專業的塔羅老師。學員使用實體紙牌進行了一次真實占卜，並記錄了自己的解讀。請根據牌義給予提點與訂正，幫助學員更準確地理解牌意。
+
+【問題】
+${entry.question}
+
+【牌陣與牌面】
+${cardsSummary}
+
+【學員的解讀】
+${entry.interp}
+
+請用繁體中文回應，格式如下：
+
+✦ 牌義提點：
+（針對各張牌在此位置的核心意義給予說明，2-3句）
+
+▲ 解讀訂正：
+（若學員解讀有偏離牌義之處，直接但溫和地指出，說明正確理解方向）
+
+♡ 整體洞見：
+（結合整個牌陣，給出更完整的訊息，2-3句）
+
+語氣溫暖但清晰，約250字內。`;
+
+  const section=document.getElementById('rl-prompt-'+id);
+  if(!section) return;
+  section.style.display='block';
+  section.innerHTML=`
+    <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:10px">📖 老師提點 Prompt</div>
+    <div class="rl-prompt-box">
+      <div class="rl-prompt-header">
+        <span style="font-size:11px;color:var(--text2)">複製後貼到 AI 平台</span>
+        <button class="copy-btn" id="rl-copy-${id}" onclick="rlCopyPrompt(${id})">複製</button>
+      </div>
+      <div class="rl-prompt-text">${rlCurrentPrompt}</div>
+    </div>
+    <div class="platform-links" style="margin-bottom:12px">
+      <span class="platform-label">快速前往：</span>
+      <a class="platform-link" href="https://claude.ai" target="_blank">Claude</a>
+      <a class="platform-link" href="https://chatgpt.com" target="_blank">ChatGPT</a>
+      <a class="platform-link" href="https://gemini.google.com" target="_blank">Gemini</a>
+    </div>
+    <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">貼上 AI 的回饋</div>
+    <div class="rl-feedback-box">
+      <textarea class="rl-feedback-input" id="rl-feedback-${id}" placeholder="將 AI 的提點與訂正貼在這裡…"></textarea>
+    </div>
+    <button class="diary-save-feedback-btn" onclick="rlSaveFeedback(${id})">儲存回饋 + 加入牌義庫</button>
+    <div id="rl-dbnotes-${id}"></div>
+    <div class="rl-db-save-ok" id="rl-db-ok-${id}">✓ 已儲存到牌義庫</div>`;
+  rlRenderDbNotes(id);
+  section.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function rlCopyPrompt(id){
+  if(!rlCurrentPrompt) return;
+  navigator.clipboard.writeText(rlCurrentPrompt).then(()=>{
+    const btn=document.getElementById('rl-copy-'+id);
+    if(btn){btn.textContent='✓ 已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);}
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=rlCurrentPrompt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+}
+
+function rlRenderDbNotes(id){
+  const entry=getReadingLog().find(e=>e.id===id);
+  if(!entry) return;
+  const cont=document.getElementById('rl-dbnotes-'+id);
+  if(!cont) return;
+  cont.innerHTML=`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin:10px 0 8px">將訂正重點記入牌義庫（選填）</div>`;
+  (entry.cards||[]).forEach((c,i)=>{
+    const row=document.createElement('div');row.className='card-note-item';
+    row.innerHTML=`<span class="card-note-label" style="font-size:11px;min-width:72px">${c.name}</span>
+      <textarea class="note-input" id="rl-note-${id}-${i}" placeholder="訂正重點…"></textarea>`;
+    cont.appendChild(row);
+  });
+}
+
+function rlSaveFeedback(id){
+  const feedbackEl=document.getElementById('rl-feedback-'+id);
+  const feedback=feedbackEl?.value?.trim();
+  if(!feedback){alert('請先貼上 AI 的回饋喔！');return;}
+  // Save feedback to entry
+  const log=getReadingLog();
+  const entry=log.find(e=>e.id===id);
+  if(entry) entry.teacherFeedback=feedback;
+  saveReadingLog2(log);
+  // Save card notes to database
+  const db2=getDatabase();
+  const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
+  (entry?.cards||[]).forEach((c,i)=>{
+    const el=document.getElementById(`rl-note-${id}-${i}`);
+    const note=el?.value?.trim();
+    if(!note) return;
+    const key='tarot::'+c.name;
+    if(!db2[key]) db2[key]=[];
+    db2[key].push({note,date:today,mode:'tarot'});
+  });
+  saveDatabase(db2);
+  const okEl=document.getElementById('rl-db-ok-'+id);
+  if(okEl){okEl.style.display='block';setTimeout(()=>okEl.style.display='none',2500);}
+  renderReadingLog();
+}
 const MAJOR_NAMES=new Set(TAROT_MAJOR.map(c=>c.name));
 const RANA4_NAMES=new Set(LENORMAND_RANA4.map(c=>c.name));
 
