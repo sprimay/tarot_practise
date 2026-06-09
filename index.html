@@ -2245,16 +2245,23 @@ function saveReadingLog(){
     return {name,position:pos.label||('位置'+(i+1)),reversed};
   });
 
-  const log=getReadingLog();
+  // 存入練習記錄（JOURNAL_KEY），加 source:'reading' 標籤
+  const journal=getJournal();
   const entry={
     id:Date.now(),
-    question,cards,interp,
-    teacherFeedback:'',
+    source:'reading',        // 解讀紀錄來源標籤
+    mode:'tarot',
+    drawMode:'physical',
+    spread: rlPositions.length+'張自訂牌陣',
+    question, cards,
+    interpText:interp,
+    aiResponse:'', score:null,
+    cats:['other'],
     date:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'}),
     isoDate:new Date().toISOString().slice(0,10)
   };
-  log.unshift(entry);
-  saveReadingLog2(log);
+  journal.unshift(entry);
+  saveJournal(journal);
 
   // Reset form
   document.getElementById('rlQuestionInput').value='';
@@ -2262,7 +2269,6 @@ function saveReadingLog(){
   rlApplyPreset(PHYSICAL_PRESETS_TAROT[0]);
 
   renderReadingLog();
-  // Scroll to saved entry
   setTimeout(()=>{
     const list=document.getElementById('readingLogList');
     if(list) list.scrollIntoView({behavior:'smooth',block:'start'});
@@ -2271,7 +2277,7 @@ function saveReadingLog(){
 
 function renderReadingLog(){
   rlInitSpread();
-  const log=getReadingLog();
+  const log=getJournal().filter(j=>j.source==='reading');
   const cont=document.getElementById('readingLogList');
   if(!log.length){cont.innerHTML='';return;}
   cont.innerHTML=`<div class="rl-list-header">
@@ -2285,6 +2291,8 @@ function renderReadingLog(){
     const cardsHtml=(entry.cards||[]).map(c=>
       `<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`
     ).join('');
+    const interp=entry.interpText||entry.interp||'';
+    const feedback=entry.aiResponse||entry.teacherFeedback||'';
     item.innerHTML=`<div class="rl-item-header" onclick="toggleRlItem(this)">
       <span class="rl-date">${entry.date}</span>
       <span class="rl-question-preview">${entry.question}</span>
@@ -2293,9 +2301,10 @@ function renderReadingLog(){
     <div class="rl-item-body">
       <div class="rl-q-full">${entry.question}</div>
       <div class="rl-cards-row">${cardsHtml}</div>
-      <div class="rl-interp">${entry.interp}</div>
-      ${entry.teacherFeedback?`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div class="rl-teacher-box">${entry.teacherFeedback}</div>`:''}
+      ${interp?`<div class="rl-interp">${interp}</div>`:''}
+      ${feedback?`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div class="rl-teacher-box">${feedback}</div>`:''}
       <div class="rl-action-row">
+        <button class="rl-action-link" onclick="openJournalEdit(${entry.id})">✎ 編輯</button>
         <button class="rl-action-link" onclick="rlGeneratePrompt(${entry.id})">✦ 產生老師提點 Prompt</button>
         <button class="rl-action-link" onclick="rlDeleteEntry(${entry.id})">刪除此筆</button>
       </div>
