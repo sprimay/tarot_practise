@@ -2801,13 +2801,15 @@ function deleteDbNote(key,idx,e){
   const bar=document.getElementById('lsBarInner');
   const screen=document.getElementById('loadingScreen');
   if(!bar||!screen) return;
-  let pct=0;
+  let pct=0;let finished=false;
   const iv=setInterval(()=>{
     const step=pct<60?3.5:pct<85?1.2:0.4;
     pct=Math.min(pct+step,96);
     bar.style.width=pct+'%';
   },60);
   function finish(){
+    if(finished) return;
+    finished=true;
     clearInterval(iv);
     bar.style.transition='width 0.35s ease';
     bar.style.width='100%';
@@ -2816,6 +2818,8 @@ function deleteDbNote(key,idx,e){
       setTimeout(()=>{screen.style.display='none';},650);
     },350);
   }
+  // 最多等 3 秒，不管頁面是否載入完成
+  setTimeout(finish, 3000);
   if(document.readyState==='complete') setTimeout(finish,300);
   else window.addEventListener('load',()=>setTimeout(finish,300));
 })();
