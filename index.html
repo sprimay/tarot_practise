@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塔羅練習筆記</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -491,6 +491,10 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 .rl-ai-section{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);padding:14px}
 
 /* ═══ LOADING SCREEN ═══ */
+/* Prevent iOS auto-zoom: keep input font-size >= 16px */
+@media(max-width:600px){
+  input,textarea,select{font-size:16px !important;}
+}
 #loadingScreen{position:fixed;inset:0;z-index:9999;background:#A8C8E8;transition:opacity 0.7s ease;}
 #loadingScreen.fade-out{opacity:0;pointer-events:none;}
 .ls-bg{
