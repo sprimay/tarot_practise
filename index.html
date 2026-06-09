@@ -982,6 +982,11 @@ const db=firebase.firestore();
 let currentUser=null;
 let syncTimeout=null;
 
+// Handle redirect result (for browsers that fall back to redirect)
+auth.getRedirectResult().catch(e=>{
+  if(e.code && e.code!=='auth/no-current-user') console.warn('Redirect result error:',e.code);
+});
+
 function setSyncDot(state){ // 'ok'|'syncing'|'offline'
   const dot=document.getElementById('syncDot');
   if(!dot) return;
@@ -993,7 +998,14 @@ function setSyncDot(state){ // 'ok'|'syncing'|'offline'
 // ══════════════════════════════════════════
 function signInWithGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider).catch(e=>alert('登入失敗：'+e.message));
+  auth.signInWithPopup(provider).catch(e=>{
+    // If popup blocked or not supported, try redirect
+    if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){
+      auth.signInWithRedirect(provider);
+    } else {
+      alert('登入失敗：'+e.message);
+    }
+  });
 }
 function signOut(){
   if(!confirm('確定要登出嗎？')) return;
