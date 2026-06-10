@@ -174,8 +174,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans TC'
 .card-name{font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:11px;color:var(--text);font-weight:500;line-height:1.3}
 .card-orient{font-size:9px;color:var(--text3);margin-top:2px}
 .card.reversed .card-art{transform:rotate(180deg);border-radius:6px}
-.nine-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.nine-grid{display:grid;grid-template-columns:repeat(3,minmax(0,80px));gap:5px;margin-bottom:6px;justify-content:center}
 .nine-grid .card{max-width:none}
+.nine-grid .card-art img{width:100%;height:auto;display:block}
+.nine-grid .card-inner{padding:5px 4px 5px}
+.nine-grid .card-name{font-size:10px}
+.nine-grid .card-pos{font-size:9px}
+.nine-grid .card-orient{font-size:9px}
 /* ── Spread layout grids ── */
 .spread-cross{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(4,auto);gap:8px;justify-content:center;margin-bottom:6px}
 .spread-either{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(3,auto);gap:8px;justify-content:center;margin-bottom:6px}
@@ -1046,7 +1051,8 @@ const LEN_SPREADS=[
   {key:"two",    name:"雙牌組合", positions:["第1張","第2張"],hint:"雷諾曼最基礎的雙牌解讀"},
   {key:"three",  name:"三牌陣",   positions:["第1張","第2張","第3張"],hint:"三牌連貫解讀"},
   {key:"line5",  name:"五牌一列", positions:["第1張","第2張","第3張","第4張","第5張"],hint:"五張牌橫向連貫解讀"},
-  {key:"either", name:"二擇一",   positions:["選項A","選項B","建議"],hint:"三張牌協助二選一決策"},
+  {key:"len_cross", name:"十字牌陣", positions:["第一張","第二張","第三張","第四張","第五張"],hint:"五張牌十字形解讀",layout:"len_cross"},
+  {key:"either", name:"二擇一",   positions:["選項一A","選項一B","選項一C","選項二A","選項二B","選項二C"],hint:"六張牌，兩組各三張對比解讀",layout:"len_either"},
   {key:"nine",   name:"九宮格",   positions:["左上","中上","右上","左中","中心","右中","左下","中下","右下"],hint:"九張牌，以中心牌為核心向四方延伸解讀"}
 ];
 const PHYSICAL_PRESETS_TAROT=[
@@ -1061,7 +1067,8 @@ const PHYSICAL_PRESETS_LEN=[
   {name:"雙牌組合",positions:["第1張","第2張"]},
   {name:"三牌陣",  positions:["第1張","第2張","第3張"]},
   {name:"五牌一列",positions:["第1張","第2張","第3張","第4張","第5張"]},
-  {name:"二擇一",  positions:["選項A","選項B","建議"]},
+  {name:"十字牌陣",positions:["第一張","第二張","第三張","第四張","第五張"]},
+  {name:"二擇一",  positions:["選項一A","選項一B","選項一C","選項二A","選項二B","選項二C"]},
   {name:"九宮格",  positions:["左上","中上","右上","左中","中心","右中","左下","中下","右下"]},
 ];
 
@@ -1582,6 +1589,10 @@ function drawCardsDigital(){
     renderRelationLayout(row,drawnCards);
   } else if(layout==='celtic'){
     renderCelticLayout(row,drawnCards);
+  } else if(layout==='len_cross'){
+    renderLenCrossLayout(row,drawnCards);
+  } else if(layout==='len_either'){
+    renderLenEitherLayout(row,drawnCards);
   } else if(currentSpread==='nine'){
     row.className='nine-grid';
     drawnCards.forEach((d,i)=>row.appendChild(makeCardEl(d,i)));
@@ -1612,6 +1623,52 @@ function makePlaceholder(){
   el.className='card spread-grid-placeholder';
   el.innerHTML='<div class="card-inner"><div class="card-art"></div></div>';
   return el;
+}
+
+// 雷諾曼十字牌陣
+// positions: 第一張(0)=左, 第二張(1)=中, 第三張(2)=右, 第四張(3)=中上, 第五張(4)=中下
+// Grid 3×3:
+//   row0: [空]      [第四張(3)] [空]
+//   row1: [第一張(0)] [第二張(1)] [第三張(2)]
+//   row2: [空]      [第五張(4)] [空]
+function renderLenCrossLayout(container, cards){
+  container.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(80px,100px));gap:10px;justify-content:center;margin-bottom:6px';
+  const p=()=>makePlaceholder();
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[3],3));
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[0],0));
+  container.appendChild(makeCardEl(cards[1],1));
+  container.appendChild(makeCardEl(cards[2],2));
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[4],4));
+  container.appendChild(p());
+}
+
+// 雷諾曼二擇一（6張，兩組各3張）
+// positions: 選項一A(0), 選項一B(1), 選項一C(2), 選項二A(3), 選項二B(4), 選項二C(5)
+// Grid 3×2 + 標題分隔
+function renderLenEitherLayout(container, cards){
+  container.style.cssText='display:flex;flex-direction:column;gap:14px;align-items:center;margin-bottom:6px;width:100%';
+  const makeGroup=(label,c0,c1,c2)=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%';
+    const lbl=document.createElement('div');
+    lbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;text-align:center';
+    lbl.textContent=label;
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(80px,100px));gap:10px;justify-content:center';
+    row.appendChild(makeCardEl(c0,cards.indexOf(c0)));
+    row.appendChild(makeCardEl(c1,cards.indexOf(c1)));
+    row.appendChild(makeCardEl(c2,cards.indexOf(c2)));
+    wrap.appendChild(lbl); wrap.appendChild(row);
+    return wrap;
+  };
+  container.appendChild(makeGroup('選項一',cards[0],cards[1],cards[2]));
+  const divider=document.createElement('div');
+  divider.style.cssText='width:80%;height:1px;background:var(--border);margin:0 auto';
+  container.appendChild(divider);
+  container.appendChild(makeGroup('選項二',cards[3],cards[4],cards[5]));
 }
 
 // 十字牌陣：依截圖
