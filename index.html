@@ -176,6 +176,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans TC'
 .card.reversed .card-art{transform:rotate(180deg);border-radius:6px}
 .nine-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
 .nine-grid .card{max-width:none}
+/* ── Spread layout grids ── */
+.spread-cross{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(4,auto);gap:8px;justify-content:center;margin-bottom:6px}
+.spread-either{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(3,auto);gap:8px;justify-content:center;margin-bottom:6px}
+.spread-relation{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(2,auto);gap:8px;justify-content:center;margin-bottom:6px}
+.spread-celtic{display:grid;grid-template-columns:repeat(4,90px);grid-template-rows:repeat(4,auto);gap:8px;justify-content:center;margin-bottom:6px}
+.spread-grid-placeholder{visibility:hidden;pointer-events:none}
 .interp-section{display:none;margin-top:20px}
 .interp-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
 .interp-box-header{padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
@@ -725,6 +731,11 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--brand);b
     <div class="sec-label">Step 3 — 選擇牌陣</div>
     <select class="spread-select" id="spreadSelect" onchange="onDigitalSpreadChange()"></select>
     <div class="spread-hint" id="spreadHint"></div>
+    <div id="freeCountArea" style="display:none;margin-top:10px;display:none;align-items:center;gap:10px">
+      <span style="font-size:13px;color:var(--text2)">抽幾張牌：</span>
+      <input type="number" id="freeCountInput" min="1" max="20" value="3"
+        style="width:60px;border:1px solid var(--border);border-radius:var(--rm);padding:6px 10px;font-size:14px;color:var(--text);background:var(--bg);text-align:center;outline:none">
+    </div>
   </div>
   <div class="manual-section" id="manualSection">
     <div class="sec-label">Step 3 — 自訂牌陣</div>
@@ -1020,16 +1031,18 @@ function getCardSVG(card, mode){
 }
 
 const TAROT_SPREADS=[
+  {key:"free",    name:"無牌陣（自訂張數）",positions:[],hint:"自訂抽牌張數，不設牌陣位置",free:true},
   {key:"two",     name:"雙牌組合",     positions:["主題","補充"],hint:"兩張牌相互補充解讀"},
   {key:"three",   name:"三牌陣",       positions:["過去","現在","未來"],hint:"最經典的時間流向牌陣"},
-  {key:"cross",   name:"十字牌陣",     positions:["核心","阻礙","基礎","未來","建議"],hint:"五張牌深入分析核心議題"},
-  {key:"either",  name:"二擇一牌陣",   positions:["選項A現況","選項A結果","選項B現況","選項B結果"],hint:"兩個選擇的對比分析"},
-  {key:"relation",name:"關係牌陣",     positions:["自己","對方","關係現況","阻礙","建議"],hint:"五張牌剖析人際或愛情關係"},
-  {key:"celtic",  name:"凱爾特十字",   positions:["核心","跨越","遠因","近因","過去","未來","自我","環境","希望恐懼","結果"],hint:"十張牌，最完整的全面解析"},
+  {key:"cross",   name:"十字牌陣",     positions:["過去","現在","預計發生","實際發生","結果"],hint:"五張牌深入分析核心議題",layout:"cross"},
+  {key:"either",  name:"二擇一牌陣",   positions:["本人現況","選項A現況","選項A影響","選項B現況","選項B影響"],hint:"五張牌分析兩個選擇",layout:"either"},
+  {key:"relation",name:"關係牌陣",     positions:["你的想法","對你感情","目前關係","對方想法","你的期望","對方期望"],hint:"六張牌剖析雙方狀態",layout:"relation"},
+  {key:"celtic",  name:"凱爾特十字",   positions:["提問者狀況","障礙","表意識","潛意識","不久的未來","過去","提問者立場","環境","期望或恐懼","結果"],hint:"十張牌，最完整的全面解析",layout:"celtic"},
   {key:"zodiac",  name:"黃道十二宮",   positions:["第一宮 自我","第二宮 財富","第三宮 溝通","第四宮 家庭","第五宮 創意","第六宮 健康","第七宮 關係","第八宮 轉化","第九宮 信念","第十宮 事業","第十一宮 友誼","第十二宮 潛意識"],hint:"十二張牌，對應黃道十二宮位全面解析"}
 ];
 // 雷諾曼五牌一列：位置只顯示編號，不附語意標籤
 const LEN_SPREADS=[
+  {key:"free",   name:"無牌陣（自訂張數）",positions:[],hint:"自訂抽牌張數，不設牌陣位置",free:true},
   {key:"two",    name:"雙牌組合", positions:["第1張","第2張"],hint:"雷諾曼最基礎的雙牌解讀"},
   {key:"three",  name:"三牌陣",   positions:["第1張","第2張","第3張"],hint:"三牌連貫解讀"},
   {key:"line5",  name:"五牌一列", positions:["第1張","第2張","第3張","第4張","第5張"],hint:"五張牌橫向連貫解讀"},
@@ -1041,7 +1054,7 @@ const PHYSICAL_PRESETS_TAROT=[
   {name:"十字牌陣",    positions:["核心","阻礙","基礎","未來","建議"]},
   {name:"二擇一",      positions:["選項A現況","選項A結果","選項B現況","選項B結果"]},
   {name:"關係牌陣",    positions:["自己","對方","關係現況","阻礙","建議"]},
-  {name:"凱爾特十字",  positions:["核心","跨越","遠因","近因","過去","未來","自我","環境","希望恐懼","結果"]},
+  {name:"凱爾特十字",  positions:["提問者狀況","障礙","表意識","潛意識","不久的未來","過去","提問者立場","環境","期望或恐懼","結果"]},
   {name:"黃道十二宮",  positions:["第一宮 自我","第二宮 財富","第三宮 溝通","第四宮 家庭","第五宮 創意","第六宮 健康","第七宮 關係","第八宮 轉化","第九宮 信念","第十宮 事業","第十一宮 友誼","第十二宮 潛意識"]},
 ];
 const PHYSICAL_PRESETS_LEN=[
@@ -1449,6 +1462,8 @@ function setDrawMode(mode){
     spreads.forEach(s=>{const o=document.createElement('option');o.value=s.key;o.textContent=s.name+' — '+s.positions.length+'張';sel.appendChild(o);});
     currentSpread=spreads[0].key;
     updateSpreadHint();
+    const fa=document.getElementById('freeCountArea');
+    if(fa) fa.style.display=spreads[0].free?'flex':'none';
     document.getElementById('spreadSection').style.display='block';
     const btn=document.getElementById('actionBtn');
     btn.textContent='✦ 電腦抽牌，開始解讀';
@@ -1463,7 +1478,14 @@ function setDrawMode(mode){
     btn.style.display='block';btn.disabled=false;
   }
 }
-function onDigitalSpreadChange(){currentSpread=document.getElementById('spreadSelect').value;updateSpreadHint();}
+function onDigitalSpreadChange(){
+  currentSpread=document.getElementById('spreadSelect').value;
+  updateSpreadHint();
+  const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
+  const s=spreads.find(x=>x.key===currentSpread);
+  const fa=document.getElementById('freeCountArea');
+  if(fa) fa.style.display=s?.free?'flex':'none';
+}
 function updateSpreadHint(){
   const spreads=currentMode==='tarot'?TAROT_SPREADS:LEN_SPREADS;
   const s=spreads.find(x=>x.key===currentSpread);
@@ -1536,26 +1558,132 @@ function drawCardsDigital(){
   const spread=spreads.find(x=>x.key===currentSpread);
   const pool=currentMode==='tarot'?TAROT_ALL:getLenormand();
   const shuffled=[...pool].sort(()=>Math.random()-0.5);
-  drawnCards=shuffled.slice(0,spread.positions.length).map((c,i)=>({
-    card:c,position:spread.positions[i],reversed:currentMode==='tarot'&&Math.random()>0.65
+
+  // Free spread: use custom count
+  let positions=spread.positions;
+  if(spread.free){
+    const n=Math.min(20,Math.max(1,parseInt(document.getElementById('freeCountInput')?.value)||3));
+    positions=Array.from({length:n},(_,i)=>'第'+(i+1)+'張');
+  }
+
+  drawnCards=shuffled.slice(0,positions.length).map((c,i)=>({
+    card:c,position:positions[i],reversed:currentMode==='tarot'&&Math.random()>0.65
   }));
-  const isNine=currentSpread==='nine';
+
   const row=document.getElementById('cardsRow');
-  row.className=isNine?'nine-grid':'cards-row';row.innerHTML='';
-  drawnCards.forEach((d,i)=>{
-    const el=document.createElement('div');
-    el.className='card'+(d.reversed?' reversed':'');
-    el.style.animationDelay=(i*0.08)+'s';
-    el.innerHTML=`<div class="card-inner">
-      <div class="card-pos">${d.position}</div>
-      <div class="card-art">${getCardSVG(d.card,currentMode)}</div>
-      <div class="card-name">${d.card.name}</div>
-      <div class="card-orient">${d.reversed?'逆位':'正位'}</div>
-    </div>`;
-    row.appendChild(el);
-  });
+  row.innerHTML='';
+
+  const layout=spread.layout||'';
+  if(layout==='cross'){
+    renderCrossLayout(row,drawnCards);
+  } else if(layout==='either'){
+    renderEitherLayout(row,drawnCards);
+  } else if(layout==='relation'){
+    renderRelationLayout(row,drawnCards);
+  } else if(layout==='celtic'){
+    renderCelticLayout(row,drawnCards);
+  } else if(currentSpread==='nine'){
+    row.className='nine-grid';
+    drawnCards.forEach((d,i)=>row.appendChild(makeCardEl(d,i)));
+  } else {
+    row.className='cards-row';
+    drawnCards.forEach((d,i)=>row.appendChild(makeCardEl(d,i)));
+  }
+
   document.getElementById('cardsSection').style.display='block';
   buildInterpBox();
+}
+
+function makeCardEl(d,i){
+  const el=document.createElement('div');
+  el.className='card'+(d.reversed?' reversed':'');
+  el.style.animationDelay=(i*0.08)+'s';
+  el.innerHTML=`<div class="card-inner">
+    <div class="card-pos">${d.position}</div>
+    <div class="card-art">${getCardSVG(d.card,currentMode)}</div>
+    <div class="card-name">${d.card.name}</div>
+    <div class="card-orient">${d.reversed?'逆位':'正位'}</div>
+  </div>`;
+  return el;
+}
+
+function makePlaceholder(){
+  const el=document.createElement('div');
+  el.className='card spread-grid-placeholder';
+  el.innerHTML='<div class="card-inner"><div class="card-art"></div></div>';
+  return el;
+}
+
+// 十字牌陣：依截圖
+// positions: 核心(0), 阻礙(1), 基礎(2), 未來(3), 建議(4)
+// 視覺排列 (grid 3欄×3列):
+//   row0: [空] [建議(4)]  [空]
+//   row1: [空] [核心+阻礙] [未來(3)]
+//   row2: [空] [基礎(2)]  [空]
+function renderCrossLayout(container, cards){
+  container.className='spread-cross';
+  container.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(80px,100px));gap:10px;justify-content:center;margin-bottom:6px';
+  const p=()=>makePlaceholder();
+  // row0: 空, 預計發生(2), 空
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[2],2));
+  container.appendChild(p());
+  // row1: 過去(0), 結果(4), 現在(1)
+  container.appendChild(makeCardEl(cards[0],0));
+  container.appendChild(makeCardEl(cards[4],4));
+  container.appendChild(makeCardEl(cards[1],1));
+  // row2: 空, 實際發生(3), 空
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[3],3));
+  container.appendChild(p());
+}
+function renderEitherLayout(container, cards){
+  container.className='spread-either';
+  container.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(80px,100px));gap:10px;justify-content:center;margin-bottom:6px';
+  const p=()=>makePlaceholder();
+  // row0: 選A影響(2), 空, 選B影響(4)
+  container.appendChild(makeCardEl(cards[2],2));
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[4],4));
+  // row1: 選A現況(1), 空, 選B現況(3)
+  container.appendChild(makeCardEl(cards[1],1));
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[3],3));
+  // row2: 空, 本人現況(0), 空
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[0],0));
+  container.appendChild(p());
+}
+function renderCelticLayout(container, cards){
+  container.className='spread-celtic';
+  container.style.cssText='display:grid;grid-template-columns:repeat(5,minmax(72px,90px));gap:8px;justify-content:center;margin-bottom:6px';
+  const p=()=>makePlaceholder();
+  // row0: 空,空, 表意識(2), 空, 結果(9)
+  container.appendChild(p()); container.appendChild(p());
+  container.appendChild(makeCardEl(cards[2],2));
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[9],9));
+  // row1: 空, 不久的未來(4), 提問者+障礙疊, 過去(5), 期望或恐懼(8)
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[4],4));
+  const stack=document.createElement('div');
+  stack.style.cssText='position:relative;';
+  const c0=makeCardEl(cards[0],0); c0.style.position='relative';c0.style.zIndex='1';
+  const c1=makeCardEl(cards[1],1);
+  c1.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(90deg);transform-origin:center;z-index:2;width:100%;opacity:0.92;';
+  stack.appendChild(c0); stack.appendChild(c1);
+  container.appendChild(stack);
+  container.appendChild(makeCardEl(cards[5],5));
+  container.appendChild(makeCardEl(cards[8],8));
+  // row2: 空,空, 潛意識(3), 空, 環境(7)
+  container.appendChild(p()); container.appendChild(p());
+  container.appendChild(makeCardEl(cards[3],3));
+  container.appendChild(p());
+  container.appendChild(makeCardEl(cards[7],7));
+  // row3: 空,空,空,空, 提問者立場(6)
+  container.appendChild(p()); container.appendChild(p());
+  container.appendChild(p()); container.appendChild(p());
+  container.appendChild(makeCardEl(cards[6],6));
 }
 function collectManualCards(){
   if(customPositions.length<1){alert('請至少新增一個牌陣位置！');return;}
