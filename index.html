@@ -316,6 +316,7 @@ textarea.note-input:focus{border-color:var(--border2)}
 .diary-phys-row{display:flex;align-items:center;gap:8px}
 .diary-phys-num{font-size:11px;color:var(--text3);min-width:16px}
 .diary-phys-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:14px;color:var(--text);background:var(--bg2);outline:none}
+.card-select{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:14px;color:var(--text);background:var(--bg2);outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238094AA' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .diary-phys-input:focus{border-color:var(--border2);background:var(--bg)}
 .diary-phys-del{width:24px;height:24px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
 .diary-phys-del:hover{color:#E24B4A;border-color:#E24B4A}
@@ -1536,21 +1537,38 @@ function syncManualCardRows(){
 }
 function renderManualCardRows(){
   const cont=document.getElementById('manualCardRows');cont.innerHTML='';
-  const showOrient=currentMode==='tarot';
+  const isLen=currentMode==='lenormand';
+  const showOrient=!isLen;
   customPositions.forEach((pos,i)=>{
     const row=document.createElement('div');row.className='manual-card-row';
-    row.innerHTML=`<span class="mcr-pos">${pos.label||('位置'+(i+1))}</span>
-      <input class="card-name-input" id="mcard_${i}" placeholder="牌名…" autocomplete="off">
-      ${showOrient?`<div class="orient-toggle">
-        <button class="orient-btn active" id="orient_${i}_u" onclick="setOrient(${i},'upright')">正位</button>
-        <button class="orient-btn" id="orient_${i}_r" onclick="setOrient(${i},'reversed')">逆位</button>
-      </div>`:''}`;
+    const inputHtml=isLen
+      ? `<select class="card-select" id="mcard_${i}">${buildLenOptions('')}</select>`
+      : `<input class="card-name-input" id="mcard_${i}" placeholder="牌名…" autocomplete="off">`;
+    const orientHtml=showOrient
+      ? '<div class="orient-toggle">'
+        +'<button class="orient-btn active" id="orient_'+i+'_u" onclick="setOrient('+i+',\'upright\')">正位</button>'
+        +'<button class="orient-btn" id="orient_'+i+'_r" onclick="setOrient('+i+',\'reversed\')">逆位</button>'
+        +'</div>'
+      : '';
+    row.innerHTML=`<span class="mcr-pos">${pos.label||('位置'+(i+1))}</span>`+inputHtml+orientHtml;
     cont.appendChild(row);
   });
 }
 function setOrient(i,val){
   document.getElementById('orient_'+i+'_u').classList.toggle('active',val==='upright');
   document.getElementById('orient_'+i+'_r').classList.toggle('active',val==='reversed');
+}
+
+
+// ── 雷諾曼牌名下拉選單 helper ──
+function buildLenOptions(selectedName){
+  const pool=getLenormand();
+  return '<option value="">選擇牌名…</option>'
+    + pool.map(c=>`<option value="${c.name}"${c.name===selectedName?' selected':''}>${c.name}</option>`).join('');
+}
+function buildTarotOptions(selectedName){
+  return '<option value="">選擇牌名…</option>'
+    + TAROT_ALL.map(c=>`<option value="${c.name}"${c.name===selectedName?' selected':''}>${c.name}</option>`).join('');
 }
 
 // ══════════════════════════════════════════
@@ -2353,12 +2371,17 @@ function renderDiaryEditor(body,existing){
       </div>
     </div>`).join('');
 
-  const physRowsHtml=diaryPhysCards.map((name,i)=>`
-    <div class="diary-phys-row" id="dpr_${i}">
+  const isLenDiary=diaryDeckType==='lenormand';
+  const physRowsHtml=diaryPhysCards.map((name,i)=>{
+    const inputHtml=isLenDiary
+      ? `<select class="card-select" id="dpi_${i}">${buildLenOptions(name)}</select>`
+      : `<input class="diary-phys-input" id="dpi_${i}" value="${name}" placeholder="牌名…" autocomplete="off">`;
+    return `<div class="diary-phys-row" id="dpr_${i}">
       <span class="diary-phys-num">${i+1}</span>
-      <input class="diary-phys-input" id="dpi_${i}" value="${name}" placeholder="牌名…" autocomplete="off">
+      ${inputHtml}
       <button class="diary-phys-del" onclick="diaryPhysDel(${i})">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   body.innerHTML=`
     <div class="diary-mode-switch">
@@ -2439,28 +2462,35 @@ function diaryPhysAdd(){
   diaryPhysCards.push('');
   const cont=document.getElementById('diaryPhysRows');
   const i=diaryPhysCards.length-1;
+  const isLen=diaryDeckType==='lenormand';
   const row=document.createElement('div');row.className='diary-phys-row';row.id='dpr_'+i;
-  row.innerHTML=`<span class="diary-phys-num">${i+1}</span>
-    <input class="diary-phys-input" id="dpi_${i}" value="" placeholder="牌名…" autocomplete="off">
-    <button class="diary-phys-del" onclick="diaryPhysDel(${i})">✕</button>`;
+  const inputHtml=isLen
+    ? '<select class="card-select" id="dpi_'+i+'">'+buildLenOptions('')+'</select>'
+    : '<input class="diary-phys-input" id="dpi_'+i+'" value="" placeholder="牌名…" autocomplete="off">';
+  row.innerHTML='<span class="diary-phys-num">'+(i+1)+'</span>'+inputHtml
+    +'<button class="diary-phys-del" onclick="diaryPhysDel('+i+')">✕</button>';
   cont.appendChild(row);
-  document.getElementById('dpi_'+i).focus();
+  if(!isLen) document.getElementById('dpi_'+i)?.focus();
 }
 function diaryPhysDel(i){
-  diaryPhysCards.splice(i,1);
-  // re-render all rows
-  const cont=document.getElementById('diaryPhysRows');
-  // collect current values first
+  // collect current values
   const vals=[];
-  document.querySelectorAll('.diary-phys-input').forEach(inp=>vals.push(inp.value));
+  document.querySelectorAll('#diaryPhysRows .diary-phys-row').forEach((row,idx)=>{
+    const inp=document.getElementById('dpi_'+idx);
+    vals.push(inp?inp.value:'');
+  });
   vals.splice(i,1);
   diaryPhysCards=vals;
-  cont.innerHTML=diaryPhysCards.map((v,idx)=>`
-    <div class="diary-phys-row" id="dpr_${idx}">
-      <span class="diary-phys-num">${idx+1}</span>
-      <input class="diary-phys-input" id="dpi_${idx}" value="${v}" placeholder="牌名…" autocomplete="off">
-      <button class="diary-phys-del" onclick="diaryPhysDel(${idx})">✕</button>
-    </div>`).join('');
+  const isLen=diaryDeckType==='lenormand';
+  const cont=document.getElementById('diaryPhysRows');
+  cont.innerHTML=diaryPhysCards.map((v,idx)=>{
+    const inputHtml=isLen
+      ? '<select class="card-select" id="dpi_'+idx+'">'+buildLenOptions(v)+'</select>'
+      : '<input class="diary-phys-input" id="dpi_'+idx+'" value="'+v+'" placeholder="牌名…" autocomplete="off">';
+    return '<div class="diary-phys-row" id="dpr_'+idx+'">'
+      +'<span class="diary-phys-num">'+(idx+1)+'</span>'+inputHtml
+      +'<button class="diary-phys-del" onclick="diaryPhysDel('+idx+')">✕</button></div>';
+  }).join('');
 }
 
 // 日記附件圖片
@@ -2496,8 +2526,9 @@ function saveDiaryEntry(){
   if(diaryDrawMode==='digital'){
     cards=diaryDigitalCards.map(c=>({name:c.name,sym:c.sym||'',reversed:c.reversed||false}));
   } else {
-    document.querySelectorAll('.diary-phys-input').forEach(inp=>{
-      const v=inp.value.trim();if(v) cards.push({name:v,sym:'',reversed:false});
+    document.querySelectorAll('#diaryPhysRows .diary-phys-row').forEach((row,i)=>{
+      const inp=document.getElementById('dpi_'+i);
+      const v=inp?inp.value.trim():'';if(v) cards.push({name:v,sym:'',reversed:false});
     });
   }
   const diary=getDiary();
@@ -2704,18 +2735,20 @@ function rlSyncCardLabels(){
 }
 function rlRenderCardRows(){
   const cont=document.getElementById('rlCardRows');cont.innerHTML='';
-  const showOrient=rlMode==='tarot';
+  const isLen=rlMode==='lenormand';
+  const showOrient=!isLen;
   rlPositions.forEach((pos,i)=>{
     const row=document.createElement('div');row.className='manual-card-row';
+    const inputHtml=isLen
+      ? '<select class="card-select" id="rlcard_'+i+'">'+buildLenOptions('')+'</select>'
+      : '<input class="card-name-input" id="rlcard_'+i+'" placeholder="牌名…" autocomplete="off">';
     const orientHtml=showOrient
       ? '<div class="orient-toggle">'
         + '<button class="orient-btn active" id="rlor_'+i+'_u" onclick="rlSetOrient('+i+',this)">正位</button>'
         + '<button class="orient-btn" id="rlor_'+i+'_r" onclick="rlSetOrient('+i+',this)">逆位</button>'
         + '</div>'
       : '';
-    row.innerHTML='<span class="mcr-pos">'+(pos.label||('位置'+(i+1)))+'</span>'
-      +'<input class="card-name-input" id="rlcard_'+i+'" placeholder="牌名…" autocomplete="off">'
-      +orientHtml;
+    row.innerHTML='<span class="mcr-pos">'+(pos.label||('位置'+(i+1)))+'</span>'+inputHtml+orientHtml;
     cont.appendChild(row);
   });
 }
@@ -3038,6 +3071,13 @@ function renderDatabase(){
   const db=getDatabase();
   const query=(document.getElementById('dbSearch').value||'').toLowerCase();
   const list=document.getElementById('dbList');
+
+  // ── 建立標準排序 map ──
+  const tarotOrder={};
+  TAROT_ALL.forEach((c,i)=>tarotOrder[c.name]=i);
+  const lenOrder={};
+  LENORMAND_40.forEach((c,i)=>lenOrder[c.name]=i);
+
   const entries=Object.entries(db)
     .filter(([k])=>k.startsWith(currentDbTab+'::'))
     .map(([k,notes])=>({name:k.split('::')[1],notes,key:k}))
@@ -3046,6 +3086,19 @@ function renderDatabase(){
       if(currentDbTab==='tarot') return cardMatchesTarotFilter(e.name);
       if(currentDbTab==='lenormand') return cardMatchesLenFilter(e.name);
       return true;
+    })
+    .sort((a,b)=>{
+      if(currentDbTab==='tarot'){
+        const ai=tarotOrder[a.name]??999;
+        const bi=tarotOrder[b.name]??999;
+        return ai-bi;
+      }
+      if(currentDbTab==='lenormand'){
+        const ai=lenOrder[a.name]??parseInt(a.name)||999;
+        const bi=lenOrder[b.name]??parseInt(b.name)||999;
+        return ai-bi;
+      }
+      return 0;
     });
   if(!entries.length){
     list.innerHTML=`<div class="db-empty">這個分類還沒有牌義記錄。</div>`;return;
