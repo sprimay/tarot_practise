@@ -607,9 +607,9 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--brand);b
 .ls-star{position:absolute;right:-2px;top:50%;transform:translateY(-50%);font-size:13px;line-height:1;}
 </style>
 <!-- Firebase SDK -->
-<script async src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script async src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script async src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <!-- ═══ LOADING SCREEN ═══ -->
@@ -1403,7 +1403,7 @@ function goPage(p){
     // Update active tab visually but show gate
     document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
     const tabs=document.querySelectorAll('.nav-tab');
-    const idx={practice:0,record:1,diary:2,database:3}[p];
+    const idx={practice:0,reading:1,record:2,diary:3,database:4}[p];
     if(idx!==undefined) tabs[idx].classList.add('active');
     showLoginGate();
     return;
@@ -2472,10 +2472,6 @@ function diaryPhysDel(i){
       <input class="diary-phys-input" id="dpi_${idx}" value="${v}" placeholder="牌名…" autocomplete="off">
       <button class="diary-phys-del" onclick="diaryPhysDel(${idx})">✕</button>
     </div>`).join('');
-}
-
-  };
-  reader.readAsDataURL(input.files[0]);
 }
 
 // 日記附件圖片
