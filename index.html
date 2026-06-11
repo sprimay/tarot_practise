@@ -2340,8 +2340,20 @@ function renderDiaryView(body,entry,dateStr){
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
       <span class="diary-edit-btn" onclick="openDiaryEdit('${dateStr}')">編輯日記</span>
       <span class="diary-edit-btn" onclick="generateDiaryPrompt('${dateStr}')">✦ 產生老師提點 Prompt</span>
+      <span class="diary-edit-btn" style="color:#E24B4A" onclick="deleteDiaryEntry('${dateStr}')">✕ 刪除此筆</span>
     </div>
   </div>`;
+}
+
+function deleteDiaryEntry(dateStr){
+  if(!confirm('確定要刪除這天的日記嗎？')) return;
+  const diary=getDiary();
+  delete diary[dateStr];
+  saveDiary(diary);
+  // Close panel and refresh calendar
+  document.getElementById('diaryPanel').style.display='none';
+  activeDiaryDate=null;
+  renderCalendar();
 }
 
 function openDiaryEdit(dateStr){
