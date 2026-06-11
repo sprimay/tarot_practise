@@ -331,6 +331,12 @@ textarea.note-input:focus{border-color:var(--border2)}
 .diary-note-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:12px}
 textarea.diary-note{width:100%;border:none;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:130px;line-height:1.8;outline:none}
 .diary-save-btn{width:100%;padding:12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:17px;color:var(--text);cursor:pointer;transition:all 0.15s}
+.diary-feedback-details{border:1px solid var(--border);border-radius:var(--rm);overflow:hidden}
+.diary-feedback-summary{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;background:var(--bg2);list-style:none;user-select:none}
+.diary-feedback-summary::-webkit-details-marker{display:none}
+.diary-feedback-summary:hover{background:var(--bg3)}
+.diary-feedback-toggle-icon{font-size:12px;color:var(--text3);transition:transform 0.2s}
+.diary-feedback-details[open] .diary-feedback-toggle-icon{transform:rotate(180deg)}
 .diary-saved-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
 /* diary prompt section */
 .diary-prompt-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;display:none}
@@ -2288,6 +2294,15 @@ function renderDiaryView(body,entry,dateStr){
   const cardsHtml=(entry.cards||[]).map(c=>
     `<span class="j-card-chip">${c.name}${c.reversed?' ↓':''}</span>`
   ).join('');
+  const feedbackHtml=entry.teacherFeedback
+    ? `<details class="diary-feedback-details" style="margin-top:12px">
+        <summary class="diary-feedback-summary">
+          <span style="font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)">✦ 老師提點</span>
+          <span class="diary-feedback-toggle-icon">▾</span>
+        </summary>
+        <div style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;padding:12px 14px;background:var(--bg2);border-radius:0 0 var(--rm) var(--rm);border-left:3px solid var(--brand);margin-top:2px">${entry.teacherFeedback}</div>
+      </details>`
+    : '';
   body.innerHTML=`<div class="diary-existing">
     <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">
       抽到的牌 <span style="font-size:10px;padding:1px 8px;border-radius:10px;background:var(--bg3);color:var(--text3);text-transform:none;letter-spacing:0">${deckLabel}</span>
@@ -2296,8 +2311,8 @@ function renderDiaryView(body,entry,dateStr){
     <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:12px">日記</div>
     <div class="diary-existing-note">${entry.note||'（無文字記錄）'}</div>
     ${entry.attachPhoto?`<div style="margin-top:10px"><img src="${entry.attachPhoto}" style="max-width:100%;border-radius:var(--r);border:1px solid var(--border);display:block"></div>`:''}
-    ${entry.teacherFeedback?`<div style="margin-top:12px;font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">老師提點</div><div style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid var(--border2)">${entry.teacherFeedback}</div>`:''}
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+    ${feedbackHtml}
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
       <span class="diary-edit-btn" onclick="openDiaryEdit('${dateStr}')">編輯日記</span>
       <span class="diary-edit-btn" onclick="generateDiaryPrompt('${dateStr}')">✦ 產生老師提點 Prompt</span>
       <span class="diary-edit-btn" style="color:#E24B4A" onclick="deleteDiaryEntry('${dateStr}')">✕ 刪除此筆</span>
@@ -2601,7 +2616,6 @@ function renderDiaryDbNotes(dateStr){
 function saveDiaryFeedback(dateStr){
   const feedbackText=(document.getElementById('diaryFeedbackInput')||{}).value?.trim();
   if(!feedbackText){alert('請先貼上 AI 的回饋喔！');return;}
-  // Save feedback into diary entry
   const diary=getDiary();
   if(diary[dateStr]) diary[dateStr].teacherFeedback=feedbackText;
   saveDiary(diary);
@@ -2619,8 +2633,12 @@ function saveDiaryFeedback(dateStr){
     db[key].push({note,date:today,mode:deckMode});
   });
   saveDatabase(db);
-  document.getElementById('diaryDbSaveOk').style.display='block';
-  setTimeout(()=>document.getElementById('diaryDbSaveOk').style.display='none',2500);
+  // 重新渲染日記查看頁面，讓老師提點折疊清單出現
+  const body=document.getElementById('diaryPanelBody');
+  renderDiaryView(body,diary[dateStr],dateStr);
+  // 顯示儲存成功提示
+  const ok=document.getElementById('diaryDbSaveOk');
+  if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2500);}
 }
 
 // ══════════════════════════════════════════
