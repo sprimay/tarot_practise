@@ -1039,7 +1039,7 @@ const TAROT_SPREADS=[
   {key:"three",   name:"三牌陣",       positions:["過去","現在","未來"],hint:"最經典的時間流向牌陣"},
   {key:"cross",   name:"十字牌陣",     positions:["過去","現在","預計發生","實際發生","結果"],hint:"五張牌深入分析核心議題",layout:"cross"},
   {key:"either",  name:"二擇一牌陣",   positions:["本人現況","選項A現況","選項A影響","選項B現況","選項B影響"],hint:"五張牌分析兩個選擇",layout:"either"},
-  {key:"relation",name:"關係牌陣",     positions:["你的想法","對你感情","目前關係","對方想法","你的期望","對方期望"],hint:"六張牌剖析雙方狀態",layout:"relation"},
+  {key:"relation",name:"關係牌陣",     positions:["對方看你","你看對方","對方與我相處","我與對方相處","對方對我的期待","我對對方的期待","建議"],hint:"七張牌全面剖析雙方關係",layout:"relation"},
   {key:"celtic",  name:"凱爾特十字",   positions:["提問者狀況","障礙","表意識","潛意識","不久的未來","過去","提問者立場","環境","期望或恐懼","結果"],hint:"十張牌，最完整的全面解析",layout:"celtic"},
   {key:"zodiac",  name:"黃道十二宮",   positions:["第一宮 自我","第二宮 財富","第三宮 溝通","第四宮 家庭","第五宮 創意","第六宮 健康","第七宮 關係","第八宮 轉化","第九宮 信念","第十宮 事業","第十一宮 友誼","第十二宮 潛意識"],hint:"十二張牌，對應黃道十二宮位全面解析"}
 ];
@@ -1057,7 +1057,7 @@ const PHYSICAL_PRESETS_TAROT=[
   {name:"三牌陣",      positions:["過去","現在","未來"]},
   {name:"十字牌陣",    positions:["核心","阻礙","基礎","未來","建議"]},
   {name:"二擇一",      positions:["選項A現況","選項A結果","選項B現況","選項B結果"]},
-  {name:"關係牌陣",    positions:["自己","對方","關係現況","阻礙","建議"]},
+  {name:"關係牌陣",    positions:["對方看你","你看對方","對方與我相處","我與對方相處","對方對我的期待","我對對方的期待","建議"]},
   {name:"凱爾特十字",  positions:["提問者狀況","障礙","表意識","潛意識","不久的未來","過去","提問者立場","環境","期望或恐懼","結果"]},
   {name:"黃道十二宮",  positions:["第一宮 自我","第二宮 財富","第三宮 溝通","第四宮 家庭","第五宮 創意","第六宮 健康","第七宮 關係","第八宮 轉化","第九宮 信念","第十宮 事業","第十一宮 友誼","第十二宮 潛意識"]},
 ];
@@ -1618,19 +1618,24 @@ function makePlaceholder(){
   return el;
 }
 
-// 關係牌陣 layout (2×3)
-// positions: 你的想法(0), 對你感情(1), 目前關係(2), 對方想法(3), 你的期望(4), 對方期望(5)
-// Grid 3×2:
-//   row0: 你的想法(0), 目前關係(2), 你的期望(4)
-//   row1: 對你感情(1), 對方想法(3), 對方期望(5)
+// 關係牌陣 layout (3×2 + 底部建議)
+// positions: 對方看你(0), 你看對方(1), 對方與我相處(2), 我與對方相處(3), 對方對我的期待(4), 我對對方的期待(5), 建議(6)
+// Grid:
+//   row0: 對方看你(0),    對方與我相處(2), 對方對我的期待(4)
+//   row1: 你看對方(1),    我與對方相處(3), 我對對方的期待(5)
+//   row2: 空,             建議(6),          空
 function renderRelationLayout(container, cards){
   container.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(80px,100px));gap:10px;justify-content:center;margin-bottom:6px';
+  const p=()=>makePlaceholder();
   container.appendChild(makeCardEl(cards[0],0));
   container.appendChild(makeCardEl(cards[2],2));
   container.appendChild(makeCardEl(cards[4],4));
   container.appendChild(makeCardEl(cards[1],1));
   container.appendChild(makeCardEl(cards[3],3));
-  if(cards[5]) container.appendChild(makeCardEl(cards[5],5));
+  container.appendChild(makeCardEl(cards[5],5));
+  container.appendChild(p());
+  container.appendChild(cards[6]?makeCardEl(cards[6],6):p());
+  container.appendChild(p());
 }
 
 // 雷諾曼十字牌陣
@@ -1806,9 +1811,9 @@ function generatePrompt(){
   };
 
   const styleFormat={
-    gentle:`評分：X/10\n\n✓ 做得好的地方：\n（1-2點，充分肯定學員的優點）\n\n♡ 輕柔建議：\n（1-2點，以溫和方式提示改進空間）\n\n老師鼓勵：\n（1-2句溫暖的結語）\n\n語氣溫暖親切，約200字內。`,
-    balanced:`評分：X/10\n\n✓ 正確之處：\n（1-2點，具體說明做得好的地方）\n\n✗ 需要改進：\n（1-2點，直接指出錯誤或不足，說明原因）\n\n補充說明：\n（對牌義或牌陣的客觀補充，2-3句）\n\n語氣中立專業，約250字內。`,
-    strict:`評分：X/10\n\n問題一：（直接點名第一個錯誤，說明正確解讀應為何）\n\n問題二：（直接點名第二個錯誤或不精確之處）\n\n問題三（若有）：（其他需要矯正的地方）\n\n正確解讀方向：\n（簡短說明這個牌陣的正確解讀思路）\n\n不給鼓勵，直接指出問題，語氣嚴格。約250字內。`
+    gentle:`評分：X/10\n\n✓ 做得好的地方：\n（最多5點，充分肯定學員的優點，每點具體說明）\n\n♡ 輕柔建議：\n（盡量列出所有需要改進的地方，以溫和方式提示，不限點數）\n\n老師鼓勵：\n（1-2句溫暖的結語）\n\n語氣溫暖親切，詳細完整。`,
+    balanced:`評分：X/10\n\n✓ 正確之處：\n（最多5點，具體說明做得好的地方）\n\n✗ 需要改進：\n（盡量列出所有需要改進之處，不限點數，每點直接指出錯誤或不足並說明原因）\n\n補充說明：\n（對牌義或牌陣的客觀補充，可包含延伸解讀方向）\n\n語氣中立專業，詳細完整。`,
+    strict:`評分：X/10\n\n【錯誤逐條列出】\n（不限數量，把所有解讀錯誤、偏差、不精確之處全部列出，每條直接說明錯誤所在與正確解讀應為何）\n\n正確解讀方向：\n（說明這個牌陣整體的正確解讀思路）\n\n不給鼓勵，只針對問題，語氣嚴格直接，詳細完整。`
   };
 
   generatedPrompt=`${styleInstructions[ratingStyle]}${drawTypeNote}
@@ -2518,15 +2523,15 @@ ${diaryPromptNote||'（無文字記錄）'}
 請用繁體中文回應，格式如下：
 
 ✦ 牌義提點：
-（針對每張牌，說明核心牌義與在日常生活中的實際意義，2-3句）
+（針對每張牌，詳細說明核心牌義與在日常生活中的實際意義，最多5點）
 
 ▲ 解讀訂正：
-（若學員的解讀有偏離牌義之處，直接但溫和地指出，並說明正確理解方向）
+（若學員的解讀有偏離牌義之處，全部列出不限點數，直接但溫和地指出，並說明正確理解方向）
 
 ♡ 老師叮嚀：
 （1-2句鼓勵學員繼續觀察與記錄的話語）
 
-語氣溫暖但清晰，約200字內。`;
+語氣溫暖但清晰，詳細完整。`;;
 
   // Render the prompt section in diary view
   const body=document.getElementById('diaryPanelBody');
@@ -2754,15 +2759,15 @@ ${interp}
 請用繁體中文回應，格式如下：
 
 ✦ 牌義提點：
-（針對各張牌在此位置的核心意義給予說明，2-3句）
+（針對各張牌在此位置的核心意義給予詳細說明，最多5點）
 
 ▲ 解讀訂正：
-（若學員解讀有偏離牌義之處，直接但溫和地指出，說明正確理解方向）
+（若學員解讀有偏離牌義之處，全部列出不限點數，直接但溫和地指出，說明正確理解方向）
 
 ♡ 整體洞見：
-（結合整個牌陣，給出更完整的訊息，2-3句）
+（結合整個牌陣，給出完整的整體訊息與延伸解讀方向）
 
-語氣溫暖但清晰，約250字內。`;
+語氣溫暖但清晰，詳細完整。`;
 
   cont.innerHTML=`
     <div class="rl-saved-notice">
@@ -2880,15 +2885,15 @@ ${entry.interpText||entry.interp||''}
 請用繁體中文回應，格式如下：
 
 ✦ 牌義提點：
-（針對各張牌在此位置的核心意義給予說明，2-3句）
+（針對各張牌在此位置的核心意義給予詳細說明，最多5點）
 
 ▲ 解讀訂正：
-（若學員解讀有偏離牌義之處，直接但溫和地指出，說明正確理解方向）
+（若學員解讀有偏離牌義之處，全部列出不限點數，直接但溫和地指出，說明正確理解方向）
 
 ♡ 整體洞見：
-（結合整個牌陣，給出更完整的訊息，2-3句）
+（結合整個牌陣，給出完整的整體訊息與延伸解讀方向）
 
-語氣溫暖但清晰，約250字內。`;
+語氣溫暖但清晰，詳細完整。`;
 
   const section=document.getElementById('rl-prompt-'+id);
   if(!section) return;
