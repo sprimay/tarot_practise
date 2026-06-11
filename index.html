@@ -1625,6 +1625,21 @@ function makePlaceholder(){
   return el;
 }
 
+// 關係牌陣 layout (2×3)
+// positions: 你的想法(0), 對你感情(1), 目前關係(2), 對方想法(3), 你的期望(4), 對方期望(5)
+// Grid 3×2:
+//   row0: 你的想法(0), 目前關係(2), 你的期望(4)
+//   row1: 對你感情(1), 對方想法(3), 對方期望(5)
+function renderRelationLayout(container, cards){
+  container.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(80px,100px));gap:10px;justify-content:center;margin-bottom:6px';
+  container.appendChild(makeCardEl(cards[0],0));
+  container.appendChild(makeCardEl(cards[2],2));
+  container.appendChild(makeCardEl(cards[4],4));
+  container.appendChild(makeCardEl(cards[1],1));
+  container.appendChild(makeCardEl(cards[3],3));
+  if(cards[5]) container.appendChild(makeCardEl(cards[5],5));
+}
+
 // 雷諾曼十字牌陣
 // positions: 第一張(0)=左, 第二張(1)=中, 第三張(2)=右, 第四張(3)=中上, 第五張(4)=中下
 // Grid 3×3:
