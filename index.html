@@ -2410,16 +2410,26 @@ function renderDiaryEditor(body,existing){
     </div>`).join('');
 
   const isLenDiary=diaryDeckType==='lenormand';
-  const physRowsHtml=diaryPhysCards.map((name,i)=>{
-    const inputHtml=isLenDiary
-      ? `<select class="card-select" id="dpi_${i}">${buildLenOptions(name)}</select>`
-      : buildTarotSuitSelect('dpi_'+i,name);
-    return `<div class="diary-phys-row" id="dpr_${i}">
-      <span class="diary-phys-num">${i+1}</span>
-      ${inputHtml}
-      <button class="diary-phys-del" onclick="diaryPhysDel(${i})">✕</button>
-    </div>`;
-  }).join('');
+  // Build phys rows via DOM to avoid quote conflicts
+  function buildPhysRows(){
+    const cont=document.createElement('div');
+    diaryPhysCards.forEach((name,i)=>{
+      const row=document.createElement('div');
+      row.className='diary-phys-row';row.id='dpr_'+i;
+      const inputHtml=isLenDiary
+        ? '<select class="card-select" id="dpi_'+i+'">'+buildLenOptions(name)+'</select>'
+        : buildTarotSuitSelect('dpi_'+i,name);
+      const num=document.createElement('span');num.className='diary-phys-num';num.textContent=i+1;
+      row.appendChild(num);
+      const tmp=document.createElement('div');tmp.innerHTML=inputHtml;
+      while(tmp.firstChild) row.appendChild(tmp.firstChild);
+      const del=document.createElement('button');del.className='diary-phys-del';
+      del.textContent='✕';del.onclick=()=>diaryPhysDel(i);
+      row.appendChild(del);
+      cont.appendChild(row);
+    });
+    return cont;
+  }
 
   body.innerHTML=`
     <div class="diary-mode-switch">
@@ -2440,7 +2450,7 @@ function renderDiaryEditor(body,existing){
       <div class="cards-row diary-cards-row" id="diaryCardsRow">${cardsHtml}</div>
     </div>
     <div class="diary-physical-area" id="diaryPhysicalArea" style="display:${diaryDrawMode==='physical'?'block':'none'}">
-      <div class="diary-phys-rows" id="diaryPhysRows">${physRowsHtml}</div>
+      <div class="diary-phys-rows" id="diaryPhysRows"></div>
       <button class="diary-phys-add" onclick="diaryPhysAdd()">＋ 新增牌</button>
     </div>
     <div style="margin-top:14px">
@@ -2461,6 +2471,9 @@ function renderDiaryEditor(body,existing){
       <button class="diary-save-btn" onclick="saveDiaryEntry()">✦ 儲存今日日記</button>
       <div class="diary-saved-ok" id="diarySavedOk">✓ 已儲存</div>
     </div>`;
+  // Inject physical card rows via DOM (avoids quote conflicts with tarot dropdowns)
+  const physCont=document.getElementById('diaryPhysRows');
+  if(physCont) physCont.appendChild(buildPhysRows());
 }
 
 function setDiaryDeck(deck,btn){
