@@ -153,7 +153,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans TC'
 .preset-chip{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
 .preset-chip:hover{background:var(--bg2);border-color:var(--border2);color:var(--text)}
 .manual-card-rows{display:flex;flex-direction:column;gap:6px}
-.manual-card-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg)}
+.manual-card-row{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);flex-wrap:wrap}
 .mcr-pos{font-size:11px;color:var(--text3);min-width:70px;font-family:'DM Sans','Noto Sans TC',sans-serif}
 .card-name-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:15px;color:var(--text);background:var(--bg2);outline:none}
 .card-name-input:focus{border-color:var(--border2);background:var(--bg)}
@@ -1543,7 +1543,7 @@ function renderManualCardRows(){
     const row=document.createElement('div');row.className='manual-card-row';
     const inputHtml=isLen
       ? `<select class="card-select" id="mcard_${i}">${buildLenOptions('')}</select>`
-      : `<input class="card-name-input" id="mcard_${i}" placeholder="牌名…" autocomplete="off">`;
+      : buildTarotSuitSelect('mcard_'+i,'');
     const orientHtml=showOrient
       ? '<div class="orient-toggle">'
         +'<button class="orient-btn active" id="orient_'+i+'_u" onclick="setOrient('+i+',\'upright\')">正位</button>'
@@ -1559,6 +1559,42 @@ function setOrient(i,val){
   document.getElementById('orient_'+i+'_r').classList.toggle('active',val==='reversed');
 }
 
+
+
+// ── 塔羅兩層下拉選單 helper ──
+const TAROT_GROUPS={
+  '大阿爾克納': TAROT_MAJOR.map(c=>c.name),
+  '權杖': NUMS.map(n=>'權杖'+n),
+  '聖杯': NUMS.map(n=>'聖杯'+n),
+  '寶劍': NUMS.map(n=>'寶劍'+n),
+  '金幣': NUMS.map(n=>'金幣'+n),
+};
+function buildTarotSuitSelect(elId,selectedName){
+  let selectedGroup='大阿爾克納';
+  if(selectedName){
+    for(const g of Object.keys(TAROT_GROUPS)){
+      if(TAROT_GROUPS[g].includes(selectedName)){selectedGroup=g;break;}
+    }
+  }
+  const suitOpts=Object.keys(TAROT_GROUPS).map(g=>'<option value="'+g+'"'+(g===selectedGroup?' selected':'')+'>'+g+'</option>').join('');
+  const cardOpts=buildTarotCardOptions(elId,selectedGroup,selectedName);
+  return '<select class="card-select" style="max-width:110px" id="'+elId+'_suit" onchange="onTarotSuitChange(this,&quot;'+elId+'&quot;)">'+suitOpts+'</select>'
+    +'<select class="card-select" id="'+elId+'_card">'+cardOpts+'</select>';
+}
+function buildTarotCardOptions(elId,group,selectedName){
+  const cards=TAROT_GROUPS[group]||TAROT_GROUPS['大阿爾克納'];
+  return '<option value="">選擇牌名…</option>'
+    +cards.map(c=>'<option value="'+c+'"'+(c===selectedName?' selected':'')+'>'+c+'</option>').join('');
+}
+function onTarotSuitChange(suitEl,elId){
+  const cardSel=document.getElementById(elId+'_card');
+  if(!cardSel) return;
+  cardSel.innerHTML=buildTarotCardOptions(elId,suitEl.value,'');
+}
+function getTarotSelectValue(elId){
+  const cardSel=document.getElementById(elId+'_card');
+  return cardSel?cardSel.value:'';
+}
 
 // ── 雷諾曼牌名下拉選單 helper ──
 function buildLenOptions(selectedName){
@@ -1782,7 +1818,9 @@ function renderCelticLayout(container, cards){
 function collectManualCards(){
   if(customPositions.length<1){alert('請至少新增一個牌陣位置！');return;}
   drawnCards=customPositions.map((pos,i)=>{
-    const name=(document.getElementById('mcard_'+i)||{}).value?.trim()||'（未填寫）';
+    const name=currentMode==='lenormand'
+      ?(document.getElementById('mcard_'+i)||{}).value?.trim()||'（未填寫）'
+      :getTarotSelectValue('mcard_'+i)||'（未填寫）';
     const uBtn=document.getElementById('orient_'+i+'_u');
     const reversed=uBtn?!uBtn.classList.contains('active'):false;
     return {card:{name,sym:''},position:pos.label||('位置'+(i+1)),reversed};
@@ -2375,7 +2413,7 @@ function renderDiaryEditor(body,existing){
   const physRowsHtml=diaryPhysCards.map((name,i)=>{
     const inputHtml=isLenDiary
       ? `<select class="card-select" id="dpi_${i}">${buildLenOptions(name)}</select>`
-      : `<input class="diary-phys-input" id="dpi_${i}" value="${name}" placeholder="牌名…" autocomplete="off">`;
+      : buildTarotSuitSelect('dpi_'+i,name);
     return `<div class="diary-phys-row" id="dpr_${i}">
       <span class="diary-phys-num">${i+1}</span>
       ${inputHtml}
@@ -2429,6 +2467,26 @@ function setDiaryDeck(deck,btn){
   diaryDeckType=deck;
   document.querySelectorAll('.diary-deck-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  // 重新渲染紙本輸入列（塔羅↔雷諾曼切換時更新輸入類型）
+  const cont=document.getElementById('diaryPhysRows');
+  if(!cont) return;
+  const isLen=deck==='lenormand';
+  // 收集現有值
+  const vals=[];
+  document.querySelectorAll('#diaryPhysRows .diary-phys-row').forEach((row,idx)=>{
+    const inp=document.getElementById('dpi_'+idx);
+    vals.push(inp?inp.value:'');
+  });
+  if(vals.length===0) vals.push(''); // 至少一列
+  diaryPhysCards=vals;
+  cont.innerHTML=diaryPhysCards.map((v,idx)=>{
+    const inputHtml=isLen
+      ? '<select class="card-select" id="dpi_'+idx+'">'+buildLenOptions(v)+'</select>'
+      : buildTarotSuitSelect('dpi_'+idx,v);
+    return '<div class="diary-phys-row" id="dpr_'+idx+'">'
+      +'<span class="diary-phys-num">'+(idx+1)+'</span>'+inputHtml
+      +'<button class="diary-phys-del" onclick="diaryPhysDel('+idx+')">✕</button></div>';
+  }).join('');
 }
 
 function switchDiaryMode(mode,btn){
@@ -2466,11 +2524,11 @@ function diaryPhysAdd(){
   const row=document.createElement('div');row.className='diary-phys-row';row.id='dpr_'+i;
   const inputHtml=isLen
     ? '<select class="card-select" id="dpi_'+i+'">'+buildLenOptions('')+'</select>'
-    : '<input class="diary-phys-input" id="dpi_'+i+'" value="" placeholder="牌名…" autocomplete="off">';
+    : buildTarotSuitSelect('dpi_'+i,'');
   row.innerHTML='<span class="diary-phys-num">'+(i+1)+'</span>'+inputHtml
     +'<button class="diary-phys-del" onclick="diaryPhysDel('+i+')">✕</button>';
   cont.appendChild(row);
-  if(!isLen) document.getElementById('dpi_'+i)?.focus();
+  if(!isLen){/* tarot uses dropdowns, no focus needed */}
 }
 function diaryPhysDel(i){
   // collect current values
@@ -2486,7 +2544,7 @@ function diaryPhysDel(i){
   cont.innerHTML=diaryPhysCards.map((v,idx)=>{
     const inputHtml=isLen
       ? '<select class="card-select" id="dpi_'+idx+'">'+buildLenOptions(v)+'</select>'
-      : '<input class="diary-phys-input" id="dpi_'+idx+'" value="'+v+'" placeholder="牌名…" autocomplete="off">';
+      : buildTarotSuitSelect('dpi_'+idx,v);
     return '<div class="diary-phys-row" id="dpr_'+idx+'">'
       +'<span class="diary-phys-num">'+(idx+1)+'</span>'+inputHtml
       +'<button class="diary-phys-del" onclick="diaryPhysDel('+idx+')">✕</button></div>';
@@ -2527,8 +2585,13 @@ function saveDiaryEntry(){
     cards=diaryDigitalCards.map(c=>({name:c.name,sym:c.sym||'',reversed:c.reversed||false}));
   } else {
     document.querySelectorAll('#diaryPhysRows .diary-phys-row').forEach((row,i)=>{
-      const inp=document.getElementById('dpi_'+i);
-      const v=inp?inp.value.trim():'';if(v) cards.push({name:v,sym:'',reversed:false});
+      let v='';
+      if(diaryDeckType==='lenormand'){
+        v=(document.getElementById('dpi_'+i)?.value||'').trim();
+      } else {
+        v=getTarotSelectValue('dpi_'+i);
+      }
+      if(v) cards.push({name:v,sym:'',reversed:false});
     });
   }
   const diary=getDiary();
@@ -2741,7 +2804,7 @@ function rlRenderCardRows(){
     const row=document.createElement('div');row.className='manual-card-row';
     const inputHtml=isLen
       ? '<select class="card-select" id="rlcard_'+i+'">'+buildLenOptions('')+'</select>'
-      : '<input class="card-name-input" id="rlcard_'+i+'" placeholder="牌名…" autocomplete="off">';
+      : buildTarotSuitSelect('rlcard_'+i,'');
     const orientHtml=showOrient
       ? '<div class="orient-toggle">'
         + '<button class="orient-btn active" id="rlor_'+i+'_u" onclick="rlSetOrient('+i+',this)">正位</button>'
@@ -2769,7 +2832,9 @@ function saveReadingLog(){
   if(!interp){alert('請填寫你的解讀喔！');return;}
 
   const cards=rlPositions.map((pos,i)=>{
-    const name=(document.getElementById('rlcard_'+i)||{}).value?.trim()||'（未填寫）';
+    const name=rlMode==='lenormand'
+      ?(document.getElementById('rlcard_'+i)||{}).value?.trim()||'（未填寫）'
+      :getTarotSelectValue('rlcard_'+i)||'（未填寫）';
     const showOrient=rlMode==='tarot';
     const uBtn=showOrient?document.getElementById('rlor_'+i+'_u'):null;
     const reversed=uBtn?!uBtn.classList.contains('active'):false;
