@@ -2457,23 +2457,42 @@ function renderDiaryEditor(body,existing){
       <div class="diary-note-label">今日日記</div>
       <div class="diary-note-box">
         <textarea class="diary-note" id="diaryNoteInput" placeholder="記錄今天抽到的牌，以及你的感受、靈感或解讀…">${existing?.note||''}</textarea>
-        <div style="margin-top:10px">
-          <label class="diary-phys-upload-btn" for="diaryAttachFile" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
-            📎 新增附件圖片（選填）
-          </label>
-          <input type="file" id="diaryAttachFile" accept="image/*" style="display:none" onchange="diaryAttachPreview(this)">
-          <div id="diaryAttachPreviewWrap" style="display:${existing?.attachPhoto?'block':'none'};margin-top:8px">
-            <img id="diaryAttachPreviewImg" src="${existing?.attachPhoto||''}" style="max-width:100%;max-height:200px;border-radius:var(--r);border:1px solid var(--border);display:${existing?.attachPhoto?'block':'none'}">
-            <button onclick="diaryAttachRemove()" style="margin-top:6px;font-size:11px;color:#E24B4A;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0">✕ 移除附件</button>
-          </div>
+        <div style="margin-top:10px" id="diaryAttachArea">
         </div>
       </div>
       <button class="diary-save-btn" onclick="saveDiaryEntry()">✦ 儲存今日日記</button>
       <div class="diary-saved-ok" id="diarySavedOk">✓ 已儲存</div>
     </div>`;
-  // Inject physical card rows via DOM (avoids quote conflicts with tarot dropdowns)
+  // Inject physical card rows via DOM
   const physCont=document.getElementById('diaryPhysRows');
   if(physCont) physCont.appendChild(buildPhysRows());
+  // Inject attach area via DOM (avoid image/* comment issue in template literal)
+  const attachArea=document.getElementById('diaryAttachArea');
+  if(attachArea){
+    const hasPhoto=existing?.attachPhoto;
+    attachArea.innerHTML='<label class="diary-phys-upload-btn" for="diaryAttachFile" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">📎 新增附件圖片（選填）</label>';
+    const fileInput=document.createElement('input');
+    fileInput.type='file';fileInput.id='diaryAttachFile';
+    fileInput.accept='image/*';
+    fileInput.style.display='none';
+    fileInput.onchange=function(){diaryAttachPreview(this);};
+    attachArea.appendChild(fileInput);
+    const previewWrap=document.createElement('div');
+    previewWrap.id='diaryAttachPreviewWrap';
+    previewWrap.style.display=hasPhoto?'block':'none';
+    previewWrap.style.marginTop='8px';
+    const previewImg=document.createElement('img');
+    previewImg.id='diaryAttachPreviewImg';
+    previewImg.src=existing?.attachPhoto||'';
+    previewImg.style.cssText='max-width:100%;max-height:200px;border-radius:var(--r);border:1px solid var(--border);display:'+(hasPhoto?'block':'none');
+    previewWrap.appendChild(previewImg);
+    const removeBtn=document.createElement('button');
+    removeBtn.textContent='✕ 移除附件';
+    removeBtn.style.cssText='margin-top:6px;font-size:11px;color:#E24B4A;background:none;border:none;cursor:pointer;font-family:\'DM Sans\',sans-serif;padding:0';
+    removeBtn.onclick=diaryAttachRemove;
+    previewWrap.appendChild(removeBtn);
+    attachArea.appendChild(previewWrap);
+  }
 }
 
 function setDiaryDeck(deck,btn){
