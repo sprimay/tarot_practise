@@ -2511,14 +2511,23 @@ function setDiaryDeck(deck,btn){
   });
   if(vals.length===0) vals.push(''); // 至少一列
   diaryPhysCards=vals;
-  cont.innerHTML=diaryPhysCards.map((v,idx)=>{
-    const inputHtml=isLen
+  cont.innerHTML='';
+  diaryPhysCards.forEach((v,idx)=>{
+    const row=document.createElement('div');
+    row.className='diary-phys-row';row.id='dpr_'+idx;
+    const num=document.createElement('span');num.className='diary-phys-num';num.textContent=idx+1;
+    row.appendChild(num);
+    const tmp=document.createElement('div');
+    tmp.innerHTML=isLen
       ? '<select class="card-select" id="dpi_'+idx+'">'+buildLenOptions(v)+'</select>'
       : buildTarotSuitSelect('dpi_'+idx,v);
-    return '<div class="diary-phys-row" id="dpr_'+idx+'">'
-      +'<span class="diary-phys-num">'+(idx+1)+'</span>'+inputHtml
-      +'<button class="diary-phys-del" onclick="diaryPhysDel('+idx+')">✕</button></div>';
-  }).join('');
+    while(tmp.firstChild) row.appendChild(tmp.firstChild);
+    const del=document.createElement('button');
+    del.className='diary-phys-del';del.textContent='✕';
+    del.onclick=(function(n){return function(){diaryPhysDel(n);};})(idx);
+    row.appendChild(del);
+    cont.appendChild(row);
+  });
 }
 
 function switchDiaryMode(mode,btn){
@@ -2563,24 +2572,32 @@ function diaryPhysAdd(){
   if(!isLen){/* tarot uses dropdowns, no focus needed */}
 }
 function diaryPhysDel(i){
-  // collect current values
   const vals=[];
   document.querySelectorAll('#diaryPhysRows .diary-phys-row').forEach((row,idx)=>{
-    const inp=document.getElementById('dpi_'+idx);
+    const inp=document.getElementById('dpi_'+idx+'_card')||document.getElementById('dpi_'+idx);
     vals.push(inp?inp.value:'');
   });
   vals.splice(i,1);
   diaryPhysCards=vals;
   const isLen=diaryDeckType==='lenormand';
   const cont=document.getElementById('diaryPhysRows');
-  cont.innerHTML=diaryPhysCards.map((v,idx)=>{
-    const inputHtml=isLen
+  cont.innerHTML='';
+  diaryPhysCards.forEach((v,idx)=>{
+    const row=document.createElement('div');
+    row.className='diary-phys-row';row.id='dpr_'+idx;
+    const num=document.createElement('span');num.className='diary-phys-num';num.textContent=idx+1;
+    row.appendChild(num);
+    const tmp=document.createElement('div');
+    tmp.innerHTML=isLen
       ? '<select class="card-select" id="dpi_'+idx+'">'+buildLenOptions(v)+'</select>'
       : buildTarotSuitSelect('dpi_'+idx,v);
-    return '<div class="diary-phys-row" id="dpr_'+idx+'">'
-      +'<span class="diary-phys-num">'+(idx+1)+'</span>'+inputHtml
-      +'<button class="diary-phys-del" onclick="diaryPhysDel('+idx+')">✕</button></div>';
-  }).join('');
+    while(tmp.firstChild) row.appendChild(tmp.firstChild);
+    const del=document.createElement('button');
+    del.className='diary-phys-del';del.textContent='✕';
+    del.onclick=(function(n){return function(){diaryPhysDel(n);};})(idx);
+    row.appendChild(del);
+    cont.appendChild(row);
+  });
 }
 
 // 日記附件圖片
