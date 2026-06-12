@@ -285,12 +285,12 @@ textarea.note-input:focus{border-color:var(--border2)}
 .cal-card-preview{font-size:9px;color:var(--text3);text-align:center;line-height:1.3;margin-top:2px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
 /* diary entry modal-like panel */
-.diary-panel{display:none;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:4px}
+.diary-panel{display:none;border:1px solid var(--border);border-radius:var(--r);margin-top:4px;overflow:visible}
 .diary-panel-header{padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .diary-panel-date{font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:17px;color:var(--text)}
 .diary-close-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
 .diary-close-btn:hover{background:var(--bg3);color:var(--text)}
-.diary-panel-body{padding:16px}
+.diary-panel-body{padding:16px;padding-bottom:32px}
 /* diary draw mode */
 .diary-mode-switch{display:flex;background:var(--bg2);border-radius:var(--r);padding:3px;margin-bottom:14px;border:1px solid var(--border)}
 .diary-mode-btn{flex:1;padding:7px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;background:none;color:var(--text3)}
@@ -2456,12 +2456,11 @@ function renderDiaryEditor(body,existing){
     <div style="margin-top:14px">
       <div class="diary-note-label">今日日記</div>
       <div class="diary-note-box">
-        <textarea class="diary-note" id="diaryNoteInput" placeholder="記錄今天抽到的牌，以及你的感受、靈感或解讀…">${existing?.note||''}</textarea>
+        <textarea class="diary-note" id="diaryNoteInput" placeholder="記錄今天抽到的牌，以及你的感受、靈感或解讀…"></textarea>
         <div style="margin-top:10px" id="diaryAttachArea">
         </div>
       </div>
-      <button class="diary-save-btn" onclick="saveDiaryEntry()">✦ 儲存今日日記</button>
-      <div class="diary-saved-ok" id="diarySavedOk">✓ 已儲存</div>
+      <div id="diarySaveArea"></div>
     </div>`;
   // Inject physical card rows via DOM
   const physCont=document.getElementById('diaryPhysRows');
@@ -2493,6 +2492,23 @@ function renderDiaryEditor(body,existing){
     previewWrap.appendChild(removeBtn);
     attachArea.appendChild(previewWrap);
   }
+  // Inject save button via DOM (ensures it's always accessible on iOS)
+  const saveArea=document.getElementById('diarySaveArea');
+  if(saveArea){
+    const saveBtn=document.createElement('button');
+    saveBtn.className='diary-save-btn';
+    saveBtn.textContent='✦ 儲存今日日記';
+    saveBtn.onclick=saveDiaryEntry;
+    const savedOk=document.createElement('div');
+    savedOk.className='diary-saved-ok';
+    savedOk.id='diarySavedOk';
+    savedOk.textContent='✓ 已儲存';
+    saveArea.appendChild(saveBtn);
+    saveArea.appendChild(savedOk);
+  }
+  // Fix note textarea value safely (avoid backtick issues)
+  const noteEl=document.getElementById('diaryNoteInput');
+  if(noteEl && existing?.note) noteEl.value=existing.note;
 }
 
 function setDiaryDeck(deck,btn){
