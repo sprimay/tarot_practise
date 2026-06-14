@@ -17,8 +17,6 @@
   --bg:#EBF5FA;          /* cloud-50 bg */
   --bg2:#DFEEF7;         /* cloud-100 sunken */
   --bg3:#D1E6F3;         /* cloud-200 */
-  --bg4:#BFDAED;         /* cloud-300 */
-
   /* ── Ink text ── */
   --text:#243343;        /* ink-1 text */
   --text2:#4E6175;       /* ink-2 body */
@@ -31,40 +29,18 @@
   /* ── Sky / Brand blues ── */
   --sky-50:#EFF6FD;
   --sky-100:#DCEBF9;
-  --sky-200:#BFDAF2;
-  --sky-300:#9CC4EA;
-  --sky-400:#6EA7E1;
-  --brand:#8CBED8;       /* sky-500 brand */
-  --sky-600:#8CBED8;
-  --sky-700:#3568BE;
-  --ink-800:#2A50A0;
+  --brand:#8CBED8;       /* sky-500 */
   --ink-900:#1A2F63;
 
-  /* ── Accents ── */
-  --frost-300:#CFE6F5;
-  --frost-400:#6FB2E4;
-  --frost-500:#3E8BC4;
-  --periwinkle:#8A9CE6;
-  --slate:#8AA4C2;
-  --sage:#7FA396;
-
-  /* ── Semantic ── */
-  --success:#4E9B86;
-  --success-soft:#8FC9B5;
-  --danger:#D8606A;
-
   /* ── Corner radii ── */
-  --r-sm:6px;
-  --r:10px;              /* md · default */
+  --r:10px;
   --r-lg:16px;
   --r-pill:999px;
-  --rm:6px;              /* alias for sm */
+  --rm:6px;
 
   /* ── Shadows (sky-tinted) ── */
   --shadow-sm:0 1px 3px rgba(74,134,212,0.10);
   --shadow-md:0 2px 8px rgba(74,134,212,0.12),0 1px 3px rgba(74,134,212,0.08);
-  --shadow-lg:0 4px 20px rgba(74,134,212,0.15),0 2px 6px rgba(74,134,212,0.10);
-  --shadow-glow:0 0 0 3px rgba(74,134,212,0.25);
 }
 body{background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans TC',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
@@ -2734,7 +2710,7 @@ ${diaryPromptNote||'（無文字記錄）'}
 ♡ 老師叮嚀：
 （1-2句鼓勵學員繼續觀察與記錄的話語）
 
-語氣溫暖但清晰，詳細完整。`;;
+語氣溫暖但清晰，詳細完整。`;
 
   // Render the prompt section in diary view
   const body=document.getElementById('diaryPanelBody');
