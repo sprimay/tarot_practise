@@ -1230,18 +1230,26 @@ auth.onAuthStateChanged(async user=>{
     loggedIn.style.display='flex';
     document.getElementById('navAvatar').src=user.photoURL||'';
     document.getElementById('navUserName').textContent=user.displayName||user.email||'';
-    setSyncDot('ok');
+    setSyncDot('syncing');
     await loadFromFirestore();
-    // Refresh current protected page if user just logged in
+    // 載入完成後，重新渲染所有已初始化的頁面內容
     const activePage=document.querySelector('.page.active');
-    if(activePage && activePage.id!=='page-practice'){
-      const p=activePage.id.replace('page-','');
-      goPage(p);
+    const activePid=activePage?activePage.id.replace('page-',''):'practice';
+    // 強制重新渲染當前頁面（確保 Firestore 資料顯示出來）
+    if(activePid==='record'){
+      if(recordView==='cal') renderRecordCalendar(); else renderJournal();
+    } else if(activePid==='database'){
+      renderDatabase();
+    } else if(activePid==='diary'){
+      renderCalendar();
+    } else if(activePid==='reading'){
+      renderReadingLog();
+    } else if(activePid!=='practice'){
+      goPage(activePid);
     }
   } else {
     loggedOut.style.display='flex';
     loggedIn.style.display='none';
-    // If on a protected page, show gate
     const activePage=document.querySelector('.page.active');
     if(activePage && activePage.id!=='page-practice'){
       showLoginGate();
@@ -1260,14 +1268,17 @@ async function loadFromFirestore(){
       db.collection('users').doc(uid).collection('data').doc('diary').get(),
       db.collection('users').doc(uid).collection('data').doc('reading').get(),
     ]);
-    if(jSnap.exists && jSnap.data().value) localStorage.setItem(JOURNAL_KEY, jSnap.data().value);
-    if(dbSnap.exists && dbSnap.data().value) localStorage.setItem(DB_KEY, dbSnap.data().value);
-    if(dSnap.exists && dSnap.data().value) localStorage.setItem(DIARY_KEY, dSnap.data().value);
-    if(rSnap.exists && rSnap.data().value) localStorage.setItem(READING_KEY, rSnap.data().value);
-    migrateLenormandNames(); // 自動移轉舊格式名稱
+    // 只在雲端有資料時才覆蓋 localStorage（避免用空資料蓋掉本機）
+    if(jSnap.exists && jSnap.data()?.value) localStorage.setItem(JOURNAL_KEY, jSnap.data().value);
+    if(dbSnap.exists && dbSnap.data()?.value) localStorage.setItem(DB_KEY, dbSnap.data().value);
+    if(dSnap.exists && dSnap.data()?.value) localStorage.setItem(DIARY_KEY, dSnap.data().value);
+    if(rSnap.exists && rSnap.data()?.value) localStorage.setItem(READING_KEY, rSnap.data().value);
+    migrateLenormandNames();
     setSyncDot('ok');
   }catch(e){
+    console.warn('Firestore load error',e);
     setSyncDot('offline');
+    // 離線時用 localStorage 現有資料，不清空
   }
 }
 
