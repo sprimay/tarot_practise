@@ -2303,7 +2303,7 @@ function renderCalendar(){
     const cell=document.createElement('div');
     cell.className='cal-day'+(isToday?' today':'')+(entry?' has-entry':'');
     cell.innerHTML=`<span class="cal-day-num">${d}</span>`+
-      (entry?`<span class="cal-dot"></span><span class="cal-card-preview">${(entry.cards||[]).map(c=>c.name).slice(0,2).join('·')}</span>`:'');
+      (entry?`<span class="cal-dot"></span><span class="cal-card-preview">${(entry.cards||[])[entry.coreCardIndex||0]?.name||''}</span>`:'');
     cell.onclick=()=>openDiaryPanel(dateStr);
     grid.appendChild(cell);
   }
@@ -2334,9 +2334,12 @@ function closeDiaryPanel(){
 function renderDiaryView(body,entry,dateStr){
   const deckLabels={tarot:'塔羅',lenormand:'雷諾曼',mixed:'塔羅＋雷諾曼'};
   const deckLabel=deckLabels[entry.deckType]||'塔羅';
-  const cardsHtml=(entry.cards||[]).map(c=>
-    `<span class="j-card-chip">${c.name}${c.reversed?' ↓':''}</span>`
-  ).join('');
+  const coreIdx=entry.coreCardIndex||0;
+  const cardsHtml=(entry.cards||[]).length<=1
+    ? (entry.cards||[]).map(c=>`<span class="j-card-chip">${c.name}${c.reversed?' ↓':''}</span>`).join('')
+    : (entry.cards||[]).map((c,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;margin:2px 3px 2px 0">
+        <span class="j-card-chip" style="${i===coreIdx?'border-color:var(--brand);background:var(--sky-100)':''}">${c.name}${c.reversed?' ↓':''}</span><button onclick="setCoreCard('${dateStr}',${i})" title="設為日曆顯示牌" style="border:none;background:none;cursor:pointer;font-size:13px;padding:0;line-height:1;color:${i===coreIdx?'#E8A830':'var(--text3)'}">${i===coreIdx?'★':'☆'}</button>
+      </span>`).join('');
   const feedbackHtml=entry.teacherFeedback
     ? `<details class="diary-feedback-details" style="margin-top:12px">
         <summary class="diary-feedback-summary">
@@ -2351,6 +2354,7 @@ function renderDiaryView(body,entry,dateStr){
       抽到的牌 <span style="font-size:10px;padding:1px 8px;border-radius:10px;background:var(--bg3);color:var(--text3);text-transform:none;letter-spacing:0">${deckLabel}</span>
     </div>
     <div class="diary-existing-cards">${cardsHtml}</div>
+    ${(entry.cards||[]).length>1?'<div style="font-size:10px;color:var(--text3);margin-top:4px;margin-bottom:2px">☆ 點星號設為日曆主顯示牌</div>':''}
     <div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:12px">日記</div>
     <div class="diary-existing-note">${entry.note||'（無文字記錄）'}</div>
     ${entry.attachPhoto?`<div style="margin-top:10px"><img src="${entry.attachPhoto}" style="max-width:100%;border-radius:var(--r);border:1px solid var(--border);display:block"></div>`:''}
@@ -2361,6 +2365,17 @@ function renderDiaryView(body,entry,dateStr){
       <span class="diary-edit-btn" style="color:#E24B4A" onclick="deleteDiaryEntry('${dateStr}')">✕ 刪除此筆</span>
     </div>
   </div>`;
+}
+
+function setCoreCard(dateStr,idx){
+  const diary=getDiary();
+  if(!diary[dateStr]) return;
+  diary[dateStr].coreCardIndex=idx;
+  saveDiary(diary);
+  // Re-render the view so stars update immediately
+  const body=document.getElementById('diaryPanelBody');
+  renderDiaryView(body,diary[dateStr],dateStr);
+  renderCalendar();
 }
 
 function deleteDiaryEntry(dateStr){
@@ -2813,6 +2828,7 @@ let rlPosCounter=0;
 let rlCurrentPrompt='';
 let rlCurrentEntryId=null;
 let rlMode='tarot'; // 'tarot' | 'lenormand'
+let rlCurrentPresetName='';
 
 function setRlMode(m){
   rlMode=m;
@@ -2839,6 +2855,7 @@ function rlInitSpread(){
   rlApplyPreset(presets[0]);
 }
 function rlApplyPreset(preset){
+  rlCurrentPresetName=preset.name||'';
   rlPositions=preset.positions.map(p=>({id:rlPosCounter++,label:p}));
   rlRenderBuilder();rlRenderCardRows();
 }
@@ -2854,6 +2871,7 @@ function rlRenderBuilder(){
   document.getElementById('rlCsbCount').textContent=rlPositions.length+' 個位置';
 }
 function rlAddPosition(){
+  rlCurrentPresetName='';
   rlPositions.push({id:rlPosCounter++,label:''});
   rlRenderBuilder();rlRenderCardRows();
   const inputs=document.querySelectorAll('#rlCsbPositions .csb-pos-input');
@@ -2911,7 +2929,7 @@ function saveReadingLog(){
     return {name,position:pos.label||('位置'+(i+1)),reversed};
   });
 
-  const spreadName=rlPositions.map(p=>p.label).filter(Boolean).join('·')||rlPositions.length+'張自訂牌陣';
+  const spreadName=rlCurrentPresetName||rlPositions.length+'張自訂';
   const entryId=Date.now();
   const journal=getJournal();
   const entry={
