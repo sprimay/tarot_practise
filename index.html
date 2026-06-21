@@ -3707,6 +3707,14 @@ function openAddDbModal(){
       <button class="mode-btn" id="addDbTypeLenormand" onclick="addDbSelectType('lenormand')">🌹 雷諾曼</button>
     </div>
     <div class="sec-label" style="margin-bottom:8px">Step 2 — 選擇牌名</div>
+    <div id="addDbSuitRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="db-sub-btn active" onclick="addDbSelectSuit('all',this)">全部</button>
+      <button class="db-sub-btn" onclick="addDbSelectSuit('major',this)">大阿爾克納</button>
+      <button class="db-sub-btn" onclick="addDbSelectSuit('wands',this)">權杖</button>
+      <button class="db-sub-btn" onclick="addDbSelectSuit('cups',this)">聖杯</button>
+      <button class="db-sub-btn" onclick="addDbSelectSuit('swords',this)">寶劍</button>
+      <button class="db-sub-btn" onclick="addDbSelectSuit('coins',this)">金幣</button>
+    </div>
     <select id="addDbCardSelect" class="spread-select" style="margin-bottom:16px"></select>
     <div class="sec-label" style="margin-bottom:8px">Step 3 — 輸入牌義</div>
     <div class="feedback-input-box" style="margin-bottom:16px">
@@ -3716,7 +3724,8 @@ function openAddDbModal(){
     <div style="font-size:12px;color:#639922;margin-top:8px;display:none;text-align:center" id="addDbSaveOk">✓ 已加入牌義庫</div>
   `;
   window._addDbType='tarot';
-  addDbPopulateCards('tarot');
+  window._addDbSuit='all';
+  addDbPopulateCards('tarot','all');
   document.getElementById('addDbModal').style.display='block';
   document.body.style.overflow='hidden';
 }
@@ -3726,14 +3735,32 @@ function closeAddDbModal(){
 }
 function addDbSelectType(type){
   window._addDbType=type;
+  window._addDbSuit='all';
   document.getElementById('addDbTypeTarot').classList.toggle('active',type==='tarot');
   document.getElementById('addDbTypeLenormand').classList.toggle('active',type==='lenormand');
-  addDbPopulateCards(type);
+  const suitRow=document.getElementById('addDbSuitRow');
+  if(suitRow) suitRow.style.display=type==='tarot'?'flex':'none';
+  if(suitRow) suitRow.querySelectorAll('.db-sub-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  addDbPopulateCards(type,'all');
 }
-function addDbPopulateCards(type){
+function addDbSelectSuit(suit,btn){
+  window._addDbSuit=suit;
+  const row=document.getElementById('addDbSuitRow');
+  if(row) row.querySelectorAll('.db-sub-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  addDbPopulateCards(window._addDbType||'tarot',suit);
+}
+function addDbPopulateCards(type,suit){
   const sel=document.getElementById('addDbCardSelect');
   if(!sel) return;
-  const cards=type==='lenormand'?LENORMAND_40:TAROT_ALL;
+  let cards=type==='lenormand'?LENORMAND_40:TAROT_ALL;
+  if(type==='tarot'&&suit&&suit!=='all'){
+    if(suit==='major') cards=cards.filter(c=>MAJOR_NAMES.has(c.name));
+    else if(suit==='wands') cards=cards.filter(c=>c.name.startsWith('權杖'));
+    else if(suit==='cups')  cards=cards.filter(c=>c.name.startsWith('聖杯'));
+    else if(suit==='swords')cards=cards.filter(c=>c.name.startsWith('寶劍'));
+    else if(suit==='coins') cards=cards.filter(c=>c.name.startsWith('金幣'));
+  }
   sel.innerHTML=cards.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
 }
 function saveAddDbNote(){
