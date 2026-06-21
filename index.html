@@ -2642,12 +2642,54 @@ function openJournalEdit(id){
     <div class="feedback-input-box" style="margin-bottom:14px">
       <textarea class="feedback-input" id="editAiResponse" style="min-height:120px">${entry.aiResponse||''}</textarea>
     </div>
+    <div class="sec-label" style="margin-bottom:8px">照片</div>
+    <div style="margin-bottom:14px">
+      ${entry.photo?`<img id="editPhotoPreview" src="${entry.photo}" style="max-width:180px;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:6px">`
+        :`<img id="editPhotoPreview" style="display:none;max-width:180px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px">`}
+      <input type="file" id="editPhotoInput" accept="image/*" style="display:none" onchange="editPreviewPhoto(this)">
+      <label for="editPhotoInput" class="diary-phys-upload-btn" style="display:inline-block;margin-right:8px">📷 ${entry.photo?'更換照片':'上傳照片'}</label>
+      <button id="editPhotoClearBtn" onclick="editClearPhoto()" style="${entry.photo?'':'display:none;'}font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer">✕ 移除照片</button>
+    </div>
     <button class="action-row-btn" onclick="saveJournalEdit(${id})">✦ 儲存修改</button>
     <div style="font-size:12px;color:#639922;margin-top:8px;display:none;text-align:center" id="editSaveOk">✓ 已儲存</div>`;
+  window._editPhotoData=null;
   document.getElementById('editModal').style.display='block';
   document.body.style.overflow='hidden';
 }
 
+function editPreviewPhoto(input){
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const raw=new Image();
+    raw.onload=()=>{
+      const MAX=800;
+      let w=raw.width,h=raw.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(raw,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.7);
+      window._editPhotoData=compressed;
+      const img=document.getElementById('editPhotoPreview');
+      if(img){img.src=compressed;img.style.display='block';}
+      const btn=document.getElementById('editPhotoClearBtn');
+      if(btn) btn.style.display='inline-block';
+    };
+    raw.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function editClearPhoto(){
+  window._editPhotoData='__clear__';
+  const img=document.getElementById('editPhotoPreview');
+  if(img){img.src='';img.style.display='none';}
+  const inp=document.getElementById('editPhotoInput');
+  if(inp) inp.value='';
+  const btn=document.getElementById('editPhotoClearBtn');
+  if(btn) btn.style.display='none';
+}
 function eSetOrient(i,val){
   document.getElementById('eor_'+i+'_u').classList.toggle('active',val==='upright');
   document.getElementById('eor_'+i+'_r').classList.toggle('active',val==='reversed');
@@ -2660,6 +2702,9 @@ function saveJournalEdit(id){
   entry.question=document.getElementById('editQuestion').value.trim()||entry.question;
   entry.interpText=document.getElementById('editInterp').value.trim();
   entry.aiResponse=document.getElementById('editAiResponse')?.value?.trim()??entry.aiResponse;
+  if(window._editPhotoData==='__clear__') entry.photo='';
+  else if(window._editPhotoData) entry.photo=window._editPhotoData;
+  window._editPhotoData=null;
   // Update cards
   const showOrient=entry.mode==='tarot';
   entry.cards=(entry.cards||[]).map((c,i)=>{
@@ -3499,11 +3544,22 @@ function rlPreviewPhoto(input){
   if(!file) return;
   const reader=new FileReader();
   reader.onload=function(e){
-    window._rlPhotoData=e.target.result;
-    const img=document.getElementById('rlPhotoPreview');
-    if(img){img.src=e.target.result;img.style.display='block';}
-    const btn=document.getElementById('rlPhotoClearBtn');
-    if(btn) btn.style.display='inline-block';
+    const raw=new Image();
+    raw.onload=()=>{
+      const MAX=800;
+      let w=raw.width,h=raw.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(raw,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.7);
+      window._rlPhotoData=compressed;
+      const img=document.getElementById('rlPhotoPreview');
+      if(img){img.src=compressed;img.style.display='block';}
+      const btn=document.getElementById('rlPhotoClearBtn');
+      if(btn) btn.style.display='inline-block';
+    };
+    raw.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
