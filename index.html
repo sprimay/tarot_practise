@@ -913,6 +913,13 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
       </div>
       <textarea class="interp-unified" id="rlInterpInput" placeholder="寫下你對這次牌陣的完整解讀…"></textarea>
     </div>
+    <div class="sec-label" style="margin-top:16px">Step 4 — 附上照片（選填）</div>
+    <div style="margin-bottom:12px">
+      <input type="file" id="rlPhotoInput" accept="image/*" style="display:none" onchange="rlPreviewPhoto(this)">
+      <label for="rlPhotoInput" class="diary-phys-upload-btn" style="display:inline-block;margin-bottom:8px">📷 上傳牌面照片</label>
+      <img id="rlPhotoPreview" style="display:none;max-width:200px;border-radius:8px;border:1px solid var(--border);display:block;margin-top:6px">
+      <button id="rlPhotoClearBtn" onclick="rlClearPhoto()" style="display:none;font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;margin-top:4px">✕ 移除照片</button>
+    </div>
     <button class="action-row-btn" onclick="saveReadingLog()">✦ 儲存實占紀錄</button>
   </div>
 
@@ -929,6 +936,17 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
       <button onclick="closeEditModal()" style="width:28px;height:28px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text3)">✕</button>
     </div>
     <div style="padding:18px" id="editModalBody"></div>
+  </div>
+</div>
+
+<!-- ADD DB NOTE MODAL -->
+<div id="addDbModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;overflow-y:auto;padding:20px">
+  <div style="max-width:480px;margin:0 auto;background:var(--bg);border-radius:var(--r);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.15)">
+    <div style="padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:17px">新增牌義</span>
+      <button onclick="closeAddDbModal()" style="width:28px;height:28px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text3)">✕</button>
+    </div>
+    <div style="padding:18px" id="addDbModalBody"></div>
   </div>
 </div>
 
@@ -951,6 +969,9 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 
 <!-- ═══ DATABASE PAGE ═══ -->
 <div class="page" id="page-database">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+    <button class="copy-btn" onclick="openAddDbModal()" style="padding:7px 16px;font-size:13px">＋ 新增牌義</button>
+  </div>
   <input class="db-search" id="dbSearch" placeholder="搜尋牌名…" oninput="renderDatabase()">
   <div class="db-tabs">
     <button class="db-tab active" id="dbtab-tarot" onclick="setDbTab('tarot')">塔羅牌</button>
@@ -2474,6 +2495,7 @@ function renderJournal(){
     <div class="journal-body">
       <div class="j-question">${entry.question}</div>
       <div class="j-cards-row">${(entry.cards||[]).map(c=>`<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`).join('')}</div>
+      ${entry.photo?`<img src="${entry.photo}" style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-bottom:10px;display:block">`:''}
       ${entry.interpText?`<div class="j-interp">${entry.interpText}</div>`:''}
       <div class="j-feedback">${entry.aiResponse||''}</div>
       <div style="margin-top:8px;display:flex;gap:12px;align-items:center">
@@ -2616,6 +2638,10 @@ function openJournalEdit(id){
     <div class="interp-box" style="margin-bottom:14px">
       <textarea class="interp-unified" id="editInterp" style="min-height:140px">${entry.interpText||entry.interp||''}</textarea>
     </div>
+    <div class="sec-label" style="margin-bottom:8px">AI 批改內容</div>
+    <div class="feedback-input-box" style="margin-bottom:14px">
+      <textarea class="feedback-input" id="editAiResponse" style="min-height:120px">${entry.aiResponse||''}</textarea>
+    </div>
     <button class="action-row-btn" onclick="saveJournalEdit(${id})">✦ 儲存修改</button>
     <div style="font-size:12px;color:#639922;margin-top:8px;display:none;text-align:center" id="editSaveOk">✓ 已儲存</div>`;
   document.getElementById('editModal').style.display='block';
@@ -2633,6 +2659,7 @@ function saveJournalEdit(id){
   if(!entry) return;
   entry.question=document.getElementById('editQuestion').value.trim()||entry.question;
   entry.interpText=document.getElementById('editInterp').value.trim();
+  entry.aiResponse=document.getElementById('editAiResponse')?.value?.trim()??entry.aiResponse;
   // Update cards
   const showOrient=entry.mode==='tarot';
   entry.cards=(entry.cards||[]).map((c,i)=>{
@@ -3326,6 +3353,7 @@ function saveReadingLog(){
     source:'reading', rlMode, mode:rlMode,
     drawMode:'physical', spread:spreadName,
     question, cards, interpText:interp,
+    photo:window._rlPhotoData||'',
     aiResponse:'', score:null, cats:['other'],
     date:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'}),
     isoDate:new Date().toISOString().slice(0,10)
@@ -3394,6 +3422,8 @@ ${interp}
       <button class="reset-btn" onclick="rlResetForm()">✦ 新增下一筆實占紀錄</button>
     </div>`;
 
+  // Clear photo data after save
+  window._rlPhotoData='';
   // Store prompt for copy
   window._rlSavedPrompt=aiPrompt;
   cont.scrollIntoView({behavior:'smooth',block:'start'});
@@ -3425,11 +3455,70 @@ function rlSaveSavedFeedback(id){
   if(entry) entry.aiResponse=feedback;
   saveJournal(log);
   const ok=document.getElementById('rlSavedFbOk');
-  if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2500);}
+  if(ok){ok.style.color='#639922';ok.style.display='block';}
+  // Render db notes block for saved feedback
+  const okEl=document.getElementById('rlSavedFbOk');
+  let dbBlock=document.getElementById('rlSavedDbNotesBlock_'+id);
+  if(!dbBlock){
+    dbBlock=document.createElement('div');
+    dbBlock.id='rlSavedDbNotesBlock_'+id;
+    if(okEl&&okEl.parentNode) okEl.parentNode.insertBefore(dbBlock,okEl.nextSibling);
+  }
+  const updatedEntry=getJournal().find(e=>e.id===id);
+  let notesHtml=`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin:12px 0 8px">將訂正重點記入牌義庫（選填）</div>`;
+  (updatedEntry?.cards||[]).forEach((c,i)=>{
+    notesHtml+=`<div class="card-note-item"><span class="card-note-label" style="font-size:11px;min-width:72px">${c.name}</span><textarea class="note-input" id="rl-saved-note-${id}-${i}" placeholder="訂正重點…"></textarea></div>`;
+  });
+  notesHtml+=`<button class="diary-save-feedback-btn" style="margin-top:8px" onclick="rlSaveSavedDbNotes(${id})">儲存到牌義庫</button>`;
+  notesHtml+=`<div class="rl-db-save-ok" id="rl-saved-db-ok-${id}">✓ 已儲存到牌義庫</div>`;
+  dbBlock.innerHTML=notesHtml;
+}
+function rlSaveSavedDbNotes(id){
+  const log=getJournal();
+  const entry=log.find(e=>e.id===id);
+  if(!entry) return;
+  const db=getDatabase();
+  const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
+  const deckMode=entry.rlMode==='lenormand'?'lenormand':'tarot';
+  (entry.cards||[]).forEach((c,i)=>{
+    const el=document.getElementById(`rl-saved-note-${id}-${i}`);
+    const note=el?.value?.trim();
+    if(!note) return;
+    const key=deckMode+'::'+c.name;
+    if(!db[key]) db[key]=[];
+    db[key].push({note,date:today,mode:deckMode});
+  });
+  saveDatabase(db);
+  const okEl=document.getElementById('rl-saved-db-ok-'+id);
+  if(okEl){okEl.style.display='block';setTimeout(()=>okEl.style.display='none',2500);}
+  renderDatabase();
 }
 
+function rlPreviewPhoto(input){
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    window._rlPhotoData=e.target.result;
+    const img=document.getElementById('rlPhotoPreview');
+    if(img){img.src=e.target.result;img.style.display='block';}
+    const btn=document.getElementById('rlPhotoClearBtn');
+    if(btn) btn.style.display='inline-block';
+  };
+  reader.readAsDataURL(file);
+}
+function rlClearPhoto(){
+  window._rlPhotoData='';
+  const img=document.getElementById('rlPhotoPreview');
+  if(img){img.src='';img.style.display='none';}
+  const inp=document.getElementById('rlPhotoInput');
+  if(inp) inp.value='';
+  const btn=document.getElementById('rlPhotoClearBtn');
+  if(btn) btn.style.display='none';
+}
 function rlResetForm(){
   document.getElementById('readingLogList').innerHTML='';
+  rlClearPhoto();
   window.scrollTo({top:document.getElementById('page-reading').offsetTop,behavior:'smooth'});
 }
 
@@ -3609,6 +3698,61 @@ function cardMatchesLenFilter(name){
   return true;
 }
 
+function openAddDbModal(){
+  const body=document.getElementById('addDbModalBody');
+  body.innerHTML=`
+    <div class="sec-label" style="margin-bottom:8px">Step 1 — 選擇牌系</div>
+    <div class="mode-switch" style="margin-bottom:16px">
+      <button class="mode-btn active" id="addDbTypeTarot" onclick="addDbSelectType('tarot')">🃏 塔羅牌</button>
+      <button class="mode-btn" id="addDbTypeLenormand" onclick="addDbSelectType('lenormand')">🌹 雷諾曼</button>
+    </div>
+    <div class="sec-label" style="margin-bottom:8px">Step 2 — 選擇牌名</div>
+    <select id="addDbCardSelect" class="spread-select" style="margin-bottom:16px"></select>
+    <div class="sec-label" style="margin-bottom:8px">Step 3 — 輸入牌義</div>
+    <div class="feedback-input-box" style="margin-bottom:16px">
+      <textarea class="feedback-input" id="addDbNoteText" placeholder="寫下這張牌的義意、關鍵詞或個人心得…" style="min-height:120px"></textarea>
+    </div>
+    <button class="action-row-btn" onclick="saveAddDbNote()">✦ 儲存牌義</button>
+    <div style="font-size:12px;color:#639922;margin-top:8px;display:none;text-align:center" id="addDbSaveOk">✓ 已加入牌義庫</div>
+  `;
+  window._addDbType='tarot';
+  addDbPopulateCards('tarot');
+  document.getElementById('addDbModal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeAddDbModal(){
+  document.getElementById('addDbModal').style.display='none';
+  document.body.style.overflow='';
+}
+function addDbSelectType(type){
+  window._addDbType=type;
+  document.getElementById('addDbTypeTarot').classList.toggle('active',type==='tarot');
+  document.getElementById('addDbTypeLenormand').classList.toggle('active',type==='lenormand');
+  addDbPopulateCards(type);
+}
+function addDbPopulateCards(type){
+  const sel=document.getElementById('addDbCardSelect');
+  if(!sel) return;
+  const cards=type==='lenormand'?LENORMAND_40:TAROT_ALL;
+  sel.innerHTML=cards.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+}
+function saveAddDbNote(){
+  const cardName=document.getElementById('addDbCardSelect')?.value;
+  const note=document.getElementById('addDbNoteText')?.value?.trim();
+  if(!cardName||!note){alert('請選擇牌名並輸入牌義喔！');return;}
+  const type=window._addDbType||'tarot';
+  const db=getDatabase();
+  const key=type+'::'+cardName;
+  if(!db[key]) db[key]=[];
+  const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
+  db[key].push({note,date:today,mode:type});
+  saveDatabase(db);
+  document.getElementById('addDbNoteText').value='';
+  const ok=document.getElementById('addDbSaveOk');
+  if(ok){ok.style.display='block';setTimeout(()=>{ok.style.display='none';},2500);}
+  renderDatabase();
+}
+
 function renderDatabase(){
   const db=getDatabase();
   const query=(document.getElementById('dbSearch').value||'').toLowerCase();
@@ -3657,9 +3801,13 @@ function renderDatabase(){
       <span class="db-count">${e.notes.length} 筆</span>
       <span style="font-size:11px;color:var(--text3)">▾</span>
     </div>
-    <div class="db-item-body">${e.notes.map((n,i)=>`<div class="db-note-row">
-      ${n.note}<div class="db-note-date">${n.date}</div>
-      <button class="db-del-btn" onclick="deleteDbNote('${e.key}',${i},event)">刪除此筆</button>
+    <div class="db-item-body">${e.notes.map((n,i)=>`<div class="db-note-row" id="dbnote-${e.key.replace(/:/g,'_')}-${i}">
+      <div class="db-note-text" id="dbnote-text-${e.key.replace(/:/g,'_')}-${i}">${n.note}</div>
+      <div class="db-note-date">${n.date}</div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="db-del-btn" style="color:var(--text3)" onclick="editDbNote('${e.key}',${i},event)">✎ 編輯</button>
+        <button class="db-del-btn" onclick="deleteDbNote('${e.key}',${i},event)">刪除此筆</button>
+      </div>
     </div>`).join('')}</div>`;
     list.appendChild(item);
   });
@@ -3670,6 +3818,35 @@ function deleteDbNote(key,idx,e){
   const db=getDatabase();if(!db[key]) return;
   db[key].splice(idx,1);if(!db[key].length) delete db[key];
   saveDatabase(db);renderDatabase();
+}
+function editDbNote(key,idx,e){
+  e.stopPropagation();
+  const db=getDatabase();
+  if(!db[key]||!db[key][idx]) return;
+  const safeKey=key.replace(/:/g,'_');
+  const row=document.getElementById('dbnote-'+safeKey+'-'+idx);
+  if(!row) return;
+  const currentNote=db[key][idx].note;
+  row.innerHTML=`
+    <textarea class="note-input" id="dbnote-edit-${safeKey}-${idx}" style="min-height:70px;width:100%;margin-bottom:6px">${currentNote}</textarea>
+    <div style="display:flex;gap:8px">
+      <button class="db-del-btn" style="color:var(--text)" onclick="saveDbNoteEdit('${key}',${idx},event)">✓ 儲存</button>
+      <button class="db-del-btn" onclick="renderDatabase();event.stopPropagation()">取消</button>
+    </div>
+  `;
+}
+function saveDbNoteEdit(key,idx,e){
+  e.stopPropagation();
+  const safeKey=key.replace(/:/g,'_');
+  const ta=document.getElementById('dbnote-edit-'+safeKey+'-'+idx);
+  if(!ta) return;
+  const newNote=ta.value.trim();
+  if(!newNote){alert('牌義不能為空喔！');return;}
+  const db=getDatabase();
+  if(!db[key]||!db[key][idx]) return;
+  db[key][idx].note=newNote;
+  saveDatabase(db);
+  renderDatabase();
 }
 
 </script>
