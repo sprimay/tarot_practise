@@ -343,6 +343,7 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
 .db-list{display:flex;flex-direction:column;gap:8px}
 .db-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .db-item-header{padding:10px 14px;background:var(--bg2);display:flex;align-items:center;gap:10px;cursor:pointer}
+.db-card-thumb{width:36px;flex-shrink:0;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.12)}
 .db-card-name{font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:16px;color:var(--text);flex:1}
 .db-count{font-size:11px;color:var(--text3)}
 .db-item-body{display:none;padding:12px 14px}
@@ -3906,7 +3907,9 @@ function renderDatabase(){
     const isRana=!isNaN(num)&&num>=37;
     const tagHtml=currentDbTab==='lenormand'&&isRana?
       ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:#FAC77533;color:#BA7517;margin-left:4px">Rana</span>':'';
+    const thumbHtml=getCardSVG({name:e.name},currentDbTab);
     item.innerHTML=`<div class="db-item-header" onclick="toggleDb(this)">
+      <div class="db-card-thumb">${thumbHtml}</div>
       <span class="db-card-name">${e.name}${tagHtml}</span>
       <span class="db-count">${e.notes.length} 筆</span>
       <span style="font-size:11px;color:var(--text3)">▾</span>
