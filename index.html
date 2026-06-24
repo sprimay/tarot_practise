@@ -3997,23 +3997,28 @@ function renderDbSheetBody(key){
     bodyEl.innerHTML='<p style="color:var(--text3);font-size:14px;text-align:center;padding:24px 0">尚無筆記</p>';
     return;
   }
-  bodyEl.innerHTML=notes.map((n,i)=>`
-    <div class="note-item" id="dbNoteItem_${i}" style="margin-bottom:12px;padding:12px;background:var(--sky-50);border-radius:var(--r);border:1px solid var(--border)">
+  bodyEl.innerHTML=notes.map((n,i)=>{
+    const text=typeof n==='object'?(n.note||''):(n||'');
+    const date=typeof n==='object'?(n.date||''):'';
+    const safeKey=key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div class="note-item" id="dbNoteItem_${i}" style="margin-bottom:12px;padding:12px;background:var(--sky-50);border-radius:var(--r);border:1px solid var(--border)">
       <div id="dbNoteView_${i}">
-        <div style="font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.6">${n}</div>
+        <div style="font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.6">${text}</div>
+        ${date?`<div style="font-size:11px;color:var(--text3);margin-top:4px">${date}</div>`:''}
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="editDbNote('${key.replace(/'/g,"\\'")}',${i},event)" style="font-size:12px;color:var(--brand);background:none;border:none;cursor:pointer;padding:0">編輯</button>
-          <button onclick="deleteDbNoteSheet('${key.replace(/'/g,"\\'")}',${i},event)" style="font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0">刪除</button>
+          <button onclick="editDbNote('${safeKey}',${i},event)" style="font-size:12px;color:var(--brand);background:none;border:none;cursor:pointer;padding:0">編輯</button>
+          <button onclick="deleteDbNoteSheet('${safeKey}',${i},event)" style="font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0">刪除</button>
         </div>
       </div>
       <div id="dbNoteEdit_${i}" style="display:none">
-        <textarea style="width:100%;font-size:14px;padding:8px;border:1px solid var(--border);border-radius:var(--r);resize:vertical;min-height:80px;box-sizing:border-box">${n}</textarea>
+        <textarea style="width:100%;font-size:14px;padding:8px;border:1px solid var(--border);border-radius:var(--r);resize:vertical;min-height:80px;box-sizing:border-box">${text}</textarea>
         <div style="display:flex;gap:8px;margin-top:6px">
-          <button onclick="saveDbNoteEdit('${key.replace(/'/g,"\\'")}',${i},event)" style="font-size:12px;background:var(--brand);color:#fff;border:none;border-radius:var(--rm);padding:4px 12px;cursor:pointer">儲存</button>
+          <button onclick="saveDbNoteEdit('${safeKey}',${i},event)" style="font-size:12px;background:var(--brand);color:#fff;border:none;border-radius:var(--rm);padding:4px 12px;cursor:pointer">儲存</button>
           <button onclick="document.getElementById('dbNoteEdit_${i}').style.display='none';document.getElementById('dbNoteView_${i}').style.display=''" style="font-size:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rm);padding:4px 12px;cursor:pointer">取消</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function deleteDbNoteSheet(key,idx,e){
@@ -4046,7 +4051,12 @@ function saveDbNoteEdit(key,idx,e){
   if(!val) return;
   const db=getDatabase();
   if(!db[key]) return;
-  db[key][idx]=val;
+  const existing=db[key][idx];
+  if(typeof existing==='object'){
+    db[key][idx]={...existing, note:val};
+  } else {
+    db[key][idx]=val;
+  }
   saveDatabase(db);
   renderDbSheetBody(key);
 }
