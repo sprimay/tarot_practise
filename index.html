@@ -692,7 +692,7 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
       </button>
     </div>
     <div class="custom-topic-area" id="customTopicArea" style="display:none">
-      <textarea class="custom-topic-input" id="customTopicInput" placeholder="輸入你想練習的情境或問題，系統會以此為基礎出題…" rows="3"></textarea>
+      <textarea class="custom-topic-input" id="customTopicInput" placeholder="輸入你想練習的主題或情境（例如：工作轉換、感情狀態），系統會自動幫你生成問題…" rows="3"></textarea>
     </div>
     <button class="gen-btn" id="genBtn" onclick="generateQuestion()"><span>✦</span><span>出題</span></button>
   </div>
@@ -1828,7 +1828,34 @@ async function generateQuestion(){
   let chosenQ='', defaultCats=[];
   if(selectedTopic==='custom'){
     const customText=(document.getElementById('customTopicInput')||{}).value?.trim();
-    chosenQ=customText||'請用這個牌陣幫我做一次自由解讀。';
+    if(customText){
+      const templates=currentMode==='lenormand'?[
+        `關於「${customText}」，現在的狀況是什麼？`,
+        `在「${customText}」這件事上，我需要注意什麼？`,
+        `「${customText}」的走向會如何發展？`,
+        `面對「${customText}」，我現在最重要的一步是什麼？`,
+        `「${customText}」帶給我的核心課題是什麼？`,
+        `在「${customText}」中，是什麼在支持我、什麼在阻礙我？`,
+        `關於「${customText}」，我還沒看到的盲點是什麼？`,
+        `「${customText}」這個方向，現在的時機對嗎？`,
+      ]:[
+        `關於「${customText}」，目前最需要我關注的能量是什麼？`,
+        `在「${customText}」這件事上，牌想給我什麼樣的提醒？`,
+        `「${customText}」的現況，塔羅怎麼看？`,
+        `面對「${customText}」，我現在最重要的功課是什麼？`,
+        `關於「${customText}」，是什麼在阻礙我？又有什麼在支持我？`,
+        `在「${customText}」的過程中，我需要放下什麼、又需要接納什麼？`,
+        `「${customText}」帶給我的核心課題是什麼？`,
+        `關於「${customText}」，宇宙想讓我知道什麼？`,
+        `「${customText}」這件事，我現在處於什麼樣的能量狀態？`,
+        `面對「${customText}」，我還沒有看清楚的盲點是什麼？`,
+      ];
+      let idx=Math.floor(Math.random()*templates.length);
+      if(templates[idx]===currentQuestion&&templates.length>1) idx=(idx+1)%templates.length;
+      chosenQ=templates[idx];
+    } else {
+      chosenQ='請用這個牌陣幫我做一次自由解讀。';
+    }
     defaultCats=['other'];
   } else {
     const keys=Object.keys(qBank);
