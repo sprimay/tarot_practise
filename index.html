@@ -1072,7 +1072,13 @@ const CARD_IMG_PATH = (function(){
     if(name==='__back__') return 'images/Card/牌背.jpg';
     if(mode==='lenormand'){
       const m=name.match(/^(\d+)\s+(.+)$/);
-      if(m) return 'images/Card/雷諾曼/'+parseInt(m[1])+'.'+m[2]+'.jpg';
+      if(m){
+        const num=parseInt(m[1]);
+        const nameMap={'房屋':'房子','烏雲':'雲','大鐮刀':'鐮刀','孩子':'小孩',
+          '鸛鶴':'鸛鳥','十字路口':'岔路','心':'愛心','書本':'書','書信':'信','百合花':'百合'};
+        const fname=nameMap[m[2]]||m[2];
+        return 'images/Card/雷諾曼/'+num+'.'+fname+'.jpg';
+      }
       return null;
     }
     if(major[name]) return 'images/Card/大阿爾克納/'+major[name]+'.jpg';
