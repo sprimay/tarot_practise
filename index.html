@@ -2673,6 +2673,11 @@ function openRecDayPanel(dateStr,entries){
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">${(entry.cards||[]).map(c=>`<span class="j-card-chip">${c.position} · ${c.name}${c.reversed?' ↓':''}</span>`).join('')}</div>
       ${entry.interpText?`<div class="j-interp">${entry.interpText}</div>`:''}
       <div class="j-feedback">${entry.aiResponse||''}</div>
+      ${entry.photo?`<div style="margin-top:10px"><img src="${entry.photo}" style="max-width:100%;border-radius:var(--r);display:block"></div>`:''}
+      <div style="display:flex;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <button onclick="openJournalEdit('${entry.id}')" style="font-size:12px;color:var(--brand);background:none;border:none;cursor:pointer;padding:0">✎ 編輯</button>
+        <button onclick="deleteJournalEntry('${entry.id}');closeRecDayPanel()" style="font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0">刪除</button>
+      </div>
     </div>`;
     body.appendChild(div);
   });
