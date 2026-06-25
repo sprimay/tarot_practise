@@ -287,6 +287,7 @@ textarea.note-input:focus{border-color:var(--border2)}
 .diary-card-art img{width:100%;height:auto;display:block;border-radius:5px}
 .diary-card-name{font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:11px;font-weight:500;margin-top:4px}
 .diary-card-orient{font-size:9px;color:var(--text3);margin-top:2px}
+.diary-card.reversed .diary-card-art{transform:rotate(180deg);border-radius:5px}
 /* physical diary area */
 .diary-physical-area{display:none}
 .diary-phys-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
@@ -2945,7 +2946,7 @@ function renderDiaryEditor(body,existing){
   diaryDrawMode=existing?.drawMode||'digital';
   diaryDeckType=(existing?.deckType==='mixed'?'tarot':existing?.deckType)||'tarot'; // 'tarot'|'lenormand' only
   diaryDigitalCards=existing?.cards||[];
-  diaryPhysCards=existing&&existing.drawMode==='physical'?(existing.cards||[]).map(c=>c.name):['',''];
+  diaryPhysCards=existing&&existing.drawMode==='physical'?(existing.cards||[]).map(c=>({name:c.name||'',reversed:c.reversed||false})):[{name:'',reversed:false},{name:'',reversed:false}];
 
   const cardsHtml=diaryDigitalCards.map((c,i)=>`
     <div class="diary-card${c.reversed?' reversed':''}" style="animation-delay:${i*0.07}s">
@@ -2960,16 +2961,24 @@ function renderDiaryEditor(body,existing){
   // Build phys rows via DOM to avoid quote conflicts
   function buildPhysRows(){
     const cont=document.createElement('div');
-    diaryPhysCards.forEach((name,i)=>{
+    diaryPhysCards.forEach((card,i)=>{
+      const name=typeof card==='object'?card.name:card;
+      const rev=typeof card==='object'?card.reversed:false;
       const row=document.createElement('div');
       row.className='diary-phys-row';row.id='dpr_'+i;
-      const inputHtml=isLenDiary
-        ? '<select class="card-select" id="dpi_'+i+'">'+buildLenOptions(name)+'</select>'
-        : buildTarotSuitSelect('dpi_'+i,name);
       const num=document.createElement('span');num.className='diary-phys-num';num.textContent=i+1;
       row.appendChild(num);
-      const tmp=document.createElement('div');tmp.innerHTML=inputHtml;
+      const tmp=document.createElement('div');
+      tmp.innerHTML=isLenDiary
+        ? '<select class="card-select" id="dpi_'+i+'">'+buildLenOptions(name)+'</select>'
+        : buildTarotSuitSelect('dpi_'+i,name);
       while(tmp.firstChild) row.appendChild(tmp.firstChild);
+      if(!isLenDiary){
+        const ot=document.createElement('div');ot.className='orient-toggle';ot.id='dot_'+i;
+        ot.innerHTML='<button class="orient-btn'+(rev?'':' active')+'" id="dou_'+i+'" onclick="dOrient('+i+',false)">正位</button>'
+          +'<button class="orient-btn'+(rev?' active':'')+'" id="dor_'+i+'" onclick="dOrient('+i+',true)">逆位</button>';
+        row.appendChild(ot);
+      }
       const del=document.createElement('button');del.className='diary-phys-del';
       del.textContent='✕';del.onclick=()=>diaryPhysDel(i);
       row.appendChild(del);
@@ -3144,32 +3153,50 @@ function diaryDraw(){
     </div>`).join('');
 }
 
+function dOrient(i, isRev){
+  document.getElementById('dou_'+i).classList.toggle('active',!isRev);
+  document.getElementById('dor_'+i).classList.toggle('active',isRev);
+}
+
 function diaryPhysAdd(){
-  diaryPhysCards.push('');
+  diaryPhysCards.push({name:'',reversed:false});
   const cont=document.getElementById('diaryPhysRows');
   const i=diaryPhysCards.length-1;
   const isLen=diaryDeckType==='lenormand';
   const row=document.createElement('div');row.className='diary-phys-row';row.id='dpr_'+i;
-  const inputHtml=isLen
+  const num=document.createElement('span');num.className='diary-phys-num';num.textContent=i+1;
+  row.appendChild(num);
+  const tmp=document.createElement('div');
+  tmp.innerHTML=isLen
     ? '<select class="card-select" id="dpi_'+i+'">'+buildLenOptions('')+'</select>'
     : buildTarotSuitSelect('dpi_'+i,'');
-  row.innerHTML='<span class="diary-phys-num">'+(i+1)+'</span>'+inputHtml
-    +'<button class="diary-phys-del" onclick="diaryPhysDel('+i+')">✕</button>';
+  while(tmp.firstChild) row.appendChild(tmp.firstChild);
+  if(!isLen){
+    const ot=document.createElement('div');ot.className='orient-toggle';ot.id='dot_'+i;
+    ot.innerHTML='<button class="orient-btn active" id="dou_'+i+'" onclick="dOrient('+i+',false)">正位</button>'
+      +'<button class="orient-btn" id="dor_'+i+'" onclick="dOrient('+i+',true)">逆位</button>';
+    row.appendChild(ot);
+  }
+  const del=document.createElement('button');del.className='diary-phys-del';del.textContent='✕';
+  del.onclick=()=>diaryPhysDel(i);
+  row.appendChild(del);
   cont.appendChild(row);
-  if(!isLen){/* tarot uses dropdowns, no focus needed */}
 }
 function diaryPhysDel(i){
   const vals=[];
   document.querySelectorAll('#diaryPhysRows .diary-phys-row').forEach((row,idx)=>{
     const inp=document.getElementById('dpi_'+idx+'_card')||document.getElementById('dpi_'+idx);
-    vals.push(inp?inp.value:'');
+    const revBtn=document.getElementById('dor_'+idx);
+    vals.push({name:inp?inp.value:'',reversed:revBtn?revBtn.classList.contains('active'):false});
   });
   vals.splice(i,1);
   diaryPhysCards=vals;
   const isLen=diaryDeckType==='lenormand';
   const cont=document.getElementById('diaryPhysRows');
   cont.innerHTML='';
-  diaryPhysCards.forEach((v,idx)=>{
+  diaryPhysCards.forEach((card,idx)=>{
+    const v=typeof card==='object'?card.name:card;
+    const rev=typeof card==='object'?card.reversed:false;
     const row=document.createElement('div');
     row.className='diary-phys-row';row.id='dpr_'+idx;
     const num=document.createElement('span');num.className='diary-phys-num';num.textContent=idx+1;
@@ -3179,6 +3206,12 @@ function diaryPhysDel(i){
       ? '<select class="card-select" id="dpi_'+idx+'">'+buildLenOptions(v)+'</select>'
       : buildTarotSuitSelect('dpi_'+idx,v);
     while(tmp.firstChild) row.appendChild(tmp.firstChild);
+    if(!isLen){
+      const ot=document.createElement('div');ot.className='orient-toggle';ot.id='dot_'+idx;
+      ot.innerHTML='<button class="orient-btn'+(rev?'':' active')+'" id="dou_'+idx+'" onclick="dOrient('+idx+',false)">正位</button>'
+        +'<button class="orient-btn'+(rev?' active':'')+'" id="dor_'+idx+'" onclick="dOrient('+idx+',true)">逆位</button>';
+      row.appendChild(ot);
+    }
     const del=document.createElement('button');
     del.className='diary-phys-del';del.textContent='✕';
     del.onclick=(function(n){return function(){diaryPhysDel(n);};})(idx);
@@ -3245,7 +3278,9 @@ function saveDiaryEntry(){
       } else {
         v=getTarotSelectValue('dpi_'+i);
       }
-      if(v) cards.push({name:v,sym:'',reversed:false});
+      const revBtn=document.getElementById('dor_'+i);
+        const rev=revBtn?revBtn.classList.contains('active'):false;
+        if(v) cards.push({name:v,sym:'',reversed:rev});
     });
   }
   const diary=getDiary();
