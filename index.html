@@ -2987,6 +2987,10 @@ function renderDiaryEditor(body,existing){
       <span class="diary-deck-label">牌組：</span>
       <button class="diary-deck-btn ${diaryDeckType==='tarot'?'active':''}" onclick="setDiaryDeck('tarot',this)">塔羅</button>
       <button class="diary-deck-btn ${diaryDeckType==='lenormand'?'active':''}" onclick="setDiaryDeck('lenormand',this)">雷諾曼</button>
+      ${diaryDeckType==='lenormand'?`<span style="margin-left:6px;display:flex;gap:4px;align-items:center">
+        <button class="diary-deck-btn ${lenSystem==='36'?'active':''}" style="font-size:11px;padding:3px 8px" onclick="setDiaryLenSystem('36')">36 張</button>
+        <button class="diary-deck-btn ${lenSystem==='rana40'?'active':''}" style="font-size:11px;padding:3px 8px" onclick="setDiaryLenSystem('rana40')">Rana 40 張</button>
+      </span>`:''}
     </div>
     <div class="diary-digital-area" id="diaryDigitalArea" style="display:${diaryDrawMode==='digital'?'block':'none'}">
       <div class="diary-draw-count">
@@ -3056,6 +3060,17 @@ function renderDiaryEditor(body,existing){
   // Fix note textarea value safely (avoid backtick issues)
   const noteEl=document.getElementById('diaryNoteInput');
   if(noteEl && existing?.note) noteEl.value=existing.note;
+}
+
+function setDiaryLenSystem(sys){
+  lenSystem=sys;
+  // 重新整理所有雷諾曼選牌下拉
+  document.querySelectorAll('#diaryPhysRows select.card-select').forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML=buildLenOptions(cur);
+  });
+  // 重新渲染日記面板（讓按鈕 active 狀態更新）
+  openDiaryPanel(activeDiaryDate);
 }
 
 function setDiaryDeck(deck,btn){
