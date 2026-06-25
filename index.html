@@ -383,9 +383,9 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
 /* Diary deck selector */
 .diary-deck-row{display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
 .diary-deck-label{font-size:11px;color:var(--text3)}
-.diary-deck-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
-.diary-deck-btn:hover{background:var(--bg2);border-color:var(--border2)}
-.diary-deck-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
+.diary-deck-btn,.diary-type-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--bg);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.diary-deck-btn:hover,.diary-type-btn:hover{background:var(--bg2);border-color:var(--border2)}
+.diary-deck-btn.active,.diary-type-btn.active{border-color:var(--border2);background:var(--bg2);color:var(--text)}
 
 /* ═══ MOBILE RESPONSIVE ═══ */
 @media (max-width: 600px){
@@ -2985,12 +2985,12 @@ function renderDiaryEditor(body,existing){
     </div>
     <div class="diary-deck-row">
       <span class="diary-deck-label">牌組：</span>
-      <button class="diary-deck-btn ${diaryDeckType==='tarot'?'active':''}" onclick="setDiaryDeck('tarot',this)">塔羅</button>
-      <button class="diary-deck-btn ${diaryDeckType==='lenormand'?'active':''}" onclick="setDiaryDeck('lenormand',this)">雷諾曼</button>
-      ${diaryDeckType==='lenormand'?`<span style="margin-left:6px;display:flex;gap:4px;align-items:center">
-        <button class="diary-deck-btn ${lenSystem==='36'?'active':''}" style="font-size:11px;padding:3px 8px" onclick="setDiaryLenSystem('36')">36 張</button>
-        <button class="diary-deck-btn ${lenSystem==='rana40'?'active':''}" style="font-size:11px;padding:3px 8px" onclick="setDiaryLenSystem('rana40')">Rana 40 張</button>
-      </span>`:''}
+      <button class="diary-type-btn ${diaryDeckType==='tarot'?'active':''}" onclick="setDiaryDeck('tarot',this)">塔羅</button>
+      <button class="diary-type-btn ${diaryDeckType==='lenormand'?'active':''}" onclick="setDiaryDeck('lenormand',this)">雷諾曼</button>
+      <span id="diaryLenSysRow" style="margin-left:6px;display:${diaryDeckType==='lenormand'?'flex':'none'};gap:4px;align-items:center">
+        <button class="diary-deck-btn ${lenSystem==='36'?'active':''}" id="diaryLenBtn36" style="font-size:11px;padding:3px 8px" onclick="setDiaryLenSystem('36')">36 張</button>
+        <button class="diary-deck-btn ${lenSystem==='rana40'?'active':''}" id="diaryLenBtnRana" style="font-size:11px;padding:3px 8px" onclick="setDiaryLenSystem('rana40')">Rana 40 張</button>
+      </span>
     </div>
     <div class="diary-digital-area" id="diaryDigitalArea" style="display:${diaryDrawMode==='digital'?'block':'none'}">
       <div class="diary-draw-count">
@@ -3064,19 +3064,28 @@ function renderDiaryEditor(body,existing){
 
 function setDiaryLenSystem(sys){
   lenSystem=sys;
-  // 重新整理所有雷諾曼選牌下拉
+  // 更新切換鈕 active 狀態
+  const btn36=document.getElementById('diaryLenBtn36');
+  const btnRana=document.getElementById('diaryLenBtnRana');
+  if(btn36) btn36.classList.toggle('active', sys==='36');
+  if(btnRana) btnRana.classList.toggle('active', sys==='rana40');
+  // 重新整理紙本選牌下拉
   document.querySelectorAll('#diaryPhysRows select.card-select').forEach(sel=>{
     const cur=sel.value;
     sel.innerHTML=buildLenOptions(cur);
   });
-  // 重新渲染日記面板（讓按鈕 active 狀態更新）
-  openDiaryPanel(activeDiaryDate);
+  // 電腦抽牌：清空已抽結果，讓使用者重新抽
+  diaryDigitalCards=[];
+  const row=document.getElementById('diaryCardsRow');
+  if(row) row.innerHTML='';
 }
 
 function setDiaryDeck(deck,btn){
   diaryDeckType=deck;
-  document.querySelectorAll('.diary-deck-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.diary-type-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  const lenRow=document.getElementById('diaryLenSysRow');
+  if(lenRow) lenRow.style.display=deck==='lenormand'?'flex':'none';
   // 重新渲染紙本輸入列（塔羅↔雷諾曼切換時更新輸入類型）
   const cont=document.getElementById('diaryPhysRows');
   if(!cont) return;
