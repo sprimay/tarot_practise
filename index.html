@@ -636,6 +636,11 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
     <button class="nav-signout" onclick="signOut()">登出</button>
   </div>
 </nav>
+<div id="navBackRow" style="display:none;border-bottom:1px solid var(--border);padding:4px 16px 6px;background:var(--bg);position:sticky;top:52px;z-index:99;width:100%">
+  <button onclick="goPage('home')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text3);padding:0;display:flex;align-items:center;gap:3px">
+    <span style="font-size:17px;line-height:1">‹</span> 首頁
+  </button>
+</div>
 
 <!-- ═══ PRACTICE PAGE ═══ -->
 <div class="page active" id="page-home">
@@ -739,7 +744,7 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 .home-feature-desc{font-size:11px;color:var(--text3);line-height:1.4}
 .home-user-greeting{font-size:13px;color:var(--text2);margin-bottom:20px}
 /* ══ Bottom Tab Bar ══ */
-.bottom-tab-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;max-width:720px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-tab-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom)}
 .bottom-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 6px;cursor:pointer;border:none;background:none;gap:3px;min-width:0;transition:color 0.15s}
 .bottom-tab-icon{font-size:20px;line-height:1}
 .bottom-tab-label{font-size:9px;color:var(--text3);font-family:'DM Sans','Noto Sans TC',sans-serif;white-space:nowrap;transition:color 0.15s}
@@ -1872,6 +1877,9 @@ function goPage(p){
   document.querySelectorAll('.page').forEach(el=>{el.classList.remove('active');el.style.display='';});
   document.getElementById('page-'+p).classList.add('active');
   updateBottomTab(p);
+  document.getElementById('bottomTabBar').style.display=p==='home'?'none':'flex';
+  const backRow=document.getElementById('navBackRow');
+  if(backRow) backRow.style.display=p==='home'?'none':'block';
   if(p==='record'){
     if(recordView==='cal') renderRecordCalendar(); else renderJournal();
   }
@@ -4233,11 +4241,7 @@ function saveDbNoteEdit(key,idx,e){
   </div>
 
 <!-- Bottom Tab Bar -->
-<div class="bottom-tab-bar" id="bottomTabBar">
-  <button class="bottom-tab active" id="btab-home" onclick="goPage('home')">
-    <span class="bottom-tab-icon"><img src="images/nav_icon/icon_首頁.svg" style="width:22px;height:22px"></span>
-    <span class="bottom-tab-label">首頁</span>
-  </button>
+<div class="bottom-tab-bar" id="bottomTabBar" style="display:none">
   <button class="bottom-tab" id="btab-practice" onclick="goPage('practice')">
     <span class="bottom-tab-icon"><img src="images/nav_icon/icon_解讀練習.svg" style="width:22px;height:22px"></span>
     <span class="bottom-tab-label">解讀練習</span>
