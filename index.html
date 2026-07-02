@@ -46,12 +46,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans TC'
 
 /* NAV */
 .nav{display:flex;flex-direction:column;border-bottom:1px solid var(--border);background:rgba(235,245,250,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
-.nav-top-row{display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 0}
 .nav-logo{padding:10px 16px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:17px;font-weight:500;letter-spacing:0.02em;flex:1;color:var(--ink-900)}
-.nav-tabs{display:flex}
-.nav-tab{padding:10px 14px;font-size:14px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans','Noto Sans TC',sans-serif;white-space:nowrap;font-weight:500}
-.nav-tab:hover{color:var(--text2)}
-.nav-tab.active{color:#336698;border-bottom:2px solid #336698}
 
 .page{display:none;max-width:720px;margin:0 auto;padding:24px 20px}
 .page.active{display:block}
@@ -161,7 +156,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans TC'
 /* ── Spread layout grids ── */
 .spread-cross{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(4,auto);gap:8px;justify-content:center;margin-bottom:6px}
 .spread-either{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(3,auto);gap:8px;justify-content:center;margin-bottom:6px}
-.spread-relation{display:grid;grid-template-columns:repeat(3,90px);grid-template-rows:repeat(2,auto);gap:8px;justify-content:center;margin-bottom:6px}
 .spread-celtic{display:grid;grid-template-columns:repeat(4,90px);grid-template-rows:repeat(4,auto);gap:8px;justify-content:center;margin-bottom:6px}
 .spread-grid-placeholder{visibility:hidden;pointer-events:none}
 .interp-section{display:none;margin-top:20px}
@@ -293,18 +287,13 @@ textarea.note-input:focus{border-color:var(--border2)}
 .diary-phys-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .diary-phys-row{display:flex;align-items:center;gap:8px}
 .diary-phys-num{font-size:11px;color:var(--text3);min-width:16px}
-.diary-phys-input{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:14px;color:var(--text);background:var(--bg2);outline:none}
 .card-select{flex:1;border:1px solid var(--border);border-radius:var(--rm);padding:7px 10px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:14px;color:var(--text);background:var(--bg2);outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238094AA' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-.diary-phys-input:focus{border-color:var(--border2);background:var(--bg)}
 .diary-phys-del{width:24px;height:24px;border:1px solid var(--border);border-radius:var(--rm);background:var(--bg);color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
 .diary-phys-del:hover{color:#E24B4A;border-color:#E24B4A}
 .diary-phys-add{width:100%;padding:7px;border:1px dashed var(--border2);border-radius:var(--rm);background:transparent;font-size:12px;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .diary-phys-add:hover{background:var(--bg2);color:var(--text2)}
-.diary-phys-img-wrap{margin-top:6px;width:100%;text-align:center}
-.diary-phys-img-preview{max-width:80px;border-radius:6px;border:1px solid var(--border);display:block;margin:4px auto 0}
 .diary-phys-upload-btn{font-size:11px;color:var(--text3);cursor:pointer;padding:4px 10px;border:1px dashed var(--border);border-radius:var(--rm);background:transparent;font-family:'DM Sans',sans-serif;display:inline-block;transition:all 0.15s}
 .diary-phys-upload-btn:hover{border-color:var(--brand);color:var(--brand)}
-.diary-phys-upload-input{display:none}
 /* diary note */
 .diary-note-label{font-size:11px;color:var(--text3);margin-bottom:6px}
 .diary-note-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:12px}
@@ -342,18 +331,6 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
 .db-tab{padding:9px 16px;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif}
 .db-tab.active{color:var(--text);border-bottom:2px solid var(--text)}
 .db-list{display:flex;flex-direction:column;gap:8px}
-.db-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.db-item-header{padding:10px 14px;background:var(--bg2);display:flex;align-items:center;gap:10px;cursor:pointer}
-.db-card-thumb{width:36px;flex-shrink:0;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.12)}
-.db-card-name{font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:16px;color:var(--text);flex:1}
-.db-count{font-size:11px;color:var(--text3)}
-.db-item-body{display:none;padding:12px 14px}
-.db-item-body.open{display:block}
-.db-note-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.7;color:var(--text)}
-.db-note-row:last-child{border-bottom:none}
-.db-note-date{font-size:11px;color:var(--text3);margin-top:2px}
-.db-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
-.db-del-btn{font-size:11px;color:#E24B4A;cursor:pointer;margin-top:4px;background:none;border:none;padding:0;font-family:'DM Sans',sans-serif}
 /* AUTH */
 .google-btn{width:100%;padding:12px 20px;border:1.5px solid var(--border);border-radius:var(--r);background:#fff;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.15s;box-shadow:var(--shadow-sm)}
 .google-btn:hover{background:var(--bg2)}
@@ -392,11 +369,7 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
 @media (max-width: 600px){
   /* Nav: clean two-row layout on mobile */
   .nav{flex-direction:column}
-  .nav-top-row{padding:0 12px 0 0}
   .nav-logo{padding:10px 14px;font-size:15px}
-  .nav-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .nav-tabs::-webkit-scrollbar{display:none}
-  .nav-tab{padding:9px 11px;font-size:11px;flex-shrink:0}
   .nav-auth{padding:0 4px}
   .nav-user-name{display:none}
   .nav-avatar{width:26px;height:26px}
@@ -478,7 +451,6 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
   /* Database */
   .db-sub-filter{gap:4px}
   .db-sub-btn{font-size:10px;padding:3px 10px}
-  .db-card-name{font-size:14px}
 
   /* Len system switch */
   .len-system-switch{gap:5px}
@@ -510,25 +482,7 @@ textarea.diary-feedback-input{width:100%;border:none;padding:12px 14px;font-fami
 .rl-input-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
 textarea.rl-question-input{width:100%;border:none;padding:14px 16px;font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:17px;font-style:italic;color:var(--text);background:transparent;resize:none;line-height:1.6;outline:none}
 textarea.rl-question-input:focus{outline:none}
-.rl-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
-.rl-item-header{padding:12px 16px;background:var(--bg2);display:flex;align-items:center;gap:8px;cursor:pointer;border-bottom:1px solid transparent;flex-wrap:wrap}
-.rl-item-header.open{border-bottom-color:var(--border)}
-.rl-date{font-size:12px;color:var(--text3)}
-.rl-question-preview{font-family:'DM Sans','Noto Sans TC',sans-serif;font-size:14px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
-.rl-item-body{display:none;padding:14px 16px}
-.rl-item-body.open{display:block}
-.rl-q-full{font-family:'DM Sans','Noto Sans TC',sans-serif;font-style:italic;font-size:16px;color:var(--text2);margin-bottom:10px;line-height:1.5}
-.rl-cards-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.rl-interp{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid var(--border2);margin-bottom:8px}
-.rl-teacher-box{padding:10px 12px;background:var(--bg2);border-radius:var(--rm);border-left:3px solid #C4A882;margin-top:8px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap}
-.rl-action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .rl-action-link{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0}
-.rl-prompt-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
-.rl-prompt-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:10px}
-.rl-prompt-header{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.rl-prompt-text{padding:12px 14px;font-size:12px;line-height:1.8;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto}
-.rl-feedback-box{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);margin-bottom:8px}
-textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:transparent;resize:none;min-height:110px;line-height:1.7;outline:none}
 .rl-db-save-ok{font-size:12px;color:#639922;margin-top:6px;display:none;text-align:center}
 /* reading log saved notice */
 .rl-saved-notice{text-align:center;padding:20px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);margin-bottom:16px}
@@ -540,7 +494,6 @@ textarea.rl-feedback-input{width:100%;border:none;padding:12px 14px;font-family:
 
 /* ═══ LOADING SCREEN ═══ */
 #loadingScreen{position:fixed;inset:0;z-index:9999;background:#A8C8E8;transition:opacity 0.7s ease;}
-#loadingScreen.fade-out{opacity:0;pointer-events:none;}
 .ls-bg{position:absolute;inset:0;background-size:cover;background-position:center center;}
 .ls-bar-wrap{position:absolute;bottom:28%;left:50%;transform:translateX(-50%);width:min(260px,55vw);display:flex;flex-direction:column;align-items:center;gap:10px;}
 @media(max-width:600px){.ls-bar-wrap{bottom:22%;width:min(220px,65vw);}}
@@ -1859,12 +1812,6 @@ function showLoginGate(){
   document.querySelectorAll('.page').forEach(el=>el.style.display='none');
   document.getElementById('loginGate').style.display='block';
 }
-function hideLoginGate(){
-  document.getElementById('loginGate').style.display='none';
-  document.querySelectorAll('.page').forEach(el=>{
-    el.style.display=el.classList.contains('active')?'block':'none';
-  });
-}
 
 function goPage(p){
   // Gate check for protected pages
@@ -2141,11 +2088,6 @@ function buildLenOptions(selectedName){
   return '<option value="">選擇牌名…</option>'
     + pool.map(c=>`<option value="${c.name}"${c.name===selectedName?' selected':''}>${c.name}</option>`).join('');
 }
-function buildTarotOptions(selectedName){
-  return '<option value="">選擇牌名…</option>'
-    + TAROT_ALL.map(c=>`<option value="${c.name}"${c.name===selectedName?' selected':''}>${c.name}</option>`).join('');
-}
-
 // ══════════════════════════════════════════
 //  DRAW & INTERPRET
 // ══════════════════════════════════════════
@@ -3491,8 +3433,6 @@ function saveDiaryFeedback(dateStr){
 // ══════════════════════════════════════════
 let rlPositions=[];
 let rlPosCounter=0;
-let rlCurrentPrompt='';
-let rlCurrentEntryId=null;
 let rlMode='tarot'; // 'tarot' | 'lenormand'
 let rlCurrentPresetName='';
 
@@ -3790,134 +3730,6 @@ function renderReadingLog(){
   if(cont) cont.innerHTML='';
 }
 
-function toggleRlItem(header){
-  header.classList.toggle('open');
-  header.nextElementSibling.classList.toggle('open');
-}
-
-function rlDeleteEntry(id){
-  if(!confirm('確定要刪除這筆紀錄嗎？')) return;
-  const log=getJournal().filter(e=>e.id!==id);
-  saveJournal(log);renderReadingLog();
-}
-function clearReadingLog(){
-  if(!confirm('確定要清除所有實占紀錄嗎？')) return;
-  const log=getJournal().filter(e=>e.source!=='reading');
-  saveJournal(log);renderReadingLog();
-}
-
-function rlGeneratePrompt(id){
-  const entry=getJournal().find(e=>e.id===id);
-  if(!entry) return;
-  rlCurrentEntryId=id;
-  const cardsSummary=(entry.cards||[]).map(c=>
-    `${c.position}：${c.name}${entry.rlMode==='tarot'?(c.reversed?' (逆位)':' (正位)'):''}`
-  ).join('\n');
-
-  rlCurrentPrompt=`你是一位溫暖且專業的${entry.rlMode==='lenormand'?'雷諾曼':'塔羅'}老師。學員使用實體紙牌進行了一次真實占卜，並記錄了自己的解讀。請根據牌義給予提點與訂正，幫助學員更準確地理解牌意。
-
-【問題】
-${entry.question}
-
-【牌陣與牌面】
-${cardsSummary}
-
-【學員的解讀】
-${entry.interpText||entry.interp||''}
-
-請用繁體中文回應，格式如下：
-
-✦ 牌義提點：
-（針對各張牌在此位置的核心意義給予詳細說明，最多5點）
-
-▲ 解讀訂正：
-（若學員解讀有偏離牌義之處，全部列出不限點數，直接但溫和地指出，說明正確理解方向）
-
-♡ 整體洞見：
-（結合整個牌陣，給出完整的整體訊息與延伸解讀方向）
-
-語氣溫暖但清晰，詳細完整。`;
-
-  const section=document.getElementById('rl-prompt-'+id);
-  if(!section) return;
-  section.style.display='block';
-  const promptTextSafe=rlCurrentPrompt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  section.innerHTML=
-    '<div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:10px">📖 老師提點 Prompt</div>'
-    +'<div class="rl-prompt-box">'
-      +'<div class="rl-prompt-header">'
-        +'<span style="font-size:11px;color:var(--text2)">複製後貼到 AI 平台</span>'
-        +'<button class="copy-btn" id="rl-copy-'+id+'" onclick="rlCopyPrompt('+id+')">複製</button>'
-      +'</div>'
-      +'<div class="rl-prompt-text">'+promptTextSafe+'</div>'
-    +'</div>'
-    +'<div class="platform-links" style="margin-bottom:12px">'
-      +'<span class="platform-label">快速前往：</span>'
-      +'<a class="platform-link" href="https://claude.ai" target="_blank">Claude</a>'
-      +'<a class="platform-link" href="https://chatgpt.com" target="_blank">ChatGPT</a>'
-      +'<a class="platform-link" href="https://gemini.google.com" target="_blank">Gemini</a>'
-    +'</div>'
-    +'<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">貼上 AI 的回饋</div>'
-    +'<div class="rl-feedback-box">'
-      +'<textarea class="rl-feedback-input" id="rl-feedback-'+id+'" placeholder="將 AI 的提點與訂正貼在這裡…"></textarea>'
-    +'</div>'
-    +'<button class="diary-save-feedback-btn" onclick="rlSaveFeedback('+id+')">儲存回饋 + 加入牌義庫</button>'
-    +'<div id="rl-dbnotes-'+id+'"></div>'
-    +'<div class="rl-db-save-ok" id="rl-db-ok-'+id+'">✓ 已儲存到牌義庫</div>';
-    rlRenderDbNotes(id);
-  section.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-function rlCopyPrompt(id){
-  if(!rlCurrentPrompt) return;
-  navigator.clipboard.writeText(rlCurrentPrompt).then(()=>{
-    const btn=document.getElementById('rl-copy-'+id);
-    if(btn){btn.textContent='✓ 已複製';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='複製';btn.classList.remove('copied');},2500);}
-  }).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=rlCurrentPrompt;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-  });
-}
-
-function rlRenderDbNotes(id){
-  const entry=getJournal().find(e=>e.id===id);
-  if(!entry) return;
-  const cont=document.getElementById('rl-dbnotes-'+id);
-  if(!cont) return;
-  cont.innerHTML=`<div style="font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin:10px 0 8px">將訂正重點記入牌義庫（選填）</div>`;
-  (entry.cards||[]).forEach((c,i)=>{
-    const row=document.createElement('div');row.className='card-note-item';
-    row.innerHTML=`<span class="card-note-label" style="font-size:11px;min-width:72px">${c.name}</span>
-      <textarea class="note-input" id="rl-note-${id}-${i}" placeholder="訂正重點…"></textarea>`;
-    cont.appendChild(row);
-  });
-}
-
-function rlSaveFeedback(id){
-  const feedbackEl=document.getElementById('rl-feedback-'+id);
-  const feedback=feedbackEl?.value?.trim();
-  if(!feedback){alert('請先貼上 AI 的回饋喔！');return;}
-  const log=getJournal();
-  const entry=log.find(e=>e.id===id);
-  if(entry) entry.aiResponse=feedback;
-  saveJournal(log);
-  const db2=getDatabase();
-  const today=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric'});
-  const deckMode=entry?.rlMode==='lenormand'?'lenormand':'tarot';
-  (entry?.cards||[]).forEach((c,i)=>{
-    const el=document.getElementById(`rl-note-${id}-${i}`);
-    const note=el?.value?.trim();
-    if(!note) return;
-    const key=deckMode+'::'+c.name;
-    if(!db2[key]) db2[key]=[];
-    db2[key].push({note,date:today,mode:deckMode});
-  });
-  saveDatabase(db2);
-  const okEl=document.getElementById('rl-db-ok-'+id);
-  if(okEl){okEl.style.display='block';setTimeout(()=>okEl.style.display='none',2500);}
-  renderReadingLog();
-}
 const MAJOR_NAMES=new Set(TAROT_MAJOR.map(c=>c.name));
 
 function setDbTab(tab){
@@ -4187,42 +3999,6 @@ function saveDbNoteEdit(key,idx,e){
   renderDbSheetBody(key);
 }
 
-function toggleDb(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
-function deleteDbNote(key,idx,e){
-  e.stopPropagation();
-  const db=getDatabase();if(!db[key]) return;
-  db[key].splice(idx,1);if(!db[key].length) delete db[key];
-  saveDatabase(db);renderDatabase();
-}
-function editDbNote(key,idx,e){
-  e.stopPropagation();
-  const db=getDatabase();
-  if(!db[key]||!db[key][idx]) return;
-  const safeKey=key.replace(/:/g,'_');
-  const row=document.getElementById('dbnote-'+safeKey+'-'+idx);
-  if(!row) return;
-  const currentNote=db[key][idx].note;
-  row.innerHTML=`
-    <textarea class="note-input" id="dbnote-edit-${safeKey}-${idx}" style="min-height:70px;width:100%;margin-bottom:6px">${currentNote}</textarea>
-    <div style="display:flex;gap:8px">
-      <button class="db-del-btn" style="color:var(--text)" onclick="saveDbNoteEdit('${key}',${idx},event)">✓ 儲存</button>
-      <button class="db-del-btn" onclick="renderDatabase();event.stopPropagation()">取消</button>
-    </div>
-  `;
-}
-function saveDbNoteEdit(key,idx,e){
-  e.stopPropagation();
-  const safeKey=key.replace(/:/g,'_');
-  const ta=document.getElementById('dbnote-edit-'+safeKey+'-'+idx);
-  if(!ta) return;
-  const newNote=ta.value.trim();
-  if(!newNote){alert('牌義不能為空喔！');return;}
-  const db=getDatabase();
-  if(!db[key]||!db[key][idx]) return;
-  db[key][idx].note=newNote;
-  saveDatabase(db);
-  renderDatabase();
-}
 
 </script>
 <footer style="text-align:center;padding:24px 16px 32px;font-size:11px;color:var(--text3);font-family:'DM Sans','Noto Sans TC',sans-serif;letter-spacing:0.04em">
